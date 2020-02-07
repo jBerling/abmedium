@@ -1,4 +1,4 @@
-const { document, Sym, root, sym } = require('./core');
+const { document, root, sym } = require('./core');
 const { serialized } = require('./serialization');
 
 describe('serialized', () => {
@@ -24,7 +24,7 @@ describe('serialized', () => {
   it('simultaneity', () => {
     const d = doc();
     d.add(4, 101);
-    d.sync(document("b").add(4, 102));
+    d.sync(document('b').add(4, 102));
 
     console.log(serialized(d.value()));
   });

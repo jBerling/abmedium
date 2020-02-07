@@ -1,10 +1,4 @@
-const {
-  proj,
-  mapping,
-  disagreement,
-  document,
-  root
-} = require("./core");
+const { proj, mapping, disagreement, document, root } = require('./core');
 
 describe('conflicts', () => {
   it('simultaneity', () => {

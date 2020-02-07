@@ -1,22 +1,22 @@
-const { isSym, isSim } = require("./core");
+const { isSym, isSim } = require('./core');
 
 const serialized = doc => {
   const reviver = (_, value) => {
     if (isSim(value)) {
-      return { __SIM__: Array.from(value) }
+      return { __SIM__: Array.from(value) };
     }
     if (isSym(value)) {
-      return { __SYM__: value.name }
+      return { __SYM__: value.name };
     }
-    return value
-  }
+    return value;
+  };
 
   return JSON.stringify(doc, reviver);
 };
 
 const deserialized = string => {
-  throw new Error("Not implemented")
-}
+  throw new Error('Not implemented');
+};
 
 module.exports = { serialized, deserialized };
 

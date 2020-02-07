@@ -1,11 +1,11 @@
-const { document, pres, sym, root, sync } = require('./core');
+const { document, pres, sym, root } = require('./core');
 
 describe('The core module', () => {
-  it("add handle-value pair", () => {
-    const d = document("test")
-    d.add("a", 1)
-    expect(d.value()).toMatchObject({a: 1})
-  }) 
+  it('add handle-value pair', () => {
+    const d = document('test');
+    d.add('a', 1);
+    expect(d.value()).toMatchObject({ a: 1 });
+  });
 
   const doc = () => {
     const d = document('test');
@@ -59,5 +59,4 @@ describe('The core module', () => {
       2: 22,
     });
   });
-  
 });

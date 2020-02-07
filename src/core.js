@@ -1,30 +1,26 @@
 const CRDTs = require('delta-crdts');
-const uuid = require("uuid/v1");
+const uuid = require('uuid/v1');
 
 const LAYER = Symbol('layer');
 const isLayer = v => !!v[LAYER];
 
 const root = 0;
 
-const sim = (members) => new Set(members)
+const sim = members => new Set(members);
 const isSim = v => v instanceof Set;
 
 class Sym {
   constructor(name) {
-    this.name = name
+    this.name = name;
   }
 }
-const sym = name => new Sym(name)
-const isSym = v => v instanceof Sym
+const sym = name => new Sym(name);
+const isSym = v => v instanceof Sym;
 
 const assertValidHandle = handle => {
-  if (typeof handle !== "string" && typeof handle !== "number") {
-    throw new Error(`»${handle}« is not a valid handle`)
+  if (typeof handle !== 'string' && typeof handle !== 'number') {
+    throw new Error(`»${handle}« is not a valid handle`);
   }
-}
-
-const thrw = msg => {
-  throw new Error(msg);
 };
 
 const valueOfSim = set => (set.size < 2 ? set.values().next().value : set);
@@ -69,19 +65,15 @@ const docValue = doc => {
   );
 };
 
-const ORMap = CRDTs("ormap")
+const ORMap = CRDTs('ormap');
 
 const layers = path =>
   Array.isArray(path) ? path.slice(0, path.length - 1) : [];
 
 const layerArgs = layrs =>
-    layrs.reduce(
-      (args, layer) => args.concat([layer, 'ormap', 'applySub']),
-      []
-    );
+  layrs.reduce((args, layer) => args.concat([layer, 'ormap', 'applySub']), []);
 
-const handle = path =>
-  Array.isArray(path) ? path[path.length - 1] : path;
+const handle = path => (Array.isArray(path) ? path[path.length - 1] : path);
 
 const valueOfLayer = (vOf, layer) => {
   const val = vOf(layer);
@@ -106,22 +98,20 @@ function Disagreement(expected, actual, to) {
 
 const disagreement = (...options) => new Disagreement(...options);
 
-const isDisagreement = x => x instanceof Disagreement;
-
 const mapping = (...options) => new Mapping(...options);
 
 const isMapping = x => x instanceof Mapping;
 
 class Document {
   constructor(name = uuid()) {
-    this.name = name
+    this.name = name;
     this._ormap = ORMap(name);
   }
 
   add(path, value, from) {
-    const handl = handle(path)
-    assertValidHandle(handl)
-    
+    const handl = handle(path);
+    assertValidHandle(handl);
+
     return this._ormap.applySub(
       ...layerArgs(layers(path)),
       handl,
@@ -132,10 +122,7 @@ class Document {
   }
 
   value() {
-    return valueOfLayer(
-      valueOf(valueOfSim), 
-      docValue(this._ormap.value())
-    );
+    return valueOfLayer(valueOf(valueOfSim), docValue(this._ormap.value()));
   }
 
   sync(deltas) {
@@ -185,9 +172,9 @@ const projectLayer = (projection, layer, stack = []) => {
   return projection;
 };
 
-const proj = (document, stack = []) => {
+const proj = (doc, stack = []) => {
   const projection = {};
-  projectLayer(projection, document.value(), stack);
+  projectLayer(projection, doc.value(), stack);
   return projection;
 };
 
@@ -208,5 +195,5 @@ module.exports = {
   assertValidHandle,
   proj,
   mapping,
-  disagreement
+  disagreement,
 };
