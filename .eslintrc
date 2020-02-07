@@ -1,0 +1,61 @@
+{
+    "extends": [
+        "prettier",
+        "prettier/react"
+    ],
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "script"
+    },
+    "plugins": [
+        "prettier",
+        "jest"
+    ],
+    "env": {
+        "node": true,
+        "es6": true,
+        "jest": true,
+        "jest/globals": true
+    },
+    "globals": {
+        "Generator": true,
+        "Iterator": true,
+        "Iterable": true,
+        "$Keys": true,
+        "$Shape": true
+      },
+    "rules": {
+        "no-dupe-keys": "error",
+        "no-duplicate-case": "error",
+        "no-obj-calls": "error",
+        "no-sparse-arrays":"error",
+        "no-unreachable":"warn",
+        "use-isnan": "warn",
+        "valid-typeof": "warn",
+        "array-callback-return": "warn",
+        "default-case": "warn",
+        "no-eval": "warn",
+        "no-extend-native": "warn",
+        "no-fallthrough": "warn",
+        "no-param-reassign": "warn",
+        "no-redeclare": "error",
+        "vars-on-top": "warn",
+        "no-undef": "error",
+        "no-shadow": "warn",
+        "no-unused-vars": "error",
+        "no-use-before-define": "warn",
+        "no-tabs": "warn",
+        "no-const-assign": "error",
+        "no-duplicate-imports": "warn",
+        "no-new-symbol": "error",
+        "require-yield": "warn",
+        "prettier/prettier": [
+            "error",
+            {
+              "trailingComma": "es5",
+              "singleQuote": true
+            }
+        ]
+    }
+}

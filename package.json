@@ -1,0 +1,22 @@
+{
+  "name": "@abrovink/abmedium",
+  "version": "0.1.0",
+  "description": "A graph medium",
+  "main": "index.js",
+  "repository": "git@gitlab.com:berling/abmedium.git",
+  "author": "Berling <johan.berling@abrovink.org>",
+  "license": "AGPL-3.0",
+  "private": false,
+  "dependencies": {
+    "delta-crdts": "^0.10.3",
+    "uuid": "^3.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-jest": "^23.6.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "jest": "^25.1.0",
+    "prettier": "^1.19.1"
+  }
+}
