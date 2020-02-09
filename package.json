@@ -4,7 +4,7 @@
   "description": "A graph medium",
   "main": "index.js",
   "repository": "git@gitlab.com:berling/abmedium.git",
-  "author": "Berling <johan.berling@abrovink.org>",
+  "author": "Johan Berling <johan.berling@abrovink.org>",
   "license": "AGPL-3.0",
   "private": false,
   "dependencies": {
@@ -19,5 +19,8 @@
     "eslint-plugin-prettier": "^3.1.2",
     "jest": "^25.1.0",
     "prettier": "^1.19.1"
+  },
+  "scripts": {
+    "test": "jest --watch"
   }
 }

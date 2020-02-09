@@ -8,6 +8,8 @@ const {
   pres,
 } = require('./src/core');
 
+const { serialized, deserialized } = require('./src/serialization');
+
 module.exports = {
   proj,
   mapping,
@@ -16,4 +18,6 @@ module.exports = {
   root,
   sym,
   pres,
+  serialized,
+  deserialized,
 };

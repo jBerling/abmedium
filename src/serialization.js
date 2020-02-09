@@ -14,7 +14,7 @@ const serialized = doc => {
   return JSON.stringify(doc, reviver);
 };
 
-const deserialized = string => {
+const deserialized = (/*string*/) => {
   throw new Error('Not implemented');
 };
 
@@ -34,9 +34,9 @@ module.exports = { serialized, deserialized };
  *
  */
 
-/* 
-simultaneity  
-['#s!', 'value1', 'value2', 'value3'] 
+/*
+simultaneity
+['#s!', 'value1', 'value2', 'value3']
 => new Set(["value1", "value2", "value3"])
 */
 
@@ -47,7 +47,7 @@ disagreement
 */
 
 /*
-Layer 
+Layer
 => object[LAYER]=true
 */
 

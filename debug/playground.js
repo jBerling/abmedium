@@ -1,402 +1,103 @@
 // First import the things needed
-const { proj, mapping, disagreement, document, root, sym, pres } = require("..")
+const {
+  proj,
+  document,
+  root,
+  sym,
+  pres,
+  serialized,
+  deserialized,
+} = require('..');
 
-// Let's create an empty document.
-const doc = document()
-
-// Add a list of a symbol and two numbers
-doc.add(root, [1, 2, 3]);
-doc.add(1, sym("+"));
-doc.add(2, 10);
-doc.add(3, 20);
-
-// ## Adding and Presenting
-// To see the value of the document call value
-doc.value();
-// => 
-// {
-//   0: [1, 2, 3]
-//   1: Sym {name: "+"},
-//   2: 10,
-//   3: 20
-// } 
-
-// An "assembled" graph can be created by calling
-pres(doc.value());
-// => [Sym(+), 10, 20]
-
-
-// ## Layers and Projections (and Disagreements?)
-// Let's say we want an alternative value for the 3-node
-// We can do this by adding a layer, let's call it alt
-doc.add(["alt", 3], 200);
-
-// The value of the doc is now a bit more complicated
-doc.value();
-// =>
-// {
-//   0: [1, 2, 3]
-//   1: Sym {name: "+"},
-//   2: 10,
-//   3: 20,
-//   alt: {
-//     3: 200
-//   },
-// }
-
-// Let's present it
-pres(doc.value())
-// => [Sym(+), 10, 20]
-// ... but, it's the same as before?
-
-// To get access to the new layer, we need to project it
-// over the base layer.
-proj(doc, ["alt"])
-// => {
-//   0: [1, 2, 3],
-//   1: Sym {name: "+"},
-//   2: 10,
-//   3: 200
-// }
-//
-// The projection has merged the layers into one
-
-// Layers can be nested
-doc.add(["alt", "sub-alt", 3], 2000)
-// =>
-// {
-//   0: [1, 2, 3]
-//   1: Sym {name: "+"},
-//   2: 10,
-//   3: 20,
-//   alt: {
-//     3: 200,
-//     sub-alt: {
-//       3: 2000
-//     }
-//   },
-// }
-// To project a layer and a sub-layer a construction 
-// of arrays is used. The unintuitive nesting is needed
-// to distinguish between sibling and child layers.
-proj(doc, [["alt", ["sub-alt"]]])
-// => {
-//   0: [1, 2, 3],
-//   1: Sym {name: "+"},
-//   2: 10,
-//   3: 2000
-// }
-
-// Add an example of disagreement here
-
-
-// ## Synchronizing
-
-// Create a new document
-const doc2 = document()
-
-// Pretend doc is edited by Gusten and doc2 by Sixten.
-// Sixten want doc2 to contain all the stuff Gusten has added to doc.
-// To do this, the documents are synchronized.
-doc2.sync(doc._ormap.state())
-
-// Now doc2 contains all the things doc contained when the docs where synced.
-doc2.value()
-// => 
-// {
-//   0: [1, 2, 3]
-//   1: Sym {name: "+"},
-//   2: 10,
-//   3: 20,
-//   alt: {
-//     3: 200,
-//     sub-alt: {
-//       3: 2000
-//     }
-//   },
-// }
+proj;
+pres;
+serialized;
+deserialized;
 
 // Normally you don't want to send a whole document in order to distribute content changes.
 // Since Abmedium is built on top of Delta-CRDTs you only have to send the change.
-const delta = doc.add(["alt", "sub-alt", 3], 2222)
-doc2.sync(delta)
+////const delta = doc.add(['alt', 'sub-alt', 3], 2222);
+////doc2.sync(delta);
 
-doc2.value()
-// => 
-// {
-//   0: [1, 2, 3]
-//   1: Sym {name: "+"},
-//   2: 10,
-//   3: 20,
-//   alt: {
-//     3: 200,
-//     sub-alt: {
-//       3: 2222
-//     }
-//   },
-// }
-
-// ## Conflicts (Simultaneities and Disagreements)
-
-// Abmedium differs between conflicts. There are simultaneities and disagreements.
-// A simultaneity happens if the same mapping in a document is edited concurrently.
-
-// Let's try to edit a mapping and sync it
-doc.add(2, 11)
-doc2.add(1, sym("-"))
-doc2.sync(doc._ormap.state())
-doc2.value()
-// => 
-// {
-//   0: [1, 2, 3]
-//   1: Sym {name: "-"},
-//   2: 11,
-//   3: 20,
-//   alt: {
-//     3: 200,
-//     sub-alt: {
-//       3: 2222
-//     }
-//   },
-// }
-
-// Ok, nothing special there. Now, let's create a simultaneity
-doc.add(1, sym("/"))
-doc2.add(1, sym("+"))
-doc2.sync(doc._ormap.state())
-doc2.value()
-// => 
-// {
-//   0: [1, 2, 3]
-//   1: Set {Sym {name: "+"}, Sym {name: "/"}},
-//   2: 11,
-//   3: 20,
-//   alt: {
-//     3: 200,
-//     sub-alt: {
-//       3: 2222
-//     }
-//   },
-// }
-
-// Since we edited the same mapping simultaneously, we create a simultaneity.
-// It is implemented as a Set containing the concurrent values.
-// In this case there are only two conflicts values, but potentially it could contain 
-// as many values as the number of synchronized documents.
-// To resolve the conflict, just add a value
-doc2.add(1, sym("+"))
-doc2.value()
-// => 
-// {
-//   0: [1, 2, 3]
-//   1: {name: "+"},
-//   2: 11,
-//   3: 20,
-//   alt: {
-//     3: 200,
-//     sub-alt: {
-//       3: 2222
-//     }
-//   },
-// }
-
-// The other kind of conflict is a disagreement, and this does not happen
-// because the document have not been synched. This happens because the editors
-// have conflicting minds about the values. A disagreement can not happen in one layer,
-// because then it is a simultaneity. It can only happen between layers. Layers are
-// really powerful and can be used to contain features (and used both as a feature branch
-// and a feature toggle), different languages, version branches and other different views 
-// of a document.
-
-// Let's create a disagreement. If you feel like it, you can create a disagreement with yourself.
-// Sometimes you want to try out different solutions. Let's create a new document.
-const doc3 = document()
-doc3.add(1, sym("do-something"))
-doc3.add(2, "jump")
-doc3.add(root, [1, 2])
-doc3.add(["a", 2], "walk", "jump")
-doc3.add(2, "run")
-
-doc3.value()
-// =>
-// {
-//   0: [1, 2],
-//   1: Sym {name: "do-something"}
-//   2: "run"
-//   a: {
-//     2: Mapping {from: "jump", to: "walk"}
-//   }
-// }
-
-// We have created our first disagreement. When we added "walk" to the layer a with the handle 2.
-// The extra argument "jump" tells as we expect the value to the parent mapping to be "jump".
-// But since then the value has changed to "run".
-proj(doc3, ["a"])
-// =>
-// {
-//   0: [1, 2],
-//   1: Sym {name: "do-something"},
-//   2: "run",
-//   a: Disagreement {
-//     to: "walk",
-//     expected: "jump",
-//     actual: "run"
-//   }
-// }
-
-// To resolve a disagreement, you change the expected and actual values to match each others,
-// most probably you change the expected value to match the actual one. A mismatch is a signal
-// that means your changes are based on a historical value. If you are developing a new feature
-// it's important to know that your changes are based on fresh assumptions. 
-
-// Another use of layers could be for different language implementations.
-
-// Let's create an example. A text, where every sentence is a node.
-const doc4 = document()
-doc4.add(root, [1, 2, 3])
-// doc4.add(1, "")
-// doc4.add(2, "")
-// doc4.add(3, "")
-
-// First we add the English sentences
-doc4.add(["en", 1], "The sole purpose of the plan is to avoid him.") 
-doc4.add(["en", 2], "Benny Mason, he is probably the most hate filled juvenile there is.") 
-doc4.add(["en", 3], "He hates everyone, he hates the school but most of all he hates me.")
-
-// Then we add the Swedish translations
-doc4.add(
-  ["en", "se", 1], 
-  "Hela syftet med planen är att undvika honom.", 
-  "The sole purpose of the plan is to avoid him."
-)
-doc4.add(
-  ["en", "se", 2], 
-  "Benny Mason, antagligen den mest hatiska ynglingen som finns.", 
-  "Benny Mason, he is probably the most hate filled juvenile there is."
-)
-doc4.add(
-  ["en", "se", 3], 
-  "Han hatar alla, han hatar skolan men mest av allt hatar han mig.",
-  "He hates everyone, he hates the school but most of all he hates me."
-)
-
-// Then the original English text is updated
-doc4.add(["en", 1], "I had one thing on my mind, to avoid him.")
-
-// The disagreement tells us our Swedish translation is based on an old version of the text.
-// This way one can easily think of ways to alert a translator of new work to be done.
-// The layer hierarchy also tells us that the Swedish texts are based on the English ones.
-proj(doc4, [["en", ["se"]]])
-// => {
-//   0: [1, 2, 3],
-//   1: Disagreement {
-//        expected: "The sole purpose of the plan is to avoid him.",
-//        actual: "I had one thing on my mind, to avoid him.",
-//        to: "Hela syftet med planen är att undvika honom."
-//      },
-//   2: "Benny Mason, antagligen den mest hatiska ynglingen som finns.",
-//   3: "Han hatar alla, han hatar skolan men mest av allt hatar han mig."
-// }
-
-// The layers can also be used as feature toggles.
-const doc5 = document()
-doc5.add(root, [1, 2, 3]);
-doc5.add(1, sym("+"));
-doc5.add(2, 10);
-doc5.add(3, 20);
-doc5.add(["division", 1], sym("/"), sym("+"))
-
-// To activate the toggle, project the document with the division layer on
-pres(proj(doc5, ["division"]))
-// => [Sym {name: "/"}, 10, 20]
-
-// To deactivate the toggle, just project with the division layer off
-pres(proj(doc5))
-// => [Sym {name: "+"}, 10, 20]
-
-// Let's take a look at sibling layers. First create a document and some content.
-const doc6 = document()
-doc6.add(root, [1, 2])
-doc6.add(1, "one")
-doc6.add(2, "two")
-doc6.add(["a", 1], "a-one")
-doc6.add(["b", 2], "b-two")
-doc6.add(["b", 1], "b-one")
-
-// Then present it. To project several layers add them as items in the same array.
-// The succeeding layer is projected over the preceeding one.
-pres(proj(doc6), ["a", "b"]);
-// => ["b-one", "b-two"]
-
-pres(proj(doc6), ["b", "a"]);
-// => ["a-one", "b-two"]
-
-// This is a little dangerous. We might override a value by mistake. Though strictly
-// sublayers are meant to implement dependencies between layers, you can also add a 
-// dependency by expecting a previously projected layer contains a specific value.
-doc6.add(["b", 1], "b-one", "a-one")
-
-pres(proj(doc6), ["a", "b"]);
-// => ["b-one", "b-two"]
-
-pres(proj(doc6, ["b"]))
-// => [Disagreement {expected: "a-one", actual: "one", to: "b-one"}, "b-two"]
-
-// But unfortunately ...
-pres(proj(doc6, ["b", "a"]))
-// => ["a-one", "b-two"]
-
-doc6.add(["a", 1], "a-one", "one");
-pres(proj(doc6, ["b", "a"]));
-// => [
-//   Disagreement {
-//     expected: "one", 
-//     actual: Disagreement {expected: "a-one", actual: "one", to: "b-one"}, 
-//     to: "a-one"
-//   }, 
-//   "b-two"
-// ]
-
-// If you add a value to a layer without an expected from value, you are really
-// side-stepping the safety mechanisms.
-
+var startView = document();
+startView.add(root, [1, 2, 3, 7]);
+startView.add(1, sym('div#start-view'));
+startView.add(2, []);
+startView.add(3, [4, 5, 6]);
+startView.add(4, sym('h1'));
+startView.add(5, []);
+startView.add(6, 'Hello, Sir!');
+startView.add(7, [8, 9, 10, 14, 18]);
+startView.add(8, sym('ul.menu'));
+startView.add(9, []);
+startView.add(10, [11, 12, 13]);
+startView.add(11, sym('li.menu-item'));
+startView.add(12, []);
+startView.add(13, 'Add article');
+startView.add(14, [15, 16, 17]);
+startView.add(15, sym('li.menu-item'));
+startView.add(16, []);
+startView.add(17, 'Review article');
+startView.add(18, [19, 20, 21]);
+startView.add(19, sym('li.menu-item'));
+startView.add(20, []);
+startView.add(21, 'Logout');
+startView.add(['add-value-to-items', 22], 'data-value');
+startView.add(['add-value-to-items', 23], 'add-article');
+startView.add(['add-value-to-items', 12], [22, 23]);
+startView.add(['add-value-to-items', 24], 'data-value');
+startView.add(['add-value-to-items', 25], 'review-article');
+startView.add(['add-value-to-items', 16], [24, 25]);
+startView.add(['add-value-to-items', 26], 'data-value');
+startView.add(['add-value-to-items', 27], 'logout');
+startView.add(['add-value-to-items', 20], [26, 27]);
+var startView2 = document();
+startView2.sync(startView._ormap.state());
+startView2.add(['la', 6], 'Salve magister!');
+startView.sync(startView2._ormap.state());
+startView2.add(['la', 13], 'Articulus addendi');
+startView2.add(['la', 17], 'Articulus criticis');
+startView2.add(['la', 21], 'Apage');
+startView.sync(startView2._ormap.state());
+startView.add(['hail-by-name', 28], sym('fun'));
+startView.add(['hail-by-name', 29], [30]);
+startView.add(['hail-by-name', 30], sym('user-name'));
+startView.add(['hail-by-name', 31], [1, 2, 3, 7]); // the old root
+startView.add(['hail-by-name', root], [28, 29, 31]);
+startView.add(['hail-by-name', 32], sym('concat'));
+startView.add(['hail-by-name', 33], 'Hi ');
+startView.add(['hail-by-name', 34], sym('user-name'));
+startView.add(['hail-by-name', 35], '!');
+startView.add(['hail-by-name', 6], [32, 33, 34, 35]);
+startView2.add(['la', 6], 'Salve magister!', 'Hello, Sir!');
+startView2.add(['la', 13], 'Articulus addendi', 'Add article');
+startView2.add(['la', 17], 'Articulus criticis', 'Review article');
+startView2.add(['la', 21], 'Apage', 'Logout');
+startView.sync(startView2._ormap.state());
+startView2.add(['la', 33], 'Salve ');
+startView2.add(['la', 6], [32, 33, 34, 35], [32, 33, 34, 35]);
+startView2.add(['la', 32], sym('concat'), sym('concat'));
+startView2.add(['la', 34], sym('user-name'), sym('user-name'));
+startView2.add(['la', 35], '!', '!');
+startView.sync(startView2._ormap.state());
+startView2.add(['la', 6], 'Salve magister!', 'Hello, Sir!');
+startView2.add(['hail-by-name', 'la', 33], 'Salve ');
+startView2.add(['hail-by-name', 'la', 6], [32, 33, 34, 35], [32, 33, 34, 35]);
+startView2.add(['hail-by-name', 'la', 32], sym('concat'), sym('concat'));
+startView2.add(['hail-by-name', 'la', 34], sym('user-name'), sym('user-name'));
+startView2.add(['hail-by-name', 'la', 35], '!', '!');
+startView.sync(startView2._ormap.state());
+startView2.sync(startView._ormap.state());
+pres(proj(startView, ['la', ['hail-by-name', ['la']]]));
+startView2.add(['la', 6], 'Salve, Magister!', 'Hello, Sir!');
+startView.add(['hail-by-name', 30], sym('user'));
+startView.add(['hail-by-name', 34], sym('user'));
+startView.sync(startView2._ormap.state());
+startView2.sync(startView._ormap.state());
+startView.add(1, sym('div#startView'));
+startView2.add(1, sym('div#start'));
+startView.sync(startView2._ormap.state());
+startView.add(1, sym('div#start'));
+startView.sync(startView2._ormap.state());
+startView2.sync(startView._ormap.state());
 debugger;
-
-// Explore concurrent editing
-// Let's create a new document
-const fragment = document();
-
-// add a node
-fragment.add(2, 100)
-
-// as expected its value can be called for
-value(fragment)
-// => error: A fragment can not be presented. The document has no root.
-
-// Ok, you need a root (a node with the handle 0) for
-// a presentable document. Is a fragment useless then?
-
-
-
-
-// Create another document
-// Sync documents
-// Update doc
-// Sync
-// Update both docs
-// Sync
-// See disagreement or simultaneity?
-// Resolve
-// Add layer
-// Project
-// Add sibling layer
-// Project
-// Add sublayer
-// Project
-// pres
-
-
-
-
-debugger
-console.log("Finished")

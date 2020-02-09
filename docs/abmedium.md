@@ -1,5 +1,7 @@
-Abmedium
-========
+Abmedium – A Graph Medium
+=======================
+
+_WORK IN PROGRESS! This document has been used during development as a help for the mind, but for a proper mathematician or computer scientist we are sure they leave a lot be desired._
 
 Background
 ----------
@@ -13,11 +15,7 @@ In this text we will describe a programming medium—_Abmedium_—that is develo
 
 In other words, Abmedium is designed to handle the equivalence of feature branches, feature toggles, customization and localization. Not as an afterthought, but as a core feature.
 
-The overwhelmingly predomant medium for programming code is text. Abmedium is different and its documents are directed acyclic graphs, designed to contain S-expressions.
-
-
-### Abrovink
-Abrovink is an experimental structural (programming) editor that mostly is a thought experiment so far. It will focus on collaboration and Abmedium is created with this editor in mind.
+The overwhelmingly predomant medium for programming code is text. Abmedium is different and its documents are graphs, designed to contain S-expressions and other structures using lists/sequences.
 
 ---
 

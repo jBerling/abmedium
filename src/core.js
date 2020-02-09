@@ -136,6 +136,21 @@ class Document {
 const document = name => new Document(name);
 const isDocument = x => x instanceof Document;
 
+const equal = (a, b) => {
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return false;
+    const max = a.length;
+    for (let i = 0; i < max; i++) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }
+
+  if (isSym(a)) return a.name === b.name;
+
+  return a === b;
+};
+
 const projectValue = (projection, handl, newVal) => {
   if (!isMapping(newVal)) {
     projection[handl] = newVal;
@@ -149,7 +164,7 @@ const projectValue = (projection, handl, newVal) => {
     return;
   }
 
-  if (oldVal !== newVal.from) {
+  if (!equal(oldVal, newVal.from)) {
     projection[handl] = disagreement(newVal.from, oldVal, newVal.to);
   } else {
     projection[handl] = newVal.to;
