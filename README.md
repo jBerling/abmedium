@@ -716,11 +716,39 @@ broadcast(changeset);
 onDeliver(changeset => doc.sync(changeset))
 ```
 
+
+(De)Serializing
+---------------
+You can serialize a document using the `serialized` function. If you pass a document to it, the document state will be serialized. You should not expect it to be in a very readable format though.
+
+```javascript
+const state = serialized(doc);
+```
+
+If you deserialize the document it will be revived as a document again
+
+```javascript
+const doc2 = deserialized(state);
+```
+
+Since we are working with δ-CRDTs, you can also serialize a delta.
+
+```javascript
+const changeset = [];
+changeset.push(doc.add(1, 'humle'));
+changeset.push(doc.add(2, 'humle'));
+const serializedChangeset = serialized(changeset);
+```
+
+And of course, you can then synchronize with a document from the serialized data.
+
+```javascript
+deserialized(serializedChangeset).forEach(delta => doc2.sync(delta))
+```
+
+
 What's Missing?
 ---------------
-
-### Deserialization
-Of course it shall be possible to serialize and deserialize a document. The serialization is in place (using JSON), but the deserialization has not been implemented yet.
 
 ### Timestamps, Authors and Metalayers
 To keep track of who has written what and when there shall be a way to save this in the document. Perhaps there can be some kind of log or maybe a special layer/special layers can store this information. By the way, expected value to change from could also be stored in layers instead of in mappings. This way we get a pattern in place where additional information kan be stored just by adding a special (meta) layer.
