@@ -1,6 +1,6 @@
 {
   "name": "@abrovink/abmedium",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A graph medium",
   "main": "index.js",
   "repository": "git@gitlab.com:berling/abmedium.git",
