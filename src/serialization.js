@@ -1,58 +1,48 @@
-const { isSym, isSim } = require('./core');
+const { isSym, sym, isSim, sim, document } = require('./core');
 
-const serialized = doc => {
-  const reviver = (_, value) => {
+const serialized = (doc, humanized) => {
+  const replacer = (_, value) => {
     if (isSim(value)) {
       return { __SIM__: Array.from(value) };
     }
+
     if (isSym(value)) {
       return { __SYM__: value.name };
     }
+
+    if (value instanceof Map) {
+      return { __MAP__: Array.from(value) };
+    }
+
     return value;
   };
 
-  return JSON.stringify(doc, reviver);
+  return JSON.stringify(
+    { name: doc.name, state: doc._ormap.state() },
+    replacer,
+    humanized ? 2 : undefined
+  );
 };
 
-const deserialized = (/*string*/) => {
-  throw new Error('Not implemented');
+const deserialized = code => {
+  const reviver = (_, value) => {
+    if (value && typeof value === 'object') {
+      const { __SIM__, __SYM__, __MAP__ } = value;
+      if (__SIM__) return sim(__SIM__);
+      if (__SYM__) return sym(__SYM__);
+      if (__MAP__) return new Map(__MAP__);
+    }
+
+    return value;
+  };
+
+  const rawObject = JSON.parse(code, reviver);
+
+  const doc = document(rawObject.name);
+
+  doc.sync(rawObject.state);
+
+  return doc;
 };
 
 module.exports = { serialized, deserialized };
-
-/**
- * {
- *   "___directives___": {"symbol": "#sym", "simultaneity": "#s!", "disagreement": "#d!"}
- *
- *
- *
- *
- * }
- *
- *
- *
- *
- */
-
-/*
-simultaneity
-['#s!', 'value1', 'value2', 'value3']
-=> new Set(["value1", "value2", "value3"])
-*/
-
-/*
-disagreement
-['#d!', 'expected', 'actual', 'value']
-=> new Disagreement("expected", "actual", "value")
-*/
-
-/*
-Layer
-=> object[LAYER]=true
-*/
-
-/*
-sym
-['#sym', 'symbol-content']
-=> new String("symbol-content")[SYMBOL]=true
-*/

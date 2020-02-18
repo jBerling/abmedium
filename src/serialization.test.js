@@ -1,31 +1,37 @@
-const { document, root, sym } = require('./core');
-const { serialized } = require('./serialization');
+const { document, root, sym, proj, pres } = require('./core');
+const { serialized, deserialized } = require('./serialization');
 
 describe('serialized', () => {
-  const doc = () => {
-    const d = document('a');
-    d.add(root, ['a', 'b', 3, 4]);
-    d.add('a', sym('atoms'));
-    d.add('b', true);
-    d.add(3, 'a string');
-    d.add(4, 100);
-    return d;
-  };
-  it('sequences and atoms', () => {
-    expect(JSON.parse(serialized(doc().value()))).toMatchObject({
-      0: ['a', 'b', 3, 4],
-      a: { __SYM__: 'atoms' },
-      b: true,
-      3: 'a string',
-      4: 100,
-    });
+  it('serializes and deserializes a document', () => {
+    const d = document('test-document');
+    d.add(root, ['handle-a']);
+    d.add('handle-a', sym('atoms'));
+
+    expect(pres(proj(deserialized(serialized(d))))).toMatchObject([
+      sym('atoms'),
+    ]);
   });
 
-  it('simultaneity', () => {
-    const d = doc();
-    d.add(4, 101);
-    d.sync(document('b').add(4, 102));
+  it('serializes and deserializes a document with sumultanities', () => {
+    const d = document();
+    d.add(root, 'first');
+    const serD = serialized(d);
+    const delta = serialized(document().add(root, 'second'));
 
-    console.log(serialized(d.value()));
+    const d2 = deserialized(serD);
+    d2.sync(deserialized(delta));
+
+    expect(pres(proj(d2))).toMatchObject(new Set(['first', 'second']));
+  });
+
+  it('deserializes a delta and applies it to a document', () => {
+    const d = document('test-document');
+    const deltas = [];
+    deltas.push(serialized(d.add(root, ['handle-a'])));
+    deltas.push(serialized(d.add('handle-a', sym('atoms'))));
+    const d2 = document();
+    d2.sync(deserialized(deltas[0]));
+    d2.sync(deserialized(deltas[1]));
+    expect(pres(proj(d2))).toMatchObject([sym('atoms')]);
   });
 });
