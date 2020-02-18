@@ -12,7 +12,7 @@ describe('serialized', () => {
     ]);
   });
 
-  it('serializes and deserializes a document with sumultanities', () => {
+  it('serializes and deserializes a document with simultanities', () => {
     const d = document();
     d.add(root, 'first');
     const serD = serialized(d);

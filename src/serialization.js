@@ -1,6 +1,6 @@
-const { isSym, sym, isSim, sim, document } = require('./core');
+const { isSym, sym, isSim, sim, document, isDocument } = require('./core');
 
-const serialized = (doc, humanized) => {
+const serialized = (x, humanized) => {
   const replacer = (_, value) => {
     if (isSim(value)) {
       return { __SIM__: Array.from(value) };
@@ -17,11 +17,15 @@ const serialized = (doc, humanized) => {
     return value;
   };
 
-  return JSON.stringify(
-    { name: doc.name, state: doc._ormap.state() },
-    replacer,
-    humanized ? 2 : undefined
-  );
+  if (isDocument(x)) {
+    return JSON.stringify(
+      { __DOC__: { name: x.name, state: x._ormap.state() } },
+      replacer,
+      humanized ? 2 : undefined
+    );
+  }
+
+  return JSON.stringify(x, replacer, humanized ? 2 : undefined);
 };
 
 const deserialized = code => {
@@ -38,11 +42,13 @@ const deserialized = code => {
 
   const rawObject = JSON.parse(code, reviver);
 
-  const doc = document(rawObject.name);
+  if (rawObject.__DOC__) {
+    const doc = document(rawObject.__DOC__.name);
+    doc.sync(rawObject.__DOC__.state);
+    return doc;
+  }
 
-  doc.sync(rawObject.state);
-
-  return doc;
+  return rawObject;
 };
 
 module.exports = { serialized, deserialized };
