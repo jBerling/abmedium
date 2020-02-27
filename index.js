@@ -6,6 +6,8 @@ const {
   root,
   sym,
   pres,
+  isSequence,
+  isSym,
 } = require('./src/core');
 
 const { serialized, deserialized } = require('./src/serialization');
@@ -20,4 +22,6 @@ module.exports = {
   pres,
   serialized,
   deserialized,
+  isSequence,
+  isSym,
 };

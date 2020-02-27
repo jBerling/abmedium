@@ -193,6 +193,8 @@ const proj = (doc, stack = []) => {
   return projection;
 };
 
+const isSequence = Array.isArray;
+
 module.exports = {
   Document,
   document,
@@ -211,4 +213,5 @@ module.exports = {
   proj,
   mapping,
   disagreement,
+  isSequence,
 };
