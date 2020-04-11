@@ -38,6 +38,32 @@ describe('The core module', () => {
     expect(pres(d.value())).toEqual([sym('+'), 10, [sym('-'), 20, 30]]);
   });
 
+  it('presents document using node constructor', () => {
+    const d = doc();
+
+    const constr = (value, handle) => {
+      return { handle, value };
+    };
+
+    const res = pres(d.value(), constr);
+
+    expect(res).toEqual({
+      handle: 0,
+      value: [
+        { handle: 'op', value: sym('+') },
+        { handle: 2, value: 10 },
+        {
+          handle: 3,
+          value: [
+            { handle: 4, value: sym('-') },
+            { handle: 5, value: 20 },
+            { handle: 6, value: 30 },
+          ],
+        },
+      ],
+    });
+  });
+
   it('throws when presenting fragment', () => {
     const f = document('fragment');
     f.add(1, 'foo');

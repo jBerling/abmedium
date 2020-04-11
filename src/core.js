@@ -36,7 +36,7 @@ const valueOf = valOfSim => doc => handle => {
   return v;
 };
 
-const pres = doc => {
+const pres = (doc, nodeConstructor = v => v) => {
   if (!doc[root]) {
     throw new Error(
       'A fragment can not be presented. The document has no root.'
@@ -46,11 +46,11 @@ const pres = doc => {
   const val = valueOf(valueOfSim)(doc);
 
   const graph = v => {
-    if (Array.isArray(v)) return v.map(h => graph(val(h)));
+    if (Array.isArray(v)) return v.map(h => nodeConstructor(graph(val(h)), h));
     return v;
   };
 
-  return graph(val(root));
+  return nodeConstructor(graph(val(root), root), root);
 };
 
 const docValue = doc => {
