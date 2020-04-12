@@ -9,6 +9,7 @@ const {
   pres,
   isSequence,
   isSym,
+  valueTypeof,
 } = require('./src/core');
 
 const { serialized, deserialized } = require('./src/serialization');
@@ -26,4 +27,5 @@ module.exports = {
   deserialized,
   isSequence,
   isSym,
+  valueTypeof,
 };
