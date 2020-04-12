@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4
+
+Add valueTypeof function to core.
+
 ## 0.3
 
 Add node constructor to `pres`.

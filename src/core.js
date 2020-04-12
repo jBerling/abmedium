@@ -98,6 +98,8 @@ function Disagreement(expected, actual, to) {
 
 const disagreement = (...options) => new Disagreement(...options);
 
+const isDisagreement = v => v instanceof Disagreement;
+
 const mapping = (...options) => new Mapping(...options);
 
 const isMapping = x => x instanceof Mapping;
@@ -195,6 +197,16 @@ const proj = (doc, stack = []) => {
 
 const isSequence = Array.isArray;
 
+const valueTypeof = v => {
+  if (isSym(v)) return 'sym';
+  if (isSequence(v)) return 'sequence';
+  if (typeof v === 'string') return 'string';
+  if (typeof v === 'number') return 'number';
+  if (isSim(v)) return 'sim';
+  if (isDisagreement(v)) return 'disagreement';
+  throw new Error('Unknown type');
+};
+
 module.exports = {
   Document,
   document,
@@ -213,5 +225,7 @@ module.exports = {
   proj,
   mapping,
   disagreement,
+  isDisagreement,
   isSequence,
+  valueTypeof,
 };

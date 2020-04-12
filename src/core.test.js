@@ -1,4 +1,12 @@
-const { document, pres, sym, root } = require('./core');
+const {
+  document,
+  pres,
+  sym,
+  sim,
+  disagreement,
+  root,
+  valueTypeof,
+} = require('./core');
 
 describe('The core module', () => {
   it('add handle-value pair', () => {
@@ -62,6 +70,15 @@ describe('The core module', () => {
         },
       ],
     });
+  });
+
+  test('valueType', () => {
+    expect(valueTypeof(sym('a'))).toEqual('sym');
+    expect(valueTypeof([])).toEqual('sequence');
+    expect(valueTypeof('')).toEqual('string');
+    expect(valueTypeof(0)).toEqual('number');
+    expect(valueTypeof(sim(['a', 'b']))).toEqual('sim');
+    expect(valueTypeof(disagreement('a', 'b', 'c'))).toEqual('disagreement');
   });
 
   it('throws when presenting fragment', () => {
