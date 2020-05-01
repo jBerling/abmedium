@@ -1,6 +1,7 @@
 const {
   document,
   pres,
+  proj,
   sym,
   sim,
   disagreement,
@@ -18,12 +19,19 @@ describe('The core module', () => {
   const doc = () => {
     const d = document('test');
     d.add(root, ['op', 2, 3]);
+    d.add(['type', root], 'call');
     d.add('op', sym('+'));
+    d.add(['type', 'op'], 'function');
     d.add(2, 10);
+    d.add(['type', 2], 'number');
     d.add(3, [4, 5, 6]);
+    d.add(['type', 3], 'call');
     d.add(4, sym('-'));
+    d.add(['type', 4], 'function');
     d.add(5, 20);
+    d.add(['type', 5], 'number');
     d.add(6, 30);
+    d.add(['type', 6], 'number');
     return d;
   };
 
@@ -46,26 +54,28 @@ describe('The core module', () => {
     expect(pres(d.value())).toEqual([sym('+'), 10, [sym('-'), 20, 30]]);
   });
 
-  it('presents document using node constructor', () => {
+  it('presents document with metalayer using node presenter', () => {
     const d = doc();
 
-    const constr = (value, handle) => {
-      return { handle, value };
+    const presenter = (value, handle, metadata) => {
+      return { handle, value, type: metadata.type };
     };
 
-    const res = pres(d.value(), constr);
+    const res = pres(proj(d, [], ['type']), presenter);
 
     expect(res).toEqual({
       handle: 0,
+      type: 'call',
       value: [
-        { handle: 'op', value: sym('+') },
-        { handle: 2, value: 10 },
+        { handle: 'op', type: 'function', value: sym('+') },
+        { handle: 2, type: 'number', value: 10 },
         {
           handle: 3,
+          type: 'call',
           value: [
-            { handle: 4, value: sym('-') },
-            { handle: 5, value: 20 },
-            { handle: 6, value: 30 },
+            { handle: 4, type: 'function', value: sym('-') },
+            { handle: 5, type: 'number', value: 20 },
+            { handle: 6, type: 'number', value: 30 },
           ],
         },
       ],

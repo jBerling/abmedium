@@ -36,21 +36,41 @@ const valueOf = valOfSim => doc => handle => {
   return v;
 };
 
-const pres = (doc, nodeConstructor = v => v) => {
+const pres = (docWithMetadata, nodePresenter = v => v) => {
+  const doc = {};
+  const metalayers = {};
+
+  for (const key of Object.keys(docWithMetadata)) {
+    const value = docWithMetadata[key];
+    if (isLayer(value)) metalayers[key] = value;
+    else doc[key] = value;
+  }
+
   if (!doc[root]) {
     throw new Error(
       'A fragment can not be presented. The document has no root.'
     );
   }
 
+  // todo: what is happening here? A bit complicated?
+  // Is it a leftover from the earlier more complicated
+  // extension implementation?
   const val = valueOf(valueOfSim)(doc);
 
+  const metaOfNode = h =>
+    Object.keys(metalayers).reduce(
+      (metadata, layer) => ({ ...metadata, [layer]: metalayers[layer][h] }),
+      {}
+    );
+
   const graph = v => {
-    if (Array.isArray(v)) return v.map(h => nodeConstructor(graph(val(h)), h));
+    if (Array.isArray(v)) {
+      return v.map(h => nodePresenter(graph(val(h)), h, metaOfNode(h)));
+    }
     return v;
   };
 
-  return nodeConstructor(graph(val(root), root), root);
+  return nodePresenter(graph(val(root), root), root, metaOfNode(root));
 };
 
 const docValue = doc => {
@@ -173,7 +193,7 @@ const projectValue = (projection, handl, newVal) => {
   }
 };
 
-const projectLayer = (projection, layer, stack = []) => {
+const projectLayer = (projection, layer, stack = [], metalayers = []) => {
   const val = handl => layer[handl];
   for (const handl of Object.keys(layer)) {
     const v = val(handl);
@@ -184,14 +204,19 @@ const projectLayer = (projection, layer, stack = []) => {
     const [subLayerName, subStack = []] = Array.isArray(_stack)
       ? _stack
       : [_stack];
-    projectLayer(projection, val(subLayerName), subStack);
+    projectLayer(projection, val(subLayerName), subStack, metalayers);
+  }
+  for (const mlayer of metalayers) {
+    const metaValues = layer[mlayer];
+    if (!metaValues) continue;
+    projection[mlayer] = { ...metaValues, ...(projection[mlayer] || {}) };
   }
   return projection;
 };
 
-const proj = (doc, stack = []) => {
+const proj = (doc, stack = [], metalayers = []) => {
   const projection = {};
-  projectLayer(projection, doc.value(), stack);
+  projectLayer(projection, doc.value(), stack, metalayers);
   return projection;
 };
 
