@@ -94,6 +94,36 @@ describe('content layers', () => {
         [root]: 'b',
       });
     });
+
+    it('metalayers', () => {
+      const d = document('test');
+      d.add(root, [1, 2]);
+      d.add(1, 'a');
+      d.add(['descr', 1], 'small a');
+      d.add(['ts', 1], 1588321340608);
+      d.add(2, 'b');
+      d.add(['descr', 2], 'small b');
+      d.add(['ts', 2], 1588321366606);
+      d.add(['alt', 2], 'B');
+      d.add(['alt', 'descr', 2], 'big b');
+      const result = proj(d, ['alt'], ['descr', 'ts']);
+      expect(result).toMatchObject({
+        [root]: [1, 2],
+        1: 'a',
+        2: 'B',
+        descr: {
+          1: 'small a',
+          2: 'big b',
+        },
+        ts: {
+          1: 1588321340608,
+          // todo: ponder about the desired value in this case
+          // Do we really want to keep the metavalue of a layer below,
+          // if the value is not set?
+          2: 1588321366606,
+        },
+      });
+    });
   });
 
   it('pres', () => {

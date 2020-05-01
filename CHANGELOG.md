@@ -1,17 +1,22 @@
 # Changelog
 
+## 0.5
+
+- Metalayers
+- Rename node constructors to node presenters
+
 ## 0.4
 
-Add valueTypeof function to core.
+- Add valueTypeof function to core.
 
 ## 0.3
 
-Add node constructor to `pres`.
+- Add node constructor to `pres`.
 
 ## 0.2
 
-Serializing and deserializing.
+- Serializing and deserializing.
 
 ## 0.1
 
-Basic implementation of the necessary features except deserialization.
+- Basic implementation of the necessary features except deserialization.
