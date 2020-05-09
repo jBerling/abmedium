@@ -57,8 +57,8 @@ describe('The core module', () => {
   it('presents document with metalayer using node presenter', () => {
     const d = doc();
 
-    const presenter = (value, handle, metadata) => {
-      return { handle, value, type: metadata.type };
+    const presenter = (value, handle, { type, parent, pos }) => {
+      return { handle, value, type, parent, pos };
     };
 
     const res = pres(proj(d, [], ['type']), presenter);
@@ -67,15 +67,17 @@ describe('The core module', () => {
       handle: 0,
       type: 'call',
       value: [
-        { handle: 'op', type: 'function', value: sym('+') },
-        { handle: 2, type: 'number', value: 10 },
+        { handle: 'op', type: 'function', value: sym('+'), pos: 0, parent: 0 },
+        { handle: 2, type: 'number', value: 10, pos: 1, parent: 0 },
         {
           handle: 3,
+          parent: 0,
+          pos: 2,
           type: 'call',
           value: [
-            { handle: 4, type: 'function', value: sym('-') },
-            { handle: 5, type: 'number', value: 20 },
-            { handle: 6, type: 'number', value: 30 },
+            { handle: 4, type: 'function', value: sym('-'), pos: 0, parent: 3 },
+            { handle: 5, type: 'number', value: 20, pos: 1, parent: 3 },
+            { handle: 6, type: 'number', value: 30, pos: 2, parent: 3 },
           ],
         },
       ],
