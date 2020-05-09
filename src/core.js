@@ -57,15 +57,17 @@ const pres = (docWithMetadata, nodePresenter = v => v) => {
   // extension implementation?
   const val = valueOf(valueOfSim)(doc);
 
-  const metaOfNode = h =>
+  const metaOfNode = (h, parent, pos) =>
     Object.keys(metalayers).reduce(
       (metadata, layer) => ({ ...metadata, [layer]: metalayers[layer][h] }),
-      {}
+      { pos, parent }
     );
 
-  const graph = v => {
+  const graph = (v, parent) => {
     if (Array.isArray(v)) {
-      return v.map(h => nodePresenter(graph(val(h)), h, metaOfNode(h)));
+      return v.map((h, pos) =>
+        nodePresenter(graph(val(h), h), h, metaOfNode(h, parent, pos))
+      );
     }
     return v;
   };

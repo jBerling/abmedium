@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6
+
+- Parent and pos properties in parameter of pres
+
 ## 0.5
 
 - Metalayers
