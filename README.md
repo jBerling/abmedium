@@ -55,7 +55,7 @@ sexpr.add(2, num(100));
 ... and then we add the subexpression `(- 200 300)`
 
 ```javascript
-sexpr.add(3, [4, 5, 6]);
+sexpr.add(3, seq([4, 5, 6]));
 sexpr.add(4, sym("-"));
 sexpr.add(5, num(200));
 sexpr.add(6, num(300));
