@@ -72,6 +72,15 @@ const lengthOf = v =>
     num: n => String(n).length,
     sim: NaN,
     dis: NaN,
+    _: x => {
+      let xStr;
+      try {
+        xStr = JSON.stringify(x);
+      } catch (err) {
+        xStr = x;
+      }
+      throw new Error('Not a valid Abmedium value: ' + xStr);
+    },
   });
 
 const valueOfSim = set => (set.size < 2 ? set.values().next().value : set);

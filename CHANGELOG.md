@@ -4,10 +4,14 @@
 
 Lots of breaking changes to the interface.
 
-- lengthOf added to get the lenght of a value. Meant to be used by an editor.
+- Add lengthOf. It gets the lenght of a value. Meant to be used by an editor.
 - valueTypeof is now valtype with alternative use by passing a flag.
-- isSym and isSequence removed
-- str, num, seq added. Every value is now expected to be created by the use of str, num, seq or sym.
+- Remove isSym and isSequence
+- Add str, num, and seq. Every value is now expected to be created by the use of str, num, seq or sym.
+
+### 0.7.1
+
+- lengthOf now throws a more meaningful error if no valtype of the passed value is found out.
 
 ## 0.6
 
