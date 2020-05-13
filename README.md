@@ -21,7 +21,16 @@ Let's explore how to express the [S-expression](https://en.wikipedia.org/wiki/S-
 First import `@abrovink/abmedium`.
 
 ```javascript
-const { proj, document, root, sym, pres } = require("@abrovink/abmedium");
+const {
+  proj,
+  document,
+  root,
+  sym,
+  pres,
+  num,
+  seq,
+  str,
+} = require("@abrovink/abmedium");
 ```
 
 Then create a document.
@@ -33,14 +42,14 @@ const sexpr = document();
 A complete document should contain a _root_ which is the `0` handle (hence the imported root is just a constant with the value `0`). Let's map the root to a sequence by calling `add`. The first argument is the handle and the second argument is the value.
 
 ```javascript
-sexpr.add(root, [1, 2, 3]);
+sexpr.add(root, seq([1, 2, 3]));
 ```
 
 1, 2 and 3 are handles, because as mentioned above, a sequence can only contain handles. The handles should be mapped to `+`, `100` and `(- 200 300)`. First we add ...
 
 ```javascript
 sexpr.add(1, sym("+"));
-sexpr.add(2, 100);
+sexpr.add(2, num(100));
 ```
 
 ... and then we add the subexpression `(- 200 300)`
@@ -48,8 +57,8 @@ sexpr.add(2, 100);
 ```javascript
 sexpr.add(3, [4, 5, 6]);
 sexpr.add(4, sym("-"));
-sexpr.add(5, 200);
-sexpr.add(6, 300);
+sexpr.add(5, num(200));
+sexpr.add(6, num(300));
 ```
 
 That's it! Seems like a pretty darn swift way of writing stuff! Right! Right? No, it's definitely not. Abmedium is designed to be hidden from the end user and edited through an editor. With that said, let's continue our journey.
@@ -97,26 +106,26 @@ There is a system with a start view written in a language meant to be transpiled
 const startView = document();
 startView.add(root, [1, 2, 3, 7]);
 startView.add(1, sym("div#start-view"));
-startView.add(2, []);
-startView.add(3, [4, 5, 6]);
+startView.add(2, seq([]));
+startView.add(3, seq([4, 5, 6]));
 startView.add(4, sym("h1"));
-startView.add(5, []);
-startView.add(6, "Hello, Sir!");
-startView.add(7, [8, 9, 10, 14, 18]);
+startView.add(5, seq([]));
+startView.add(6, str("Hello, Sir!"));
+startView.add(7, seq([8, 9, 10, 14, 18]));
 startView.add(8, sym("ul.menu"));
-startView.add(9, []);
-startView.add(10, [11, 12, 13]);
+startView.add(9, seq([]));
+startView.add(10, seq([11, 12, 13]));
 startView.add(11, sym("li.menu-item"));
-startView.add(12, []);
-startView.add(13, "Add article");
-startView.add(14, [15, 16, 17]);
+startView.add(12, seq([]));
+startView.add(13, str("Add article"));
+startView.add(14, seq([15, 16, 17]));
 startView.add(15, sym("li.menu-item"));
-startView.add(16, []);
-startView.add(17, "Review article");
-startView.add(18, [19, 20, 21]);
+startView.add(16, seq([]));
+startView.add(17, str("Review article"));
+startView.add(18, seq([19, 20, 21]));
 startView.add(19, sym("li.menu-item"));
-startView.add(20, []);
-startView.add(21, "Logout");
+startView.add(20, seq([]));
+startView.add(21, str("Logout"));
 ```
 
 Before we continue, I just want to say something about the handles. The numeric handles are supposed to be created automatically, probably by an incrementer of some stuff, but they serve only as unique values and are not meant to order content. They are not meant to be consumed by a human since they will be abstracted away by an editor.
@@ -139,15 +148,15 @@ It looks like a really nice start page of a system where you apparently can add 
 Brutus is working on a feature branch – `"add-value-to-items"`. Until he as added any new content, the branch is just a name in his head, or possibly an editor. He ponders about it and then he adds some content.
 
 ```javascript
-startView.add(["add-value-to-items", 22], "data-value");
-startView.add(["add-value-to-items", 23], "add-article");
-startView.add(["add-value-to-items", 12], [22, 23]);
-startView.add(["add-value-to-items", 24], "data-value");
-startView.add(["add-value-to-items", 25], "review-article");
-startView.add(["add-value-to-items", 16], [24, 25]);
-startView.add(["add-value-to-items", 26], "data-value");
-startView.add(["add-value-to-items", 27], "logout");
-startView.add(["add-value-to-items", 20], [26, 27]);
+startView.add(["add-value-to-items", 22], str("data-value"));
+startView.add(["add-value-to-items", 23], str("add-article"));
+startView.add(["add-value-to-items", 12], seq([22, 23]));
+startView.add(["add-value-to-items", 24], str("data-value"));
+startView.add(["add-value-to-items", 25], str("review-article"));
+startView.add(["add-value-to-items", 16], seq([24, 25]));
+startView.add(["add-value-to-items", 26], str("data-value"));
+startView.add(["add-value-to-items", 27], str("logout"));
+startView.add(["add-value-to-items", 20], seq([26, 27]));
 ```
 
 To add a value to a layer, you just pass an array containing the layer name and the handle to the `add` method instead of just a handle.
@@ -279,7 +288,7 @@ startView2.sync(startView._ormap.state());
 If you inspect the value of `startView2` you will see it matches the value of `startView`. Now Cato starts his work. He translates the heading.
 
 ```javascript
-startView2.add(["la", 6], "Salve magister!");
+startView2.add(["la", 6], str("Salve magister!"));
 ```
 
 He checks the result together with Brutus changes.
@@ -318,9 +327,9 @@ Now, think about what happened here. Brutus and Cato are working on different fe
 Cato continues his work and translates the rest of the items.
 
 ```javascript
-startView2.add(["la", 13], "Articulus addendi");
-startView2.add(["la", 17], "Articulus criticis");
-startView2.add(["la", 21], "Apage");
+startView2.add(["la", 13], str("Articulus addendi"));
+startView2.add(["la", 17], str("Articulus criticis"));
+startView2.add(["la", 21], str("Apage"));
 ```
 
 Once again he inspects the results and feel content when everything works as expected. He leaves the computer and hopes nobody will really inspect his shaky translations.
@@ -331,10 +340,10 @@ Brutus gets back to the computer and synchronize with Cato's work. He then start
 
 ```javascript
 startView.add(["hail-by-name", 28], sym("fun"));
-startView.add(["hail-by-name", 29], [30]);
+startView.add(["hail-by-name", 29], seq([30]));
 startView.add(["hail-by-name", 30], sym("user-name"));
-startView.add(["hail-by-name", 31], [1, 2, 3, 7]); // the old root
-startView.add(["hail-by-name", root], [28, 29, 31]);
+startView.add(["hail-by-name", 31], seq([1, 2, 3, 7])); // the old root
+startView.add(["hail-by-name", root], seq([28, 29, 31]));
 ```
 
 He inspects the result
@@ -368,10 +377,10 @@ When inspecting the value Brutus realized he forgot to use the parameter in the 
 
 ```javascript
 startView.add(["hail-by-name", 32], sym("concat"));
-startView.add(["hail-by-name", 33], "Hi ");
+startView.add(["hail-by-name", 33], str("Hi "));
 startView.add(["hail-by-name", 34], sym("user-name"));
-startView.add(["hail-by-name", 35], "!");
-startView.add(["hail-by-name", 6], [32, 33, 34, 35]);
+startView.add(["hail-by-name", 35], str("!"));
+startView.add(["hail-by-name", 6], seq([32, 33, 34, 35]));
 ```
 
 He presents the projected value
@@ -441,10 +450,10 @@ Ok, enough about _projection order_ and let's focus on conflicts not being detec
 When you add a value to a layer you can add the value you expect the node to have in the underlying layer. We inform Cato about this and he updates the "la" layer.
 
 ```javascript
-startView2.add(["la", 6], "Salve magister!", "Hello, Sir!");
-startView2.add(["la", 13], "Articulus addendi", "Add article");
-startView2.add(["la", 17], "Articulus criticis", "Review article");
-startView2.add(["la", 21], "Apage", "Logout");
+startView2.add(["la", 6], str("Salve magister!"), str("Hello, Sir!"));
+startView2.add(["la", 13], str("Articulus addendi"), str("Add article"));
+startView2.add(["la", 17], str("Articulus criticis"), str("Review article"));
+startView2.add(["la", 21], str("Apage"), str("Logout"));
 ```
 
 Let's see if this changes anything. Brutus synchronizes the documents and present the projection
@@ -484,8 +493,8 @@ which will produce
 This result introduces _Disagreements_, which is one of the conflict types. As you can see, the Disagreement knows what value to expect, which it as and what to change it to. To solve the disagreement just add a new value which expects the right value. Brutus tells Cato to resolve the conflict, which Cato does by calling
 
 ```javascript
-startView2.add(["la", 33], "Salve ");
-startView2.add(["la", 6], [32, 33, 34, 35], [32, 33, 34, 35]);
+startView2.add(["la", 33], str("Salve "));
+startView2.add(["la", 6], seq([32, 33, 34, 35]), seq([32, 33, 34, 35]));
 ```
 
 This will do the trick. After some pondering Cato also adds
@@ -493,7 +502,7 @@ This will do the trick. After some pondering Cato also adds
 ```javascript
 startView2.add(["la", 32], sym("concat"), sym("concat"));
 startView2.add(["la", 34], sym("user-name"), sym("user-name"));
-startView2.add(["la", 35], "!", "!");
+startView2.add(["la", 35], str("!"), str("!"));
 ```
 
 Though strictly not needed to produce the wanted result for now, the last content added to "la" will result in a conflict if those are changed in the base layer.
@@ -537,12 +546,16 @@ Currently things will not work as expected when you turn on/off "hail-by-name". 
 Instead we can use _sub-layers_. That is right, layers can contain layers. When Cato is told about sub-layers he updates the document.
 
 ```javascript
-startView2.add(["la", 6], "Salve magister!", "Hello, Sir!");
-startView2.add(["hail-by-name", "la", 33], "Salve ");
-startView2.add(["hail-by-name", "la", 6], [32, 33, 34, 35], [32, 33, 34, 35]);
+startView2.add(["la", 6], str("Salve magister!"), str("Hello, Sir!"));
+startView2.add(["hail-by-name", "la", 33], str("Salve "));
+startView2.add(
+  ["hail-by-name", "la", 6],
+  seq([32, 33, 34, 35]),
+  seq([32, 33, 34, 35])
+);
 startView2.add(["hail-by-name", "la", 32], sym("concat"), sym("concat"));
 startView2.add(["hail-by-name", "la", 34], sym("user-name"), sym("user-name"));
-startView2.add(["hail-by-name", "la", 35], "!", "!");
+startView2.add(["hail-by-name", "la", 35], str("!"), str("!"));
 ```
 
 He ones again adds the original translation `"Salve magister!"` and then add changes to the sub-layer.
@@ -644,7 +657,7 @@ Cato realizes he has not synchronized his document in a long time. He synchroniz
 
 ```javascript
 startView2.sync(startView._ormap.state());
-startView2.add(["la", 6], "Salve, Magister!", "Hello, Sir!");
+startView2.add(["la", 6], str("Salve, Magister!"), str("Hello, Sir!"));
 ```
 
 Then Brutus make a change in "hail-by-name", and synchronizes after.
@@ -709,9 +722,9 @@ A more realistic example, than in the examples above, would look something like 
 ```javascript
 // on machine A
 const changeSet = [];
-changeset.push(add(doc, root, [1, 2]));
-changeset.push(add(doc, 1, "foo"));
-changeset.push(add(doc, 2, "bar"));
+changeset.push(doc.add(root, seq([1, 2])));
+changeset.push(doc.add(1, str("foo")));
+changeset.push(doc.add(2, str("bar")));
 broadcast(changeset);
 ```
 
@@ -738,8 +751,8 @@ Since we are working with δ-CRDTs, you can also serialize a delta.
 
 ```javascript
 const changeset = [];
-changeset.push(doc.add(1, "humle"));
-changeset.push(doc.add(2, "humle"));
+changeset.push(doc.add(1, str("humle")));
+changeset.push(doc.add(2, str("humle")));
 const serializedChangeset = serialized(changeset);
 ```
 
@@ -755,14 +768,14 @@ One of the nice aspects of Abmedium is that every node has a handle. This fact c
 
 ```javascript
 const exp = document();
-exp.add(0, [1, 2, 3]);
+exp.add(0, seq([1, 2, 3]));
 exp.add(["type", 0], sym("expr"));
 exp.add(1, sym("+"));
-exp.add(["type", 1], "func");
-exp.add(2, 100);
-exp.add(["type", 2], "int");
-exp.add(3, 200);
-exp.add(["type", 3], "int");
+exp.add(["type", 1], str("func"));
+exp.add(2, num(100));
+exp.add(["type", 2], str("int"));
+exp.add(3, num(200));
+exp.add(["type", 3], str("int"));
 ```
 
 To use the `type` layer as a metalayer you pass in a third argument to `proj`, `proj(exp, [], ["type"])`. The projection will then contain they metalayer as well.

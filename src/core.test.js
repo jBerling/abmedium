@@ -1,37 +1,28 @@
-const {
-  document,
-  pres,
-  proj,
-  sym,
-  sim,
-  disagreement,
-  root,
-  valueTypeof,
-} = require('./core');
+const { document, pres, proj, num, sym, str, seq, root } = require('./core');
 
 describe('The core module', () => {
   it('add handle-value pair', () => {
     const d = document('test');
-    d.add('a', 1);
-    expect(d.value()).toMatchObject({ a: 1 });
+    d.add('a', num(1));
+    expect(d.value()).toMatchObject({ a: num(1) });
   });
 
   const doc = () => {
     const d = document('test');
-    d.add(root, ['op', 2, 3]);
-    d.add(['type', root], 'call');
+    d.add(root, seq(['op', 2, 3]));
+    d.add(['type', root], str('call'));
     d.add('op', sym('+'));
-    d.add(['type', 'op'], 'function');
-    d.add(2, 10);
-    d.add(['type', 2], 'number');
-    d.add(3, [4, 5, 6]);
-    d.add(['type', 3], 'call');
+    d.add(['type', 'op'], str('function'));
+    d.add(2, num(10));
+    d.add(['type', 2], str('number'));
+    d.add(3, seq([4, 5, 6]));
+    d.add(['type', 3], str('call'));
     d.add(4, sym('-'));
-    d.add(['type', 4], 'function');
-    d.add(5, 20);
-    d.add(['type', 5], 'number');
-    d.add(6, 30);
-    d.add(['type', 6], 'number');
+    d.add(['type', 4], str('function'));
+    d.add(5, num(20));
+    d.add(['type', 5], str('number'));
+    d.add(6, num(30));
+    d.add(['type', 6], str('number'));
     return d;
   };
 
@@ -39,19 +30,23 @@ describe('The core module', () => {
     const d = doc();
 
     expect(d.value()).toMatchObject({
-      [root]: ['op', 2, 3],
+      [root]: seq([str('op'), num(2), num(3)]),
       op: sym('+'),
-      2: 10,
-      3: [4, 5, 6],
+      2: num(10),
+      3: seq([4, 5, 6]),
       4: sym('-'),
-      5: 20,
-      6: 30,
+      5: num(20),
+      6: num(30),
     });
   });
 
   it('presents document', () => {
     const d = doc();
-    expect(pres(d.value())).toEqual([sym('+'), 10, [sym('-'), 20, 30]]);
+    expect(pres(d.value())).toEqual([
+      sym('+'),
+      num(10),
+      [sym('-'), num(20), num(30)],
+    ]);
   });
 
   it('presents document with metalayer using node presenter', () => {
@@ -84,18 +79,9 @@ describe('The core module', () => {
     });
   });
 
-  test('valueType', () => {
-    expect(valueTypeof(sym('a'))).toEqual('sym');
-    expect(valueTypeof([])).toEqual('sequence');
-    expect(valueTypeof('')).toEqual('string');
-    expect(valueTypeof(0)).toEqual('number');
-    expect(valueTypeof(sim(['a', 'b']))).toEqual('sim');
-    expect(valueTypeof(disagreement('a', 'b', 'c'))).toEqual('disagreement');
-  });
-
   it('throws when presenting fragment', () => {
     const f = document('fragment');
-    f.add(1, 'foo');
+    f.add(1, str('foo'));
     expect(() => pres(f.value())).toThrow(
       new Error('A fragment can not be presented. The document has no root.')
     );
@@ -103,15 +89,15 @@ describe('The core module', () => {
 
   it('syncs', () => {
     const d1 = document('1');
-    const delta1 = d1.add(2, 22);
+    const delta1 = d1.add(2, num(22));
     const d2 = document('2');
-    d2.add(root, [1, 2]);
+    d2.add(root, seq([1, 2]));
     d2.add(1, sym('inc'));
     d2.sync(delta1);
     expect(d2.value()).toMatchObject({
-      [root]: [1, 2],
+      [root]: seq([1, 2]),
       1: sym('inc'),
-      2: 22,
+      2: num(22),
     });
   });
 });

@@ -6,10 +6,12 @@ const {
   document,
   root,
   sym,
+  str,
+  num,
+  seq,
   pres,
-  isSequence,
-  isSym,
-  valueTypeof,
+  valtype,
+  lengthOf,
 } = require('./src/core');
 
 const { serialized, deserialized } = require('./src/serialization');
@@ -22,10 +24,12 @@ module.exports = {
   document,
   root,
   sym,
+  str,
+  num,
+  seq,
   pres,
   serialized,
   deserialized,
-  isSequence,
-  isSym,
-  valueTypeof,
+  valtype,
+  lengthOf,
 };
