@@ -7,7 +7,9 @@ const isLayer = v => !!v[LAYER];
 const root = 0;
 
 const sim = members => new Set(members);
-const isSim = v => v instanceof Set;
+const str = s => s;
+const num = x => (typeof x === 'string' ? Number(x) : x);
+const seq = items => (Array.isArray(items) ? items : [...items]);
 
 class Sym {
   constructor(name) {
@@ -15,7 +17,6 @@ class Sym {
   }
 }
 const sym = name => new Sym(name);
-const isSym = v => v instanceof Sym;
 
 const assertValidHandle = handle => {
   if (typeof handle !== 'string' && typeof handle !== 'number') {
@@ -23,16 +24,64 @@ const assertValidHandle = handle => {
   }
 };
 
+function Disagreement(expected, actual, to) {
+  Object.assign(this, { expected, actual, to });
+}
+const disagreement = (...options) => new Disagreement(...options);
+
+function Mapping(from, to) {
+  Object.assign(this, { from, to });
+}
+
+const mapping = (...options) => new Mapping(...options);
+
+const vtype = v => {
+  if (v instanceof Sym) return 'sym';
+  if (Array.isArray(v)) return 'seq';
+  if (typeof v === 'string') return 'str';
+  if (typeof v === 'number') return 'num';
+  if (v instanceof Set) return 'sim';
+  if (v instanceof Disagreement) return 'dis';
+  if (v instanceof Mapping) return 'map';
+
+  // Not an Abmedium value type
+  return 'none';
+};
+
+const valtype = (v, flag, ...flags) => {
+  const vt = vtype(v);
+  if (!flag) return vt;
+  if (typeof flag === 'string') {
+    return [...flags, flag].includes(vt);
+  }
+  if (typeof flag === 'object') {
+    const handler = flag[vt] !== undefined ? flag[vt] : flag._;
+    if (handler === undefined) {
+      throw new Error('no _ or ' + vt + ' handler');
+    }
+    return typeof handler === 'function' ? handler(v) : handler;
+  }
+  throw new Error('unknown flag', flag);
+};
+
+const lengthOf = v =>
+  valtype(v, {
+    seq: s => s.length,
+    sym: ({ name }) => name.length,
+    str: s => s.length,
+    num: n => String(n).length,
+    sim: NaN,
+    dis: NaN,
+  });
+
 const valueOfSim = set => (set.size < 2 ? set.values().next().value : set);
 
 const valueOf = valOfSim => doc => handle => {
   const v = doc[handle];
   if (v === undefined) return v;
-  if (isSim(v)) return valOfSim(v);
-  if (isSym(v) || Array.isArray(v)) return v;
-  if (typeof v === 'object') {
-    v[LAYER] = true;
-  }
+  if (valtype(v, 'sim')) return valOfSim(v);
+  if (valtype(v, 'sym', 'seq')) return v;
+  if (typeof v === 'object') v[LAYER] = true;
   return v;
 };
 
@@ -64,7 +113,7 @@ const pres = (docWithMetadata, nodePresenter = v => v) => {
     );
 
   const graph = (v, parent) => {
-    if (Array.isArray(v)) {
+    if (valtype(v, 'seq')) {
       return v.map((h, pos) =>
         nodePresenter(graph(val(h), h), h, metaOfNode(h, parent, pos))
       );
@@ -110,22 +159,6 @@ const valueOfLayer = (vOf, layer) => {
   }, {});
 };
 
-function Mapping(from, to) {
-  Object.assign(this, { from, to });
-}
-
-function Disagreement(expected, actual, to) {
-  Object.assign(this, { expected, actual, to });
-}
-
-const disagreement = (...options) => new Disagreement(...options);
-
-const isDisagreement = v => v instanceof Disagreement;
-
-const mapping = (...options) => new Mapping(...options);
-
-const isMapping = x => x instanceof Mapping;
-
 class Document {
   constructor(name = uuid()) {
     this.name = name;
@@ -170,19 +203,18 @@ const equal = (a, b) => {
     return true;
   }
 
-  if (isSym(a)) return a.name === b.name;
+  if (valtype(a) === 'sym') return a.name === b.name;
 
   return a === b;
 };
 
 const projectValue = (projection, handl, newVal) => {
-  if (!isMapping(newVal)) {
+  if (!valtype(newVal, 'map')) {
     projection[handl] = newVal;
     return;
   }
 
   const oldVal = projection[handl];
-
   if (oldVal === undefined) {
     projection[handl] = newVal.to;
     return;
@@ -222,18 +254,6 @@ const proj = (doc, stack = [], metalayers = []) => {
   return projection;
 };
 
-const isSequence = Array.isArray;
-
-const valueTypeof = v => {
-  if (isSym(v)) return 'sym';
-  if (isSequence(v)) return 'sequence';
-  if (typeof v === 'string') return 'string';
-  if (typeof v === 'number') return 'number';
-  if (isSim(v)) return 'sim';
-  if (isDisagreement(v)) return 'disagreement';
-  throw new Error('Unknown type');
-};
-
 module.exports = {
   Document,
   document,
@@ -241,9 +261,10 @@ module.exports = {
   pres,
   root,
   sym,
-  isSym,
   sim,
-  isSim,
+  str,
+  num,
+  seq,
   LAYER,
   isLayer,
   valueOf,
@@ -252,7 +273,6 @@ module.exports = {
   proj,
   mapping,
   disagreement,
-  isDisagreement,
-  isSequence,
-  valueTypeof,
+  valtype,
+  lengthOf,
 };

@@ -1,12 +1,12 @@
-const { isSym, sym, isSim, sim, document, isDocument } = require('./core');
+const { sym, sim, document, isDocument, valtype } = require('./core');
 
 const serialized = (x, humanized) => {
   const replacer = (_, value) => {
-    if (isSim(value)) {
+    if (valtype(value, 'sim')) {
       return { __SIM__: Array.from(value) };
     }
 
-    if (isSym(value)) {
+    if (valtype(value, 'sym')) {
       return { __SYM__: value.name };
     }
 
