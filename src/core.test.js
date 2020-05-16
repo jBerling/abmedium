@@ -1,10 +1,26 @@
-const { document, pres, proj, num, sym, str, seq, root } = require('./core');
+const {
+  document,
+  pres,
+  proj,
+  num,
+  sym,
+  str,
+  seq,
+  nil,
+  root,
+} = require('./core');
 
 describe('The core module', () => {
-  it('add handle-value pair', () => {
+  it('adds handle-value pair', () => {
     const d = document('test');
     d.add('a', num(1));
     expect(d.value()).toMatchObject({ a: num(1) });
+  });
+
+  it('adds nil values', () => {
+    const d = document();
+    d.add(root, nil);
+    expect(d.value()).toMatchObject({ 0: nil });
   });
 
   const doc = () => {

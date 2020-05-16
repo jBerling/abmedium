@@ -4,6 +4,11 @@
 
 - Add a new nil value type.
 
+### 0.8.1
+
+- export nil
+- make isLayer check work with nil values
+
 ## 0.7
 
 Lots of breaking changes to the interface.

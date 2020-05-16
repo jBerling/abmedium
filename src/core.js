@@ -2,7 +2,7 @@ const CRDTs = require('delta-crdts');
 const uuid = require('uuid/v1');
 
 const LAYER = Symbol('layer');
-const isLayer = v => !!v[LAYER];
+const isLayer = v => v !== null && Boolean(v[LAYER]);
 
 const root = 0;
 
@@ -93,7 +93,7 @@ const valueOf = valOfSim => doc => handle => {
   if (v === undefined) return v;
   if (valtype(v, 'sim')) return valOfSim(v);
   if (valtype(v, 'sym', 'seq')) return v;
-  if (typeof v === 'object') v[LAYER] = true;
+  if (!valtype(v, 'nil') && typeof v === 'object') v[LAYER] = true;
   return v;
 };
 
