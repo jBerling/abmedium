@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8
+
+- Add a new nil value type.
+
 ## 0.7
 
 Lots of breaking changes to the interface.

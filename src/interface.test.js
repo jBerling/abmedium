@@ -3,6 +3,7 @@ const {
   sim,
   seq,
   str,
+  nil,
   num,
   disagreement,
   valtype,
@@ -17,6 +18,7 @@ describe('interface', () => {
     expect(valtype(num(0))).toEqual('num');
     expect(valtype(sim(['a', 'b']))).toEqual('sim');
     expect(valtype(disagreement('a', 'b', 'c'))).toEqual('dis');
+    expect(valtype(nil)).toEqual('nil');
   });
 
   test('valtype with conditional flag', () => {
@@ -28,6 +30,7 @@ describe('interface', () => {
     expect(valtype(sim(['a', 'b']), 'sim')).toBe(true);
     expect(valtype(disagreement('a', 'b', 'c'), 'dis')).toBe(true);
     expect(valtype(sym('a'), 'str', 'num', 'sym')).toBe(true);
+    expect(valtype(nil, 'nil')).toBe(true);
   });
 
   test('valtype with switch flag', () => {
@@ -40,6 +43,7 @@ describe('interface', () => {
     valtype(sim(['a', 'b']), { sim: collect('sim') });
     valtype(disagreement('a', 'b', 'c'), { dis: collect('dis') });
     valtype(sym('a'), { _: collect('_') });
+    valtype(nil, { nil: collect('nil') });
     expect(collected).toMatchObject([
       ['seq', seq([])],
       ['sym', sym('a')],
@@ -48,6 +52,7 @@ describe('interface', () => {
       ['sim', sim(['a', 'b'])],
       ['dis', disagreement('a', 'b', 'c')],
       ['_', sym('a')],
+      ['nil', nil],
     ]);
     expect(valtype(sym('a'), { sym: 'foo' })).toEqual('foo');
   });
@@ -59,9 +64,10 @@ describe('interface', () => {
         sym('ab'),
         str('abc'),
         num('1001'),
+        nil,
         sim(['a', 'b']),
         disagreement('a', 'b', 'c'),
       ].map(lengthOf)
-    ).toMatchObject([3, 2, 3, 4, NaN, NaN]);
+    ).toMatchObject([3, 2, 3, 4, 0, NaN, NaN]);
   });
 });

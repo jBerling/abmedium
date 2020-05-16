@@ -10,6 +10,7 @@ const sim = members => new Set(members);
 const str = s => s;
 const num = x => (typeof x === 'string' ? Number(x) : x);
 const seq = items => (Array.isArray(items) ? items : [...items]);
+const nil = null;
 
 class Sym {
   constructor(name) {
@@ -43,6 +44,7 @@ const vtype = v => {
   if (v instanceof Set) return 'sim';
   if (v instanceof Disagreement) return 'dis';
   if (v instanceof Mapping) return 'map';
+  if (v === null) return 'nil';
 
   // Not an Abmedium value type
   return 'none';
@@ -72,6 +74,7 @@ const lengthOf = v =>
     num: n => String(n).length,
     sim: NaN,
     dis: NaN,
+    nil: 0,
     _: x => {
       let xStr;
       try {
@@ -274,6 +277,7 @@ module.exports = {
   str,
   num,
   seq,
+  nil,
   LAYER,
   isLayer,
   valueOf,
