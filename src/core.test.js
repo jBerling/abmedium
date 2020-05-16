@@ -65,6 +65,12 @@ describe('The core module', () => {
     ]);
   });
 
+  it('presents nil values', () => {
+    const d = document();
+    d.add(0, nil);
+    expect(pres(d.value())).toEqual(nil);
+  });
+
   it('presents document with metalayer using node presenter', () => {
     const d = doc();
 
@@ -101,6 +107,12 @@ describe('The core module', () => {
     expect(() => pres(f.value())).toThrow(
       new Error('A fragment can not be presented. The document has no root.')
     );
+  });
+
+  it('throws not when presenting nil as root', () => {
+    const f = document('fragment');
+    f.add(0, nil);
+    pres(f.value());
   });
 
   it('syncs', () => {

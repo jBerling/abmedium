@@ -8,6 +8,7 @@
 
 - export nil
 - make isLayer check work with nil values
+- present documents with nil as root
 
 ## 0.7
 

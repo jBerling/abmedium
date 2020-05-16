@@ -107,7 +107,7 @@ const pres = (docWithMetadata, nodePresenter = v => v) => {
     else doc[key] = value;
   }
 
-  if (!doc[root]) {
+  if (doc[root] === undefined) {
     throw new Error(
       'A fragment can not be presented. The document has no root.'
     );
