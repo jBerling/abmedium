@@ -8,6 +8,7 @@ const {
   disagreement,
   valtype,
   lengthOf,
+  editvalOf,
 } = require('./core');
 
 describe('interface', () => {
@@ -60,7 +61,7 @@ describe('interface', () => {
   test('lengthOf', () => {
     expect(
       [
-        seq([sym('a'), sym('b'), sym('c')]),
+        seq([1, 2, 3]),
         sym('ab'),
         str('abc'),
         num('1001'),
@@ -69,5 +70,27 @@ describe('interface', () => {
         disagreement('a', 'b', 'c'),
       ].map(lengthOf)
     ).toMatchObject([3, 2, 3, 4, 0, NaN, NaN]);
+  });
+
+  test('stringValOf', () => {
+    expect(
+      [
+        seq([1, 2, 3]),
+        sym('ab'),
+        str('abc'),
+        num('1001'),
+        nil,
+        sim(['a', 'b']),
+        disagreement('a', 'b', 'c'),
+      ].map(editvalOf)
+    ).toMatchObject([
+      [1, 2, 3],
+      'ab',
+      'abc',
+      '1001',
+      '',
+      new Set(['a', 'b']),
+      disagreement('a', 'b', 'c'),
+    ]);
   });
 });

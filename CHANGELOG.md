@@ -10,6 +10,10 @@
 - make isLayer check work with nil values
 - present documents with nil as root
 
+### 0.8.2
+
+- Add editvalOf. It returns a value suitable to be edited.
+
 ## 0.7
 
 Lots of breaking changes to the interface.

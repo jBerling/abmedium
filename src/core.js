@@ -86,6 +86,14 @@ const lengthOf = v =>
     },
   });
 
+const editvalOf = value =>
+  valtype(value, {
+    sym: () => value.name,
+    num: () => String(value),
+    nil: () => '',
+    _: value,
+  });
+
 const valueOfSim = set => (set.size < 2 ? set.values().next().value : set);
 
 const valueOf = valOfSim => doc => handle => {
@@ -288,4 +296,5 @@ module.exports = {
   disagreement,
   valtype,
   lengthOf,
+  editvalOf,
 };
