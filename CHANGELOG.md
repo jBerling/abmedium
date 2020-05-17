@@ -14,6 +14,10 @@
 
 - Add editvalOf. It returns a value suitable to be edited.
 
+### 0.8.3
+
+- export editvalOf
+
 ## 0.7
 
 Lots of breaking changes to the interface.

@@ -13,6 +13,7 @@ const {
   pres,
   valtype,
   lengthOf,
+  editvalOf,
 } = require('./src/core');
 
 const { serialized, deserialized } = require('./src/serialization');
@@ -34,4 +35,5 @@ module.exports = {
   deserialized,
   valtype,
   lengthOf,
+  editvalOf,
 };
