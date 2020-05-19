@@ -72,7 +72,7 @@ describe('interface', () => {
     ).toMatchObject([3, 2, 3, 4, 0, NaN, NaN]);
   });
 
-  test('stringValOf', () => {
+  test('editvalOf', () => {
     expect(
       [
         seq([1, 2, 3]),
