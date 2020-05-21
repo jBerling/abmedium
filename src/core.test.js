@@ -101,6 +101,13 @@ describe('The core module', () => {
     });
   });
 
+  it('presents documents with a custom root node', () => {
+    const d = doc();
+    const res = pres(proj(d), undefined, 3);
+    expect(res).toEqual([sym('-'), num(20), num(30)]);
+  });
+
+  // Todo: think about this one
   it('throws when presenting fragment', () => {
     const f = document('fragment');
     f.add(1, str('foo'));

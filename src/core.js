@@ -105,7 +105,7 @@ const valueOf = valOfSim => doc => handle => {
   return v;
 };
 
-const pres = (docWithMetadata, nodePresenter = v => v) => {
+const pres = (docWithMetadata, nodePresenter = v => v, rootNode = root) => {
   const doc = {};
   const metalayers = {};
 
@@ -115,7 +115,7 @@ const pres = (docWithMetadata, nodePresenter = v => v) => {
     else doc[key] = value;
   }
 
-  if (doc[root] === undefined) {
+  if (doc[rootNode] === undefined) {
     throw new Error(
       'A fragment can not be presented. The document has no root.'
     );
@@ -141,7 +141,11 @@ const pres = (docWithMetadata, nodePresenter = v => v) => {
     return v;
   };
 
-  return nodePresenter(graph(val(root), root), root, metaOfNode(root));
+  return nodePresenter(
+    graph(val(rootNode), rootNode),
+    rootNode,
+    metaOfNode(rootNode)
+  );
 };
 
 const docValue = doc => {

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9
+
+- pres can now present a document with a custom root node
+
 ## 0.8
 
 - Add a new nil value type.
