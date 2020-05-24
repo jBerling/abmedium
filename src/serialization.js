@@ -1,4 +1,5 @@
-const { sym, sim, document, isDocument, valtype } = require('./core');
+const { document } = require('./document');
+const { sym, sim, isDocument, valtype } = require('./core');
 
 const serialized = (x, humanized) => {
   const replacer = (_, value) => {

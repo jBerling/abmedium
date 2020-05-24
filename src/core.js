@@ -1,6 +1,6 @@
-const CRDTs = require('delta-crdts');
-
 const LAYER = Symbol('layer');
+const DOCUMENT = Symbol('document');
+
 const isLayer = v => v !== null && Boolean(v[LAYER]);
 
 const root = 0;
@@ -27,13 +27,15 @@ const assertValidHandle = handle => {
 function Disagreement(expected, actual, to) {
   Object.assign(this, { expected, actual, to });
 }
-const disagreement = (...options) => new Disagreement(...options);
+const disagreement = (expected, actual, to) =>
+  new Disagreement(expected, actual, to);
 
 function Mapping(from, to) {
-  Object.assign(this, { from, to });
+  this.from = from;
+  this.to = to;
 }
 
-const mapping = (...options) => new Mapping(...options);
+const mapping = (from, to) => new Mapping(from, to);
 
 const vtype = v => {
   if (v instanceof Sym) return 'sym';
@@ -100,51 +102,10 @@ const valueOf = valOfSim => doc => handle => {
   if (v === undefined) return v;
   if (valtype(v, 'sim')) return valOfSim(v);
   if (valtype(v, 'sym', 'seq')) return v;
-  if (!valtype(v, 'nil') && typeof v === 'object') v[LAYER] = true;
+  if (!valtype(v, 'nil', 'map') && typeof v === 'object') {
+    v[LAYER] = true;
+  }
   return v;
-};
-
-const pres = (docWithMetadata, nodePresenter = v => v, rootNode = root) => {
-  const doc = {};
-  const metalayers = {};
-
-  for (const key of Object.keys(docWithMetadata)) {
-    const value = docWithMetadata[key];
-    if (isLayer(value)) metalayers[key] = value;
-    else doc[key] = value;
-  }
-
-  if (doc[rootNode] === undefined) {
-    throw new Error(
-      'A fragment can not be presented. The document has no root.'
-    );
-  }
-
-  // todo: what is happening here? A bit complicated?
-  // Is it a leftover from the earlier more complicated
-  // extension implementation?
-  const val = valueOf(valueOfSim)(doc);
-
-  const metaOfNode = (h, parent, pos) =>
-    Object.keys(metalayers).reduce(
-      (metadata, layer) => ({ ...metadata, [layer]: metalayers[layer][h] }),
-      { pos, parent }
-    );
-
-  const graph = (v, parent) => {
-    if (valtype(v, 'seq')) {
-      return v.map((h, pos) =>
-        nodePresenter(graph(val(h), h), h, metaOfNode(h, parent, pos))
-      );
-    }
-    return v;
-  };
-
-  return nodePresenter(
-    graph(val(rootNode), rootNode),
-    rootNode,
-    metaOfNode(rootNode)
-  );
 };
 
 const docValue = doc => {
@@ -158,14 +119,6 @@ const docValue = doc => {
     {}
   );
 };
-
-const ORMap = CRDTs('ormap');
-
-const layers = path =>
-  Array.isArray(path) ? path.slice(0, path.length - 1) : [];
-
-const layerArgs = layrs =>
-  layrs.reduce((args, layer) => args.concat([layer, 'ormap', 'applySub']), []);
 
 const handle = path => (Array.isArray(path) ? path[path.length - 1] : path);
 
@@ -181,44 +134,6 @@ const valueOfLayer = (vOf, layer) => {
     return { ...acc, [handl]: v, [LAYER]: true };
   }, {});
 };
-
-const req = prop => {
-  throw new Error(prop + ' is required');
-};
-
-class Document {
-  constructor(name = req('name')) {
-    this.name = name;
-    this._ormap = ORMap(name);
-  }
-
-  add(path, value, from) {
-    const handl = handle(path);
-    assertValidHandle(handl);
-
-    return this._ormap.applySub(
-      ...layerArgs(layers(path)),
-      handl,
-      'mvreg',
-      'write',
-      from !== undefined ? mapping(from, value) : value
-    );
-  }
-
-  value() {
-    return valueOfLayer(valueOf(valueOfSim), docValue(this._ormap.value()));
-  }
-
-  sync(deltas) {
-    if (!Array.isArray(deltas)) return this._ormap.apply(deltas);
-    for (const delta of deltas) {
-      this._ormap.apply(delta);
-    }
-  }
-}
-
-const document = name => new Document(name);
-const isDocument = x => x instanceof Document;
 
 const equal = (a, b) => {
   if (Array.isArray(a)) {
@@ -258,6 +173,7 @@ const projectLayer = (projection, layer, stack = [], metalayers = []) => {
   const val = handl => layer[handl];
   for (const handl of Object.keys(layer)) {
     const v = val(handl);
+    console.log(v, isLayer(v));
     if (isLayer(v)) continue;
     projectValue(projection, handl, v);
   }
@@ -281,11 +197,13 @@ const proj = (doc, stack = [], metalayers = []) => {
   return projection;
 };
 
+const isDocument = x => Boolean(x[DOCUMENT]);
+
 module.exports = {
-  Document,
-  document,
-  isDocument,
-  pres,
+  DOCUMENT,
+  handle,
+  docValue,
+  valueOfLayer,
   root,
   sym,
   sim,
@@ -294,6 +212,7 @@ module.exports = {
   seq,
   nil,
   LAYER,
+  isDocument,
   isLayer,
   valueOf,
   valueOfSim,

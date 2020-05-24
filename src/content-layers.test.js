@@ -1,14 +1,6 @@
-const {
-  proj,
-  sym,
-  document,
-  pres,
-  root,
-  isLayer,
-  seq,
-  str,
-  num,
-} = require('./core');
+const { document } = require('./document');
+const { pres } = require('./pres');
+const { proj, sym, root, isLayer, seq, str, num } = require('./core');
 
 describe('content layers', () => {
   const doc = () => {
