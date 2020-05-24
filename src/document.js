@@ -43,6 +43,4 @@ class Document {
   }
 }
 
-const document = name => new Document(name);
-
-module.exports = { document };
+module.exports = name => new Document(name);

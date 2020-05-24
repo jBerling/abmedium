@@ -2,7 +2,7 @@
 
 ## 0.9
 
-Major changes.
+Big breaking changes.
 
 - Remove dependency on delta-crdts
 - Remove sync method on Document

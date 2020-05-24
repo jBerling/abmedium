@@ -2,7 +2,7 @@ const { proj, num, sym, str, nil, root, seq } = require('./core');
 
 const { document } = require('./document');
 
-const treeOf = require('./treeOf');
+const treeOf = require('./tree-of');
 
 describe('treeOf', () => {
   const doc = () => {
