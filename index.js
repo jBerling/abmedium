@@ -12,8 +12,10 @@ const {
   nil,
   pres,
   valtype,
+  valueOf,
   lengthOf,
   editvalOf,
+  assertValidHandle,
 } = require('./src/core');
 
 module.exports = {
@@ -32,4 +34,6 @@ module.exports = {
   valtype,
   lengthOf,
   editvalOf,
+  assertValidHandle,
+  valueOf,
 };

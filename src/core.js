@@ -97,10 +97,10 @@ const editvalOf = value =>
 
 const valueOfSim = set => (set.size < 2 ? set.values().next().value : set);
 
-const valueOf = valOfSim => doc => handle => {
+const valueOf = (doc, handle) => {
   const v = doc[handle];
-  if (v === undefined) return v;
-  if (valtype(v, 'sim')) return valOfSim(v);
+  if (v === undefined) return undefined;
+  if (valtype(v, 'sim')) return valueOfSim(v);
   if (valtype(v, 'sym', 'seq')) return v;
   if (!valtype(v, 'nil', 'map') && typeof v === 'object') {
     v[LAYER] = true;
@@ -108,19 +108,14 @@ const valueOf = valOfSim => doc => handle => {
   return v;
 };
 
-const docValue = doc => {
-  const val = valueOf(valueOfSim)(doc);
-
-  return Object.keys(doc).reduce(
+const docValue = doc =>
+  Object.keys(doc).reduce(
     (acc, handle) => ({
       ...acc,
-      [handle]: val(handle),
+      [handle]: valueOf(doc, handle),
     }),
     {}
   );
-};
-
-const handle = path => (Array.isArray(path) ? path[path.length - 1] : path);
 
 const valueOfLayer = (vOf, layer) => {
   const val = vOf(layer);
@@ -200,7 +195,6 @@ const isDocument = x => Boolean(x[DOCUMENT]);
 
 module.exports = {
   DOCUMENT,
-  handle,
   docValue,
   valueOfLayer,
   root,
@@ -214,7 +208,6 @@ module.exports = {
   isDocument,
   isLayer,
   valueOf,
-  valueOfSim,
   assertValidHandle,
   proj,
   mapping,

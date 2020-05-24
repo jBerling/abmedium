@@ -1,14 +1,14 @@
 const {
   assertValidHandle,
-  handle,
   mapping,
   valueOf,
   valueOfLayer,
-  valueOfSim,
   docValue,
   DOCUMENT,
   LAYER,
 } = require('./core');
+
+const handle = path => (Array.isArray(path) ? path[path.length - 1] : path);
 
 const { addInLayer } = require('./util');
 
@@ -36,7 +36,10 @@ class Document {
   }
 
   value() {
-    return valueOfLayer(valueOf(valueOfSim), docValue(this.content));
+    return valueOfLayer(
+      doc => value => valueOf(doc, value),
+      docValue(this.content)
+    );
   }
 }
 

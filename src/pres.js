@@ -1,4 +1,4 @@
-const { isLayer, valtype, valueOf, valueOfSim, root } = require('./core');
+const { isLayer, valtype, valueOf, root } = require('./core');
 
 const pres = (docWithMetadata, nodePresenter = v => v, rootNode = root) => {
   const doc = {};
@@ -16,10 +16,7 @@ const pres = (docWithMetadata, nodePresenter = v => v, rootNode = root) => {
     );
   }
 
-  // todo: what is happening here? A bit complicated?
-  // Is it a leftover from the earlier more complicated
-  // extension implementation?
-  const val = valueOf(valueOfSim)(doc);
+  const val = handle => valueOf(doc, handle);
 
   const metaOfNode = (h, parent, pos) =>
     Object.keys(metalayers).reduce(

@@ -5,6 +5,7 @@
 Major changes.
 
 - Remove dependency on delta-crdts
+- Remove sync method on Document
 - Remove dependency on uuids
 - Pres can now present a document with a custom root node
 
