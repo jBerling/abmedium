@@ -7,7 +7,7 @@ Major changes.
 - Remove dependency on delta-crdts
 - Remove sync method on Document
 - Remove dependency on uuids
-- Pres can now present a document with a custom root node
+- Rename pres to treeOf. It can now create a tree with a custom root
 
 ## 0.8
 

@@ -1,6 +1,6 @@
 const { isLayer, valtype, valueOf, root } = require('./core');
 
-const pres = (docWithMetadata, nodePresenter = v => v, rootNode = root) => {
+const treeOf = (docWithMetadata, nodePresenter = v => v, rootNode = root) => {
   const doc = {};
   const metalayers = {};
 
@@ -11,9 +11,7 @@ const pres = (docWithMetadata, nodePresenter = v => v, rootNode = root) => {
   }
 
   if (doc[rootNode] === undefined) {
-    throw new Error(
-      'A fragment can not be presented. The document has no root.'
-    );
+    throw new Error('Pass a root node. The document has no default root node');
   }
 
   const val = handle => valueOf(doc, handle);
@@ -40,4 +38,4 @@ const pres = (docWithMetadata, nodePresenter = v => v, rootNode = root) => {
   );
 };
 
-module.exports = { pres };
+module.exports = treeOf;

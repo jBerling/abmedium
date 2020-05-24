@@ -2,9 +2,9 @@ const { proj, num, sym, str, nil, root, seq } = require('./core');
 
 const { document } = require('./document');
 
-const { pres } = require('./pres');
+const treeOf = require('./treeOf');
 
-describe('pres', () => {
+describe('treeOf', () => {
   const doc = () => {
     const d = document('test');
     d.add(root, seq(['op', 2, 3]));
@@ -24,29 +24,29 @@ describe('pres', () => {
     return d;
   };
 
-  it('presents document', () => {
+  it('creates tree from root', () => {
     const d = doc();
-    expect(pres(d.value())).toEqual([
+    expect(treeOf(d.value())).toEqual([
       sym('+'),
       num(10),
       [sym('-'), num(20), num(30)],
     ]);
   });
 
-  it('presents nil values', () => {
+  it('Handles nil values', () => {
     const d = document('test');
     d.add(0, nil);
-    expect(pres(d.value())).toEqual(nil);
+    expect(treeOf(d.value())).toEqual(nil);
   });
 
-  it('presents document with metalayer using node presenter', () => {
+  it('create tree from document with metalayers using node presenter', () => {
     const d = doc();
 
     const presenter = (value, handle, { type, parent, pos }) => {
       return { handle, value, type, parent, pos };
     };
 
-    const res = pres(proj(d, [], ['type']), presenter);
+    const res = treeOf(proj(d, [], ['type']), presenter);
 
     expect(res).toEqual({
       handle: 0,
@@ -69,24 +69,15 @@ describe('pres', () => {
     });
   });
 
-  it('presents documents with a custom root node', () => {
+  it('creates a tree with a custom root node', () => {
     const d = doc();
-    const res = pres(proj(d), undefined, 3);
+    const res = treeOf(proj(d), undefined, 3);
     expect(res).toEqual([sym('-'), num(20), num(30)]);
   });
 
-  // Todo: think about this one
-  it('throws when presenting fragment', () => {
-    const f = document('fragment');
-    f.add(1, str('foo'));
-    expect(() => pres(f.value())).toThrow(
-      new Error('A fragment can not be presented. The document has no root.')
-    );
-  });
-
-  it('throws not when presenting nil as root', () => {
+  it('throws not when creating a tree with nil as root', () => {
     const f = document('fragment');
     f.add(0, nil);
-    pres(f.value());
+    treeOf(f.value());
   });
 });
