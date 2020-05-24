@@ -2,6 +2,7 @@ const {
   assertValidHandle,
   handle,
   mapping,
+  valueOf,
   valueOfLayer,
   valueOfSim,
   docValue,

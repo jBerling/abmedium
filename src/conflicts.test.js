@@ -1,8 +1,8 @@
-const { document } = require('./document');
+const { document } = require('./crdt-document');
 const { proj, mapping, disagreement, root, sym } = require('./core');
 
 describe('conflicts', () => {
-  xit('simultaneity', () => {
+  it('simultaneity', () => {
     const x = document('x');
     x.add(root, 'x-root');
     x.sync(document('y').add(root, 'y-root'));

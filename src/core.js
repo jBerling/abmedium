@@ -173,7 +173,6 @@ const projectLayer = (projection, layer, stack = [], metalayers = []) => {
   const val = handl => layer[handl];
   for (const handl of Object.keys(layer)) {
     const v = val(handl);
-    console.log(v, isLayer(v));
     if (isLayer(v)) continue;
     projectValue(projection, handl, v);
   }

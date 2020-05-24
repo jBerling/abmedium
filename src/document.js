@@ -38,13 +38,6 @@ class Document {
   value() {
     return valueOfLayer(valueOf(valueOfSim), docValue(this.content));
   }
-
-  sync(deltas) {
-    if (!Array.isArray(deltas)) return this._ormap.apply(deltas);
-    for (const delta of deltas) {
-      this._ormap.apply(delta);
-    }
-  }
 }
 
 const document = name => new Document(name);
