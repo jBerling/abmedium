@@ -1,18 +1,7 @@
-const { document } = require('./crdt-document');
+const { document } = require('./document');
 const { proj, mapping, disagreement, root, sym } = require('./core');
 
-describe('conflicts', () => {
-  it('simultaneity', () => {
-    const x = document('x');
-    x.add(root, 'x-root');
-    x.sync(document('y').add(root, 'y-root'));
-    x.sync(document('z').add(root, 'z-root'));
-
-    expect(x.value()).toMatchObject({
-      [root]: new Set(['x-root', 'y-root', 'z-root']),
-    });
-  });
-
+describe('disagreements', () => {
   it('mapping', () => {
     const x = document('x');
     x.add(root, 'a');
@@ -30,7 +19,6 @@ describe('conflicts', () => {
   // They might be useful if you want to override
   // a conflict in a layer you project upon.
   xit('mapping of disagreement', () => {});
-  xit('mapping of simultaneity', () => {});
 
   it('disagreement of unexpected atom', () => {
     const x = document('x');

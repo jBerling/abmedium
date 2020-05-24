@@ -16,8 +16,6 @@ const {
   editvalOf,
 } = require('./src/core');
 
-const { serialized, deserialized } = require('./src/serialization');
-
 module.exports = {
   proj,
   mapping,
@@ -31,8 +29,6 @@ module.exports = {
   seq,
   nil,
   pres,
-  serialized,
-  deserialized,
   valtype,
   lengthOf,
   editvalOf,
