@@ -18,7 +18,7 @@ describe('The core module', () => {
   });
 
   it('adds nil values', () => {
-    const d = document();
+    const d = document('test');
     d.add(root, nil);
     expect(d.value()).toMatchObject({ 0: nil });
   });
@@ -66,7 +66,7 @@ describe('The core module', () => {
   });
 
   it('presents nil values', () => {
-    const d = document();
+    const d = document('test');
     d.add(0, nil);
     expect(pres(d.value())).toEqual(nil);
   });

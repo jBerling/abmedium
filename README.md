@@ -36,7 +36,7 @@ const {
 Then create a document.
 
 ```javascript
-const sexpr = document();
+const sexpr = document("sexpr-example");
 ```
 
 A complete document should contain a _root_ which is the `0` handle (hence the imported root is just a constant with the value `0`). Let's map the root to a sequence by calling `add`. The first argument is the handle and the second argument is the value.
@@ -103,7 +103,7 @@ Let's begin to explore how a feature branch is handled, without the use of an ad
 There is a system with a start view written in a language meant to be transpiled to HTML.
 
 ```javascript
-const startView = document();
+const startView = document("layers-example");
 startView.add(root, [1, 2, 3, 7]);
 startView.add(1, sym("div#start-view"));
 startView.add(2, seq([]));

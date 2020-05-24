@@ -13,10 +13,12 @@ describe('serialized', () => {
   });
 
   it('serializes and deserializes a document with simultanities', () => {
-    const d = document();
+    const d = document('test-document');
     d.add(root, str('first'));
     const serD = serialized(d);
-    const delta = serialized(document().add(root, str('second')));
+    const delta = serialized(
+      document('test-document2').add(root, str('second'))
+    );
 
     const d2 = deserialized(serD);
     d2.sync(deserialized(delta));
@@ -25,11 +27,11 @@ describe('serialized', () => {
   });
 
   it('deserializes a delta and applies it to a document', () => {
-    const d = document('test-document');
+    const d = document('test-document1');
     const deltas = [];
     deltas.push(serialized(d.add(root, seq(['handle-a']))));
     deltas.push(serialized(d.add('handle-a', sym('atoms'))));
-    const d2 = document();
+    const d2 = document('test-document2');
     d2.sync(deserialized(deltas[0]));
     d2.sync(deserialized(deltas[1]));
     expect(pres(proj(d2))).toMatchObject(seq([sym('atoms')]));

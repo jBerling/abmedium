@@ -8,8 +8,7 @@
   "license": "AGPL-3.0",
   "private": false,
   "dependencies": {
-    "delta-crdts": "^0.10.3",
-    "uuid": "^3.4.0"
+    "delta-crdts": "^0.10.3"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",

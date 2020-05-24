@@ -1,5 +1,4 @@
 const CRDTs = require('delta-crdts');
-const uuid = require('uuid/v1');
 
 const LAYER = Symbol('layer');
 const isLayer = v => v !== null && Boolean(v[LAYER]);
@@ -183,8 +182,12 @@ const valueOfLayer = (vOf, layer) => {
   }, {});
 };
 
+const req = prop => {
+  throw new Error(prop + ' is required');
+};
+
 class Document {
-  constructor(name = uuid()) {
+  constructor(name = req('name')) {
     this.name = name;
     this._ormap = ORMap(name);
   }

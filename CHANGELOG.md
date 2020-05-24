@@ -2,7 +2,10 @@
 
 ## 0.9
 
-- pres can now present a document with a custom root node
+Major changes.
+
+- Remove dependency on uuids
+- Pres can now present a document with a custom root node
 
 ## 0.8
 
