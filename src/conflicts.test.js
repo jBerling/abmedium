@@ -1,4 +1,4 @@
-const { document } = require('./document');
+const document = require('./document');
 const { proj, mapping, disagreement, root, sym } = require('./core');
 
 describe('disagreements', () => {

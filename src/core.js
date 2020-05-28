@@ -2,7 +2,7 @@ const LAYER = Symbol('layer');
 const DOCUMENT = Symbol('document');
 
 const isLayer = v => v !== null && Boolean(v[LAYER]);
-const layer = content => ({ ...content, [LAYER]: true });
+const layer = (content = {}) => ({ ...content, [LAYER]: true });
 
 const root = 0;
 

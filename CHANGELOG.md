@@ -8,6 +8,9 @@ Big breaking changes.
 - Remove sync method on Document
 - Remove dependency on uuids
 - Rename pres to treeOf. It can now create a tree with a custom root
+- add combined. It combines two documents. If two nodes binds a value to the same handle in the same layer they are considered to be overlapping. Then the value is resolved using a function passed as the first argument in a curried function.
+- Add merge. It merges two documents. Conflicts are represented as Simultaneities. Uses combined under the hood.
+- Add replace. It replaces the nodes of one document with the nodes of a second document. Uses combined under the hood.
 
 ## 0.8
 
@@ -24,6 +27,8 @@ Big breaking changes.
 - Add editvalOf. It returns a value suitable to be edited.
 
 ### 0.8.3
+
+First public release
 
 - export editvalOf
 

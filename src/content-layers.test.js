@@ -1,5 +1,5 @@
-const { document } = require('./document');
-const { pres } = require('./pres');
+const document = require('./document');
+const treeOf = require('./tree-of');
 const { proj, sym, root, isLayer, seq, str, num } = require('./core');
 
 describe('content layers', () => {
@@ -128,9 +128,10 @@ describe('content layers', () => {
     });
   });
 
-  it('pres', () => {
+  // TODO move to tree-of.test.js
+  it('treeOf', () => {
     const d = doc();
     const projection = proj(d, [['layer1', ['layer1_1']]]);
-    expect(pres(projection)).toMatchObject([sym('+'), num(11), num(211)]);
+    expect(treeOf(projection)).toMatchObject([sym('+'), num(11), num(211)]);
   });
 });

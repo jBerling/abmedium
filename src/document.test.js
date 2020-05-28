@@ -1,5 +1,5 @@
 const { num, nil, root, seq, str, sym, LAYER } = require('./core');
-const { document } = require('./document');
+const document = require('./document');
 
 describe('Document', () => {
   it('adds handle-value pair', () => {

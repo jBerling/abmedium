@@ -10,7 +10,6 @@ const {
   seq,
   nil,
   valtype,
-  valueOf,
   lengthOf,
   editvalOf,
   assertValidHandle,
@@ -20,6 +19,7 @@ const {
 
 const document = require('./src/document');
 const treeOf = require('./src/tree-of');
+const { combined, merge, replace } = require('./src/combining');
 
 module.exports = {
   proj,
@@ -33,7 +33,6 @@ module.exports = {
   seq,
   nil,
   valtype,
-  valueOf,
   lengthOf,
   editvalOf,
   assertValidHandle,
@@ -42,4 +41,8 @@ module.exports = {
 
   document,
   treeOf,
+
+  combined,
+  merge,
+  replace,
 };
