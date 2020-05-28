@@ -8,9 +8,9 @@ Big breaking changes.
 - Remove sync method on Document
 - Remove dependency on uuids
 - Rename pres to treeOf. It can now create a tree with a custom root
-- add combined. It combines two documents. If two nodes binds a value to the same handle in the same layer they are considered to be overlapping. Then the value is resolved using a function passed as the first argument in a curried function.
-- Add merge. It merges two documents. Conflicts are represented as Simultaneities. Uses combined under the hood.
-- Add replace. It replaces the nodes of one document with the nodes of a second document. Uses combined under the hood.
+- Add combined. It is a curried function. It's first parameter is a function that resolves overlapping nodes. merged and replaced use it under the hood.
+- Add merged. It combines two documents and resolves overlapping nodes into a simultainity.
+- Add replaced. It combines two documents and resolves overlapping by replacing the value of the target document with the overlapping document.
 
 ## 0.8
 
