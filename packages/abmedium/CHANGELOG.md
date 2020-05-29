@@ -5,7 +5,8 @@
 Big breaking changes.
 
 - To multi-repo
-- Remove dependency on delta-crdts
+- Remove dependency on delta-crdts. Put CRDTs based functionality in new package @abrovink/abmedium-crdt
+- Remove serialization. Put serialization into @abrovink/abmedium-json
 - Remove sync method on Document
 - Remove dependency on uuids
 - Rename pres to treeOf. It can now create a tree with a custom root

@@ -1,0 +1,16 @@
+{
+  "name": "@abrovink/abmedium-crdt",
+  "version": "0.8.3",
+  "description": "Handle causality in Abmedium documents with δ-CRDTs",
+  "main": "index.js",
+  "repository": "git@gitlab.com:berling/abmedium.git",
+  "author": "Johan Berling <johan.berling@abrovink.org>",
+  "license": "AGPL-3.0",
+  "private": false,
+  "dependencies": {
+    "delta-crdts": "^0.10.3"
+  },
+  "scripts": {
+    "test": "jest --watch"
+  }
+}

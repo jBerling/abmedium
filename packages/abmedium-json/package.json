@@ -1,0 +1,16 @@
+{
+  "name": "@abrovink/abmedium-json",
+  "version": "0.8.3",
+  "description": "Serialize/deserialize Abmedium documents to/from JSON",
+  "main": "index.js",
+  "repository": "git@gitlab.com:berling/abmedium.git",
+  "author": "Johan Berling <johan.berling@abrovink.org>",
+  "license": "AGPL-3.0",
+  "private": false,
+  "dependencies": {
+    "@abrovink/abmedium": "0.8.3"
+  },
+  "scripts": {
+    "test": "jest --watch"
+  }
+}
