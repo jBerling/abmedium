@@ -4,6 +4,7 @@
 
 Big breaking changes.
 
+- To multi-repo
 - Remove dependency on delta-crdts
 - Remove sync method on Document
 - Remove dependency on uuids
