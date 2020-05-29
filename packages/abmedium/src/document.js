@@ -5,12 +5,15 @@ const {
   valueOfLayer,
   docValue,
   DOCUMENT,
-  LAYER,
+  isLayer,
+  layer: l,
 } = require('./core');
 
 const handle = path => (Array.isArray(path) ? path[path.length - 1] : path);
 
 const { addInLayer } = require('./util');
+
+const { merged, replaced } = require('./combining');
 
 const layers = path =>
   Array.isArray(path) ? path.slice(0, path.length - 1) : [];
@@ -22,7 +25,7 @@ class Document {
   constructor(name = req('name')) {
     this[DOCUMENT] = true;
     this.name = name;
-    this.content = { [LAYER]: true };
+    this.content = l({});
   }
 
   add(path, value, from) {
@@ -33,6 +36,22 @@ class Document {
       [...layers(path), handl],
       from != undefined ? mapping(from, value) : value
     );
+  }
+
+  replace(overlay) {
+    if (!isLayer(overlay)) {
+      throw new Error('replace expects a layer.');
+    }
+
+    replaced(this.content, overlay);
+  }
+
+  merge(layer) {
+    if (!isLayer(layer)) {
+      throw new Error('merge expects a layer.');
+    }
+
+    merged(this.content, layer);
   }
 
   value() {

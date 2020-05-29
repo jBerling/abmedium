@@ -13,6 +13,7 @@ Big breaking changes.
 - Add combined. It is a curried function. It's first parameter is a function that resolves overlapping nodes. merged and replaced use it under the hood.
 - Add merged. It combines two documents and resolves overlapping nodes into a simultainity.
 - Add replaced. It combines two documents and resolves overlapping by replacing the value of the target document with the overlapping document.
+- Add merged and replaced to Document.
 - Export sim
 
 ## 0.8.3
