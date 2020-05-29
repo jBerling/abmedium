@@ -8,7 +8,7 @@ const {
   num,
   sim,
   mapping,
-} = require('./core');
+} = require('@abrovink/abmedium');
 
 const { jsonOf, fromJson } = require('./json-value');
 

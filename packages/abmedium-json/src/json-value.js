@@ -1,4 +1,11 @@
-const { valtype, sim, sym, mapping, isLayer, layer } = require('./core');
+const {
+  valtype,
+  sim,
+  sym,
+  mapping,
+  isLayer,
+  layer,
+} = require('@abrovink/abmedium');
 
 const sim_ = '$$S',
   sym_ = '$$s',
