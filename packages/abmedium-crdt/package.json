@@ -6,8 +6,10 @@
   "repository": "git@gitlab.com:berling/abmedium.git",
   "author": "Johan Berling <johan.berling@abrovink.org>",
   "license": "AGPL-3.0",
-  "private": false,
+  "private": true,
   "dependencies": {
+    "@abrovink/abmedium": "0.8.3",
+    "@abrovink/abmedium-json": "0.8.3",
     "delta-crdts": "^0.10.3"
   },
   "scripts": {

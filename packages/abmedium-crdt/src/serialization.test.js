@@ -13,7 +13,7 @@ xdescribe('serialized', () => {
     ]);
   });
 
-  it('serializes and deserializes a document with simultanities', () => {
+  it('serializes and deserializes a document with simultaneities', () => {
     const d = document('test-document');
     d.add(root, str('first'));
     const serD = serialized(d);

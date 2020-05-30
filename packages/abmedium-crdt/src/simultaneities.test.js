@@ -1,9 +1,9 @@
 const { root } = require('@abrovink/abmedium');
 const { document } = require('./document');
 
-describe('Simultaneities', () => {
+xdescribe('Simultaneities', () => {
   // TODO not applicable since no causality info
-  it('simultaneity', () => {
+  xit('simultaneity', () => {
     const x = document('x');
     x.add(root, 'x-root');
     x.sync(document('y').add(root, 'y-root'));
