@@ -1,4 +1,4 @@
-const { isDocument, isLayer, layer, sim } = require('./core');
+const { isDocument, isLayer, layer, sim, valtype } = require('./core');
 
 const combined = resolved => (a, b) => {
   const bValue = isDocument(b) ? b.value() : b;
@@ -17,6 +17,6 @@ const combined = resolved => (a, b) => {
 
 module.exports = {
   combined,
-  merged: combined((a, b) => (a === undefined ? b : sim([a, b]))),
+  merged: combined((a, b) => (a === undefined ? b : sim(a, b))),
   replaced: combined((_, b) => b),
 };

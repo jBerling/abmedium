@@ -5,7 +5,7 @@ const { proj, sym, root, isLayer, seq, str, num } = require('./core');
 describe('content layers', () => {
   const doc = () => {
     const d = document('base');
-    d.add(root, seq([1, 2, 3]));
+    d.add(root, seq(1, 2, 3));
     d.add(1, sym('+'));
     d.add(2, num(1));
     d.add(3, num(2));
@@ -99,7 +99,7 @@ describe('content layers', () => {
 
     it('metalayers', () => {
       const d = document('test');
-      d.add(root, seq([1, 2]));
+      d.add(root, seq(1, 2));
       d.add(1, str('a'));
       d.add(['descr', 1], str('small a'));
       d.add(['ts', 1], num(1588321340608));
@@ -110,7 +110,7 @@ describe('content layers', () => {
       d.add(['alt', 'descr', 2], str('big b'));
       const result = proj(d, ['alt'], ['descr', 'ts']);
       expect(result).toMatchObject({
-        [root]: seq([1, 2]),
+        [root]: seq(1, 2),
         1: str('a'),
         2: str('B'),
         descr: {

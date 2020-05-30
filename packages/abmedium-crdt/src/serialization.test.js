@@ -30,11 +30,11 @@ xdescribe('serialized', () => {
   it('deserializes a delta and applies it to a document', () => {
     const d = document('test-document1');
     const deltas = [];
-    deltas.push(serialized(d.add(root, seq(['handle-a']))));
+    deltas.push(serialized(d.add(root, seq('handle-a'))));
     deltas.push(serialized(d.add('handle-a', sym('atoms'))));
     const d2 = document('test-document2');
     d2.sync(deserialized(deltas[0]));
     d2.sync(deserialized(deltas[1]));
-    expect(pres(proj(d2))).toMatchObject(seq([sym('atoms')]));
+    expect(pres(proj(d2))).toMatchObject(seq(sym('atoms')));
   });
 });

@@ -25,13 +25,13 @@ describe('Document', () => {
 
   const doc = () => {
     const d = document('test');
-    d.add(root, seq(['op', 2, 3]));
+    d.add(root, seq('op', 2, 3));
     d.add(['type', root], str('call'));
     d.add('op', sym('+'));
     d.add(['type', 'op'], str('function'));
     d.add(2, num(10));
     d.add(['type', 2], str('number'));
-    d.add(3, seq([4, 5, 6]));
+    d.add(3, seq(4, 5, 6));
     d.add(['type', 3], str('call'));
     d.add(4, sym('-'));
     d.add(['type', 4], str('function'));
@@ -46,10 +46,10 @@ describe('Document', () => {
     const d = doc();
 
     expect(d.value()).toMatchObject({
-      [root]: seq([str('op'), num(2), num(3)]),
+      [root]: seq(str('op'), num(2), num(3)),
       op: sym('+'),
       2: num(10),
-      3: seq([4, 5, 6]),
+      3: seq(4, 5, 6),
       4: sym('-'),
       5: num(20),
       6: num(30),

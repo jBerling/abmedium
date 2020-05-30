@@ -4,7 +4,7 @@ const { merged, replaced } = require('./combining');
 describe('combining', () => {
   it('it replaces the values of one object with another', () => {
     const a = layer({
-      a: seq(['b', 'c']),
+      a: seq('b', 'c'),
       b: sym('b'),
       c: sym('c'),
       alt: layer({ b: sym('bx'), c: sym('cx') }),
@@ -12,7 +12,7 @@ describe('combining', () => {
 
     const b = layer({
       c: sym('C'),
-      d: seq(['e', 'f']),
+      d: seq('e', 'f'),
       e: sym('e'),
       f: sym('f'),
       alt: layer({ c: sym('CX'), e: sym('ex'), f: sym('fx') }),
@@ -22,10 +22,10 @@ describe('combining', () => {
 
     expect(a).toEqual(
       layer({
-        a: seq(['b', 'c']),
+        a: seq('b', 'c'),
         b: sym('b'),
         c: sym('C'),
-        d: seq(['e', 'f']),
+        d: seq('e', 'f'),
         e: sym('e'),
         f: sym('f'),
         alt: layer({
@@ -38,9 +38,9 @@ describe('combining', () => {
     );
   });
 
-  it('merges two objects', () => {
+  it('merges objects', () => {
     const a = layer({
-      a: seq(['b', 'c']),
+      a: seq('b', 'c'),
       b: sym('b'),
       c: sym('c'),
       alt: layer({ b: sym('bx'), c: sym('cx') }),
@@ -48,25 +48,30 @@ describe('combining', () => {
 
     const b = layer({
       c: sym('C'),
-      d: seq(['e', 'f']),
+      d: seq('e', 'f'),
       e: sym('e'),
       f: sym('f'),
       alt: layer({ c: sym('CX'), e: sym('ex'), f: sym('fx') }),
     });
 
+    const c = layer({
+      c: sym('CC'),
+    });
+
     merged(a, b);
+    merged(a, c);
 
     expect(a).toEqual(
       layer({
-        a: seq(['b', 'c']),
+        a: seq('b', 'c'),
         b: sym('b'),
-        c: sim([sym('c'), sym('C')]),
-        d: seq(['e', 'f']),
+        c: sim(sym('c'), sym('C'), sym('CC')),
+        d: seq('e', 'f'),
         e: sym('e'),
         f: sym('f'),
         alt: layer({
           b: sym('bx'),
-          c: sim([sym('cx'), sym('CX')]),
+          c: sim(sym('cx'), sym('CX')),
           e: sym('ex'),
           f: sym('fx'),
         }),

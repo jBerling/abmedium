@@ -6,37 +6,26 @@ const layer = (content = {}) => ({ ...content, [LAYER]: true });
 
 const root = 0;
 
-const sim = members => new Set(members);
-const str = s => s;
-const num = x => (typeof x === 'string' ? Number(x) : x);
-const seq = items => (Array.isArray(items) ? items : [...items]);
-const nil = null;
-
-class Sym {
-  constructor(name) {
-    this.name = name;
-  }
-}
-const sym = name => new Sym(name);
-
 const assertValidHandle = handle => {
   if (typeof handle !== 'string' && typeof handle !== 'number') {
     throw new Error(`»${handle}« is not a valid handle`);
   }
 };
 
+class Sym {
+  constructor(name) {
+    this.name = name;
+  }
+}
+
 function Disagreement(expected, actual, to) {
   Object.assign(this, { expected, actual, to });
 }
-const disagreement = (expected, actual, to) =>
-  new Disagreement(expected, actual, to);
 
 function Mapping(from, to) {
   this.from = from;
   this.to = to;
 }
-
-const mapping = (from, to) => new Mapping(from, to);
 
 const vtype = v => {
   if (v instanceof Sym) return 'sym';
@@ -67,6 +56,29 @@ const valtype = (v, flag, ...flags) => {
   }
   throw new Error('unknown flag', flag);
 };
+
+const sim = (...members) => {
+  const s = new Set();
+  for (const member of members) {
+    valtype(member, {
+      sim: () => {
+        for (const [m] of member.entries()) {
+          s.add(m);
+        }
+      },
+      _: () => s.add(member),
+    });
+  }
+  return s;
+};
+const disagreement = (expected, actual, to) =>
+  new Disagreement(expected, actual, to);
+const sym = name => new Sym(name);
+const str = s => s;
+const num = x => (typeof x === 'string' ? Number(x) : x);
+const seq = (...items) => items;
+const mapping = (from, to) => new Mapping(from, to);
+const nil = null;
 
 const lengthOf = v =>
   valtype(v, {

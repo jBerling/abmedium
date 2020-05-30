@@ -14,7 +14,8 @@ Big breaking changes.
 - Add merged. It combines two documents and resolves overlapping nodes into a simultainity.
 - Add replaced. It combines two documents and resolves overlapping by replacing the value of the target document with the overlapping document.
 - Add merged and replaced to Document.
-- Export sim
+- Export sim and add isSim
+- Change sim and seq to variadic functions.
 
 ## 0.8.3
 

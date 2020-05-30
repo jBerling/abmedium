@@ -7,13 +7,13 @@ const treeOf = require('./tree-of');
 describe('treeOf', () => {
   const doc = () => {
     const d = document('test');
-    d.add(root, seq(['op', 2, 3]));
+    d.add(root, seq('op', 2, 3));
     d.add(['type', root], str('call'));
     d.add('op', sym('+'));
     d.add(['type', 'op'], str('function'));
     d.add(2, num(10));
     d.add(['type', 2], str('number'));
-    d.add(3, seq([4, 5, 6]));
+    d.add(3, seq(4, 5, 6));
     d.add(['type', 3], str('call'));
     d.add(4, sym('-'));
     d.add(['type', 4], str('function'));

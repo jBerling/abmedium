@@ -14,10 +14,10 @@ const {
 describe('interface', () => {
   test('valtype', () => {
     expect(valtype(sym('a'))).toEqual('sym');
-    expect(valtype(seq([]))).toEqual('seq');
+    expect(valtype(seq())).toEqual('seq');
     expect(valtype(str(''))).toEqual('str');
     expect(valtype(num(0))).toEqual('num');
-    expect(valtype(sim(['a', 'b']))).toEqual('sim');
+    expect(valtype(sim('a', 'b'))).toEqual('sim');
     expect(valtype(disagreement('a', 'b', 'c'))).toEqual('dis');
     expect(valtype(nil)).toEqual('nil');
   });
@@ -25,10 +25,10 @@ describe('interface', () => {
   test('valtype with conditional flag', () => {
     expect(valtype(sym('a'), 'sym')).toBe(true);
     expect(valtype(sym('a'), 'seq')).toBe(false);
-    expect(valtype(seq([]), 'seq')).toBe(true);
+    expect(valtype(seq(), 'seq')).toBe(true);
     expect(valtype(str(''), 'str')).toBe(true);
     expect(valtype(num(0), 'num')).toBe(true);
-    expect(valtype(sim(['a', 'b']), 'sim')).toBe(true);
+    expect(valtype(sim('a', 'b'), 'sim')).toBe(true);
     expect(valtype(disagreement('a', 'b', 'c'), 'dis')).toBe(true);
     expect(valtype(sym('a'), 'str', 'num', 'sym')).toBe(true);
     expect(valtype(nil, 'nil')).toBe(true);
@@ -37,20 +37,20 @@ describe('interface', () => {
   test('valtype with switch flag', () => {
     const collected = [];
     const collect = t => v => collected.push([t, v]);
-    valtype(seq([]), { seq: collect('seq') });
+    valtype(seq(), { seq: collect('seq') });
     valtype(sym('a'), { sym: collect('sym') });
     valtype(str(''), { str: collect('str') });
     valtype(num(0), { num: collect('num') });
-    valtype(sim(['a', 'b']), { sim: collect('sim') });
+    valtype(sim('a', 'b'), { sim: collect('sim') });
     valtype(disagreement('a', 'b', 'c'), { dis: collect('dis') });
     valtype(sym('a'), { _: collect('_') });
     valtype(nil, { nil: collect('nil') });
     expect(collected).toMatchObject([
-      ['seq', seq([])],
+      ['seq', seq()],
       ['sym', sym('a')],
       ['str', str('')],
       ['num', num(0)],
-      ['sim', sim(['a', 'b'])],
+      ['sim', sim('a', 'b')],
       ['dis', disagreement('a', 'b', 'c')],
       ['_', sym('a')],
       ['nil', nil],
@@ -61,12 +61,12 @@ describe('interface', () => {
   test('lengthOf', () => {
     expect(
       [
-        seq([1, 2, 3]),
+        seq(1, 2, 3),
         sym('ab'),
         str('abc'),
         num('1001'),
         nil,
-        sim(['a', 'b']),
+        sim('a', 'b'),
         disagreement('a', 'b', 'c'),
       ].map(lengthOf)
     ).toMatchObject([3, 2, 3, 4, 0, NaN, NaN]);
@@ -75,12 +75,12 @@ describe('interface', () => {
   test('editvalOf', () => {
     expect(
       [
-        seq([1, 2, 3]),
+        seq(1, 2, 3),
         sym('ab'),
         str('abc'),
         num('1001'),
         nil,
-        sim(['a', 'b']),
+        sim('a', 'b'),
         disagreement('a', 'b', 'c'),
       ].map(editvalOf)
     ).toMatchObject([
@@ -92,5 +92,11 @@ describe('interface', () => {
       new Set(['a', 'b']),
       disagreement('a', 'b', 'c'),
     ]);
+  });
+
+  test('sim of sims', () => {
+    expect(sim(sim('a', 'b'), 'c', sim('d', 'e'))).toEqual(
+      sim('a', 'b', 'c', 'd', 'e')
+    );
   });
 });

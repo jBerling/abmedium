@@ -42,7 +42,7 @@ const sexpr = document("sexpr-example");
 A complete document should contain a _root_ which is the `0` handle (hence the imported root is just a constant with the value `0`). Let's map the root to a sequence by calling `add`. The first argument is the handle and the second argument is the value.
 
 ```javascript
-sexpr.add(root, seq([1, 2, 3]));
+sexpr.add(root, seq(1, 2, 3));
 ```
 
 1, 2 and 3 are handles, because as mentioned above, a sequence can only contain handles. The handles should be mapped to `+`, `100` and `(- 200 300)`. First we add ...
@@ -55,7 +55,7 @@ sexpr.add(2, num(100));
 ... and then we add the subexpression `(- 200 300)`
 
 ```javascript
-sexpr.add(3, seq([4, 5, 6]));
+sexpr.add(3, seq(4, 5, 6));
 sexpr.add(4, sym("-"));
 sexpr.add(5, num(200));
 sexpr.add(6, num(300));
@@ -104,27 +104,27 @@ There is a system with a start view written in a language meant to be transpiled
 
 ```javascript
 const startView = document("start-view");
-startView.add(root, [1, 2, 3, 7]);
+startView.add(root, seq(1, 2, 3, 7);
 startView.add(1, sym("div#start-view"));
-startView.add(2, seq([]));
-startView.add(3, seq([4, 5, 6]));
+startView.add(2, seq());
+startView.add(3, seq(4, 5, 6));
 startView.add(4, sym("h1"));
-startView.add(5, seq([]));
+startView.add(5, seq());
 startView.add(6, str("Hello, Sir!"));
-startView.add(7, seq([8, 9, 10, 14, 18]));
+startView.add(7, seq(8, 9, 10, 14, 18));
 startView.add(8, sym("ul.menu"));
-startView.add(9, seq([]));
-startView.add(10, seq([11, 12, 13]));
+startView.add(9, seq());
+startView.add(10, seq(11, 12, 13));
 startView.add(11, sym("li.menu-item"));
-startView.add(12, seq([]));
+startView.add(12, seq());
 startView.add(13, str("Add article"));
-startView.add(14, seq([15, 16, 17]));
+startView.add(14, seq(15, 16, 17));
 startView.add(15, sym("li.menu-item"));
-startView.add(16, seq([]));
+startView.add(16, seq());
 startView.add(17, str("Review article"));
-startView.add(18, seq([19, 20, 21]));
+startView.add(18, seq(19, 20, 21));
 startView.add(19, sym("li.menu-item"));
-startView.add(20, seq([]));
+startView.add(20, seq());
 startView.add(21, str("Logout"));
 ```
 
@@ -150,13 +150,13 @@ Brutus is working on a feature branch – `"add-value-to-items"`. Until he as ad
 ```javascript
 startView.add(["add-value-to-items", 22], str("data-value"));
 startView.add(["add-value-to-items", 23], str("add-article"));
-startView.add(["add-value-to-items", 12], seq([22, 23]));
+startView.add(["add-value-to-items", 12], seq(22, 23));
 startView.add(["add-value-to-items", 24], str("data-value"));
 startView.add(["add-value-to-items", 25], str("review-article"));
-startView.add(["add-value-to-items", 16], seq([24, 25]));
+startView.add(["add-value-to-items", 16], seq(24, 25));
 startView.add(["add-value-to-items", 26], str("data-value"));
 startView.add(["add-value-to-items", 27], str("logout"));
-startView.add(["add-value-to-items", 20], seq([26, 27]));
+startView.add(["add-value-to-items", 20], seq(26, 27));
 ```
 
 To add a value to a layer, you just pass an array containing the layer name and the handle to the `add` method instead of just a handle.
@@ -340,10 +340,10 @@ Brutus gets back to the computer and synchronize with Cato's work. He then start
 
 ```javascript
 startView.add(["hail-by-name", 28], sym("fun"));
-startView.add(["hail-by-name", 29], seq([30]));
+startView.add(["hail-by-name", 29], seq(30));
 startView.add(["hail-by-name", 30], sym("user-name"));
-startView.add(["hail-by-name", 31], seq([1, 2, 3, 7])); // the old root
-startView.add(["hail-by-name", root], seq([28, 29, 31]));
+startView.add(["hail-by-name", 31], seq(1, 2, 3, 7)); // the old root
+startView.add(["hail-by-name", root], seq(28, 29, 31));
 ```
 
 He inspects the result
@@ -380,7 +380,7 @@ startView.add(["hail-by-name", 32], sym("concat"));
 startView.add(["hail-by-name", 33], str("Hi "));
 startView.add(["hail-by-name", 34], sym("user-name"));
 startView.add(["hail-by-name", 35], str("!"));
-startView.add(["hail-by-name", 6], seq([32, 33, 34, 35]));
+startView.add(["hail-by-name", 6], seq(32, 33, 34, 35));
 ```
 
 He presents the projected value
@@ -494,7 +494,7 @@ This result introduces _Disagreements_, which is one of the conflict types. As y
 
 ```javascript
 startView2.add(["la", 33], str("Salve "));
-startView2.add(["la", 6], seq([32, 33, 34, 35]), seq([32, 33, 34, 35]));
+startView2.add(["la", 6], seq(32, 33, 34, 35), seq(32, 33, 34, 35));
 ```
 
 This will do the trick. After some pondering Cato also adds
@@ -550,8 +550,8 @@ startView2.add(["la", 6], str("Salve magister!"), str("Hello, Sir!"));
 startView2.add(["hail-by-name", "la", 33], str("Salve "));
 startView2.add(
   ["hail-by-name", "la", 6],
-  seq([32, 33, 34, 35]),
-  seq([32, 33, 34, 35])
+  seq(32, 33, 34, 35),
+  seq(32, 33, 34, 35)
 );
 startView2.add(["hail-by-name", "la", 32], sym("concat"), sym("concat"));
 startView2.add(["hail-by-name", "la", 34], sym("user-name"), sym("user-name"));
@@ -722,7 +722,7 @@ A more realistic example, than in the examples above, would look something like 
 ```javascript
 // on machine A
 const changeSet = [];
-changeset.push(doc.add(root, seq([1, 2])));
+changeset.push(doc.add(root, seq(1, 2)));
 changeset.push(doc.add(1, str("foo")));
 changeset.push(doc.add(2, str("bar")));
 broadcast(changeset);
@@ -768,7 +768,7 @@ One of the nice aspects of Abmedium is that every node has a handle. This fact c
 
 ```javascript
 const exp = document("metalayers-example");
-exp.add(0, seq([1, 2, 3]));
+exp.add(0, seq(1, 2, 3));
 exp.add(["type", 0], sym("expr"));
 exp.add(1, sym("+"));
 exp.add(["type", 1], str("func"));
