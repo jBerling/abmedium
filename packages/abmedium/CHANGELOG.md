@@ -5,7 +5,7 @@
 Big breaking changes.
 
 - To multi-repo
-- Remove dependency on delta-crdts. Put CRDTs based functionality in new package @abrovink/abmedium-crdt
+- Remove dependency on delta-crdts. Put CRDTs based functionality in new package @abrovink/abmedium-crdt. With this change this package will rely on other packages to handle causality. This decision can be seen as part of an experiment. How far can we go without CRDTs?
 - Remove serialization. Put serialization into @abrovink/abmedium-json
 - Remove sync method on Document
 - Remove dependency on uuids
