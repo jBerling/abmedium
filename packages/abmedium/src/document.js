@@ -43,7 +43,7 @@ class Document {
       throw new Error('replace expects a layer.');
     }
 
-    replaced(this.content, overlay);
+    this.content = replaced(this.content, overlay);
   }
 
   merge(layer) {
@@ -51,7 +51,7 @@ class Document {
       throw new Error('merge expects a layer.');
     }
 
-    merged(this.content, layer);
+    this.content = merged(this.content, layer);
   }
 
   value() {

@@ -18,9 +18,9 @@ describe('combining', () => {
       alt: layer({ c: sym('CX'), e: sym('ex'), f: sym('fx') }),
     });
 
-    replaced(a, b);
+    const res = replaced(a, b);
 
-    expect(a).toEqual(
+    expect(res).toEqual(
       layer({
         a: seq('b', 'c'),
         b: sym('b'),
@@ -58,10 +58,10 @@ describe('combining', () => {
       c: sym('CC'),
     });
 
-    merged(a, b);
-    merged(a, c);
+    let res = merged(a, b);
+    res = merged(res, c);
 
-    expect(a).toEqual(
+    expect(res).toEqual(
       layer({
         a: seq('b', 'c'),
         b: sym('b'),

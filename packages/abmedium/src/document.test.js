@@ -1,4 +1,4 @@
-const { num, nil, root, seq, str, sym, LAYER } = require('./core');
+const { num, nil, root, seq, str, layer, sym, sim } = require('./core');
 const document = require('./document');
 
 describe('Document', () => {
@@ -17,10 +17,11 @@ describe('Document', () => {
   it('adds layers', () => {
     const d = document('test');
     d.add(['a', 'b'], sym('b'));
-    expect(d.value()).toMatchObject({
-      a: { [LAYER]: true, b: sym('b') },
-      [LAYER]: true,
-    });
+    expect(d.value()).toMatchObject(
+      layer({
+        a: layer({ b: sym('b') }),
+      })
+    );
   });
 
   const doc = () => {
@@ -54,5 +55,31 @@ describe('Document', () => {
       5: num(20),
       6: num(30),
     });
+  });
+
+  test('merge', () => {
+    const d = document('test');
+    d.merge(layer({ a: sym('a'), b: sym('b') }));
+    d.merge(layer({ a: sym('A') }));
+
+    expect(d.value()).toEqual(
+      layer({
+        a: sim(sym('a'), sym('A')),
+        b: sym('b'),
+      })
+    );
+  });
+
+  test('replace', () => {
+    const d = document('test');
+    d.replace(layer({ a: sym('a'), b: sym('b') }));
+    d.replace(layer({ a: sym('A') }));
+
+    expect(d.value()).toEqual(
+      layer({
+        a: sym('A'),
+        b: sym('b'),
+      })
+    );
   });
 });
