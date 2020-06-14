@@ -20,6 +20,8 @@ const {
 
 const document = require('./src/document');
 const treeOf = require('./src/tree-of');
+const nodes = require('./src/nodes');
+const layers = require('./layers');
 const { combined, merge, replace } = require('./src/combining');
 
 module.exports = {
@@ -43,6 +45,8 @@ module.exports = {
 
   document,
   treeOf,
+  nodes,
+  layers,
 
   combined,
   merge,
