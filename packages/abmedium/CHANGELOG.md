@@ -16,6 +16,8 @@ Big breaking changes.
 - Add merged and replaced to Document.
 - Export sim and add isSim
 - Change sim and seq to variadic functions.
+- Add nodes, a function that returns an iterator from a layer.
+- Add layers, a function that returns an iterator from a layer.
 
 ## 0.8.3
 
