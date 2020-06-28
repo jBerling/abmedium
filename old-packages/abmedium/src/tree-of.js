@@ -1,6 +1,6 @@
-const { isLayer, valtype } = require('./core');
+const { isLayer, valtype, valueOf, root } = require('./core');
 
-const treeOf = (docWithMetadata, nodePresenter = v => v, rootNode = 0) => {
+const treeOf = (docWithMetadata, nodePresenter = v => v, rootNode = root) => {
   const doc = {};
   const metalayers = {};
 
@@ -14,7 +14,7 @@ const treeOf = (docWithMetadata, nodePresenter = v => v, rootNode = 0) => {
     throw new Error('Pass a root node. The document has no default root node');
   }
 
-  const val = handle => doc[handle];
+  const val = handle => valueOf(doc, handle);
 
   const metaOfNode = (h, parent, pos) =>
     Object.keys(metalayers).reduce(

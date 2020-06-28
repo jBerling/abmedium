@@ -1,17 +1,17 @@
-const LAYER = Symbol('abmedium/layer');
+const LAYER = Symbol('layer');
+const DOCUMENT = Symbol('document');
+
 const isLayer = v => v !== null && Boolean(v[LAYER]);
-const layer = (content = {}) => {
-  content[LAYER] = true;
-  return content;
+const layer = (content = {}) => ({ ...content, [LAYER]: true });
+
+const root = 0;
+
+const assertValidHandle = handle => {
+  if (typeof handle !== 'string' && typeof handle !== 'number') {
+    throw new Error(`»${handle}« is not a valid handle`);
+  }
 };
 
-const DOCUMENT = Symbol('abmedium/document');
-const isDocument = v => v !== null && Boolean(v[DOCUMENT]);
-const document = (content = {}) => {
-  content[DOCUMENT] = true;
-  content[LAYER] = true;
-  return content;
-};
 class Sym {
   constructor(name) {
     this.name = name;
@@ -21,8 +21,6 @@ class Sym {
 function Disagreement(expected, actual, to) {
   Object.assign(this, { expected, actual, to });
 }
-
-const isDisagreement = x => x instanceof Disagreement;
 
 function Mapping(from, to) {
   this.from = from;
@@ -110,6 +108,41 @@ const editvalOf = value =>
     _: value,
   });
 
+const valueOfSim = set => (set.size < 2 ? set.values().next().value : set);
+
+const valueOf = (doc, handle) => {
+  const v = doc[handle];
+  if (v === undefined) return undefined;
+  if (valtype(v, 'sim')) return valueOfSim(v);
+  if (valtype(v, 'sym', 'seq')) return v;
+  if (!valtype(v, 'nil', 'map') && typeof v === 'object') {
+    v[LAYER] = true;
+  }
+  return v;
+};
+
+const docValue = doc =>
+  Object.keys(doc).reduce(
+    (acc, handle) => ({
+      ...acc,
+      [handle]: valueOf(doc, handle),
+    }),
+    {}
+  );
+
+const valueOfLayer = (vOf, layer) => {
+  const val = vOf(layer);
+
+  return Object.keys(layer).reduce((acc, handl) => {
+    let v;
+    if (isLayer(val(handl))) {
+      v = valueOfLayer(vOf, val(handl));
+    } else v = val(handl);
+    // TODO: instead of LAYER, maybe type Layer, like with conflict types
+    return { ...acc, [handl]: v, [LAYER]: true };
+  }, {});
+};
+
 const equal = (a, b) => {
   if (Array.isArray(a)) {
     if (a.length !== b.length) return false;
@@ -125,22 +158,75 @@ const equal = (a, b) => {
   return a === b;
 };
 
+const projectValue = (projection, handl, newVal) => {
+  if (!valtype(newVal, 'map')) {
+    projection[handl] = newVal;
+    return;
+  }
+
+  const oldVal = projection[handl];
+  if (oldVal === undefined) {
+    projection[handl] = newVal.to;
+    return;
+  }
+
+  if (!equal(oldVal, newVal.from)) {
+    projection[handl] = disagreement(newVal.from, oldVal, newVal.to);
+  } else {
+    projection[handl] = newVal.to;
+  }
+};
+
+const projectLayer = (projection, layer, stack = [], metalayers = []) => {
+  const val = handl => layer[handl];
+  for (const handl of Object.keys(layer)) {
+    const v = val(handl);
+    if (isLayer(v)) continue;
+    projectValue(projection, handl, v);
+  }
+  for (const _stack of stack) {
+    const [subLayerName, subStack = []] = Array.isArray(_stack)
+      ? _stack
+      : [_stack];
+    projectLayer(projection, val(subLayerName), subStack, metalayers);
+  }
+  for (const mlayer of metalayers) {
+    const metaValues = layer[mlayer];
+    if (!metaValues) continue;
+    projection[mlayer] = { ...metaValues, ...(projection[mlayer] || {}) };
+  }
+  return projection;
+};
+
+const proj = (doc, stack = [], metalayers = []) => {
+  const projection = {};
+  projectLayer(projection, doc.value(), stack, metalayers);
+  return projection;
+};
+
+const isDocument = x => Boolean(x[DOCUMENT]);
+
 module.exports = {
-  layer,
-  isLayer,
-  document,
-  isDocument,
-  disagreement,
-  isDisagreement,
+  DOCUMENT,
+  docValue,
+  valueOfLayer,
+  root,
   sym,
   sim,
   str,
   num,
   seq,
   nil,
+  layer,
+  LAYER,
+  isDocument,
+  isLayer,
+  valueOf,
+  assertValidHandle,
+  proj,
   mapping,
+  disagreement,
   valtype,
   lengthOf,
   editvalOf,
-  equal,
 };

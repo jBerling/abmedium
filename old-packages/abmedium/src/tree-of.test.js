@@ -1,33 +1,32 @@
-const { num, sym, str, nil, seq, document, layer } = require('./core');
+const { proj, num, sym, str, nil, root, seq } = require('./core');
+
+const document = require('./document');
 
 const treeOf = require('./tree-of');
-const proj = require('./proj');
 
 describe('treeOf', () => {
   const doc = () => {
-    return document({
-      0: seq('op', 2, 3),
-      op: sym('+'),
-      2: num(10),
-      3: seq(4, 5, 6),
-      4: sym('-'),
-      5: num(20),
-      6: num(30),
-      type: layer({
-        0: str('call'),
-        op: str('function'),
-        2: str('number'),
-        3: str('call'),
-        4: str('function'),
-        5: str('number'),
-        6: str('number'),
-      }),
-    });
+    const d = document('test');
+    d.add(root, seq('op', 2, 3));
+    d.add(['type', root], str('call'));
+    d.add('op', sym('+'));
+    d.add(['type', 'op'], str('function'));
+    d.add(2, num(10));
+    d.add(['type', 2], str('number'));
+    d.add(3, seq(4, 5, 6));
+    d.add(['type', 3], str('call'));
+    d.add(4, sym('-'));
+    d.add(['type', 4], str('function'));
+    d.add(5, num(20));
+    d.add(['type', 5], str('number'));
+    d.add(6, num(30));
+    d.add(['type', 6], str('number'));
+    return d;
   };
 
   it('creates tree from root', () => {
     const d = doc();
-    expect(treeOf(d)).toEqual([
+    expect(treeOf(d.value())).toEqual([
       sym('+'),
       num(10),
       [sym('-'), num(20), num(30)],
@@ -35,8 +34,9 @@ describe('treeOf', () => {
   });
 
   it('Handles nil values', () => {
-    const d = document({ 0: nil });
-    expect(treeOf(d)).toEqual(nil);
+    const d = document('test');
+    d.add(0, nil);
+    expect(treeOf(d.value())).toEqual(nil);
   });
 
   it('create tree from document with metalayers using node presenter', () => {
@@ -70,26 +70,14 @@ describe('treeOf', () => {
   });
 
   it('creates a tree with a custom root node', () => {
-    const res = treeOf(proj(doc()), undefined, 3);
+    const d = doc();
+    const res = treeOf(proj(d), undefined, 3);
     expect(res).toEqual([sym('-'), num(20), num(30)]);
   });
 
-  it('projection', () => {
-    const d = document({
-      0: seq(1, 2, 3),
-      1: sym('+'),
-      2: num(1),
-      3: num(2),
-      layer1: layer({
-        2: num(11),
-        3: num(21),
-        layer1_1: layer({
-          3: num(211),
-        }),
-      }),
-      layer2: layer({ 2: num(12) }),
-    });
-    const projection = proj(d, [['layer1', ['layer1_1']]]);
-    expect(treeOf(projection)).toMatchObject([sym('+'), num(11), num(211)]);
+  it('throws not when creating a tree with nil as root', () => {
+    const f = document('fragment');
+    f.add(0, nil);
+    treeOf(f.value());
   });
 });

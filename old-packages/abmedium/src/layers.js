@@ -1,10 +1,6 @@
 const { isLayer } = require('./core');
 
 const layers = layer => {
-  if (!isLayer(layer)) {
-    throw new Error('Not a layer');
-  }
-
   const handles = Object.keys(layer);
   let i = 0;
 

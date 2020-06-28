@@ -1,49 +1,54 @@
 const {
-  layer,
-  isLayer,
-  document,
-  isDocument,
+  proj,
+  mapping,
   disagreement,
   isDisagreement,
+  root,
   sym,
   sim,
   str,
   num,
   seq,
   nil,
-  mapping,
   valtype,
   lengthOf,
   editvalOf,
-  equal,
+  assertValidHandle,
+  layer,
+  isLayer,
 } = require('./src/core');
 
-const proj = require('./src/proj');
+const document = require('./src/document');
 const treeOf = require('./src/tree-of');
 const nodes = require('./src/nodes');
 const layers = require('./src/layers');
+const { combined, merge, replace } = require('./src/combining');
 
 module.exports = {
-  layer,
-  isLayer,
-  document,
-  isDocument,
+  proj,
+  mapping,
   disagreement,
   isDisagreement,
+  root,
   sym,
   sim,
   str,
   num,
   seq,
   nil,
-  mapping,
   valtype,
   lengthOf,
   editvalOf,
-  equal,
+  assertValidHandle,
+  layer,
+  isLayer,
 
-  proj,
+  document,
   treeOf,
   nodes,
   layers,
+
+  combined,
+  merge,
+  replace,
 };
