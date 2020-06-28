@@ -7,8 +7,6 @@
   "author": "Johan Berling <johan.berling@abrovink.org>",
   "license": "AGPL-3.0",
   "private": false,
-  "dependencies": {},
-  "devDependencies": {},
   "scripts": {
     "test": "jest --watch"
   }
