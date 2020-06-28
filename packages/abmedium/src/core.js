@@ -1,44 +1,26 @@
-const LAYER = Symbol('abmedium/layer');
+const LAYER = '__layer__'; // Symbol('abmedium/layer');
 const isLayer = v => v !== null && Boolean(v[LAYER]);
 const layer = (content = {}) => {
   content[LAYER] = true;
   return content;
 };
 
-const DOCUMENT = Symbol('abmedium/document');
+const DOCUMENT = '__document__'; // Symbol('abmedium/document');
 const isDocument = v => v !== null && Boolean(v[DOCUMENT]);
 const document = (content = {}) => {
   content[DOCUMENT] = true;
   content[LAYER] = true;
   return content;
 };
-class Sym {
-  constructor(name) {
-    this.name = name;
-  }
-}
-
-function Disagreement(expected, actual, to) {
-  Object.assign(this, { expected, actual, to });
-}
-
-const isDisagreement = x => x instanceof Disagreement;
-
-function Mapping(from, to) {
-  this.from = from;
-  this.to = to;
-}
 
 const vtype = v => {
-  if (v instanceof Sym) return 'sym';
-  if (Array.isArray(v)) return 'seq';
   if (typeof v === 'string') return 'str';
   if (typeof v === 'number') return 'num';
-  if (v instanceof Set) return 'sim';
-  if (v instanceof Disagreement) return 'dis';
-  if (v instanceof Mapping) return 'map';
   if (v === null) return 'nil';
-
+  if (Array.isArray(v)) {
+    const [type] = v;
+    return type;
+  }
   // Not an Abmedium value type
   return 'none';
 };
@@ -63,29 +45,37 @@ const sim = (...members) => {
   const s = new Set();
   for (const member of members) {
     valtype(member, {
-      sim: () => {
-        for (const [m] of member.entries()) {
-          s.add(m);
-        }
+      sim: ([, values]) => {
+        for (const v of values) s.add(v);
       },
-      _: () => s.add(member),
+      _: () => {
+        s.add(member);
+      },
     });
   }
-  return s;
+  return ['sim', [...s.values()]];
 };
-const disagreement = (expected, actual, to) =>
-  new Disagreement(expected, actual, to);
-const sym = name => new Sym(name);
+const disagreement = (expected, actual, to) => [
+  'dis',
+  { expected, actual, to },
+];
+const sym = name => ['sym', name];
 const str = s => s;
 const num = x => (typeof x === 'string' ? Number(x) : x);
-const seq = (...items) => items;
-const mapping = (from, to) => new Mapping(from, to);
+const seq = (...items) => ['seq', items];
+const seqItems = s => {
+  if (!valtype(s, 'seq')) {
+    throw new Error('not a seq');
+  }
+  return s[1];
+};
+const mapping = (from, to) => ['mapping', { from, to }];
 const nil = null;
 
 const lengthOf = v =>
   valtype(v, {
-    seq: s => s.length,
-    sym: ({ name }) => name.length,
+    seq: ([, s]) => s.length,
+    sym: ([, name]) => name.length,
     str: s => s.length,
     num: n => String(n).length,
     sim: NaN,
@@ -104,10 +94,10 @@ const lengthOf = v =>
 
 const editvalOf = value =>
   valtype(value, {
-    sym: () => value.name,
+    str: () => value,
     num: () => String(value),
     nil: () => '',
-    _: value,
+    _: ([, v]) => v,
   });
 
 const equal = (a, b) => {
@@ -120,23 +110,25 @@ const equal = (a, b) => {
     return true;
   }
 
-  if (valtype(a) === 'sym') return a.name === b.name;
+  if (valtype(a, 'sym')) return a.name === b.name;
 
   return a === b;
 };
 
 module.exports = {
+  LAYER,
   layer,
   isLayer,
+  DOCUMENT,
   document,
   isDocument,
   disagreement,
-  isDisagreement,
   sym,
   sim,
   str,
   num,
   seq,
+  seqItems,
   nil,
   mapping,
   valtype,

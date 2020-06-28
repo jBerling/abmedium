@@ -24,7 +24,7 @@ const treeOf = (docWithMetadata, nodePresenter = v => v, rootNode = 0) => {
 
   const graph = (v, parent) => {
     if (valtype(v, 'seq')) {
-      return v.map((h, pos) =>
+      return v[1].map((h, pos) =>
         nodePresenter(graph(val(h), h), h, metaOfNode(h, parent, pos))
       );
     }

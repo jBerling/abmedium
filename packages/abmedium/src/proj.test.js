@@ -33,7 +33,7 @@ describe('proj', () => {
     const projection = proj(doc(), ['layer2']);
     expect(projection).toEqual(
       layer({
-        0: [1, 2, 3],
+        0: seq(1, 2, 3),
         1: sym('+'),
         2: num(12),
         3: num(2),
@@ -46,7 +46,7 @@ describe('proj', () => {
     const projection = proj(d, ['layer1', 'layer2']);
     expect(projection).toEqual(
       layer({
-        0: [1, 2, 3],
+        0: seq(1, 2, 3),
         1: sym('+'),
         2: num(12),
         3: num(21),
@@ -56,7 +56,7 @@ describe('proj', () => {
     const projection2 = proj(d, ['layer2', 'layer1']);
     expect(projection2).toEqual(
       layer({
-        0: [1, 2, 3],
+        0: seq(1, 2, 3),
         1: sym('+'),
         2: num(11),
         3: num(21),
@@ -68,7 +68,7 @@ describe('proj', () => {
     const projection = proj(doc(), [['layer1', ['layer1_1']]]);
     expect(projection).toEqual(
       layer({
-        0: [1, 2, 3],
+        0: seq(1, 2, 3),
         1: sym('+'),
         2: num(11),
         3: num(211),

@@ -5,6 +5,8 @@ const {
   layer,
   isLayer,
   isDocument,
+  LAYER,
+  DOCUMENT,
 } = require('./core');
 
 const projectValue = (projection, handl, newVal) => {
@@ -29,6 +31,7 @@ const projectValue = (projection, handl, newVal) => {
 const projectLayer = (projection, layer, stack = [], metalayers = []) => {
   const val = handl => layer[handl];
   for (const handl of Object.keys(layer)) {
+    if (handl === LAYER || handl === DOCUMENT) continue;
     const v = val(handl);
     if (isLayer(v)) continue;
     projectValue(projection, handl, v);

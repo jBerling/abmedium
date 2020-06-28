@@ -2,6 +2,7 @@ const {
   sym,
   sim,
   seq,
+  seqItems,
   str,
   nil,
   num,
@@ -89,8 +90,8 @@ describe('core', () => {
       'abc',
       '1001',
       '',
-      new Set(['a', 'b']),
-      disagreement('a', 'b', 'c'),
+      ['a', 'b'],
+      { expected: 'a', actual: 'b', to: 'c' },
     ]);
   });
 
@@ -98,5 +99,9 @@ describe('core', () => {
     expect(sim(sim('a', 'b'), 'c', sim('d', 'e'))).toEqual(
       sim('a', 'b', 'c', 'd', 'e')
     );
+  });
+
+  test('seq items', () => {
+    expect(seqItems(seq(num(1), num(2)))).toEqual([num(1), num(2)]);
   });
 });

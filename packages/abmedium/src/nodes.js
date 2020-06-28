@@ -1,4 +1,4 @@
-const { isLayer } = require('./core');
+const { isLayer, LAYER, DOCUMENT } = require('./core');
 const layers = require('./layers');
 
 const nodes = document => {
@@ -8,7 +8,7 @@ const nodes = document => {
 
   const nextNode = () => {
     const handle = handles[i++];
-    if (!handle) return null;
+    if (!handle || handle === LAYER || handle === DOCUMENT) return null;
     const value = document[handle];
     if (isLayer(value)) {
       return nextNode();
