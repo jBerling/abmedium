@@ -1,4 +1,4 @@
-const { isLayer, valtype } = require('./core');
+const { isLayer, valtype, seq } = require('./core');
 
 const treeOf = (docWithMetadata, nodePresenter = v => v, rootNode = 0) => {
   const doc = {};
@@ -22,20 +22,22 @@ const treeOf = (docWithMetadata, nodePresenter = v => v, rootNode = 0) => {
       { pos, parent }
     );
 
-  const graph = (v, parent) => {
-    if (valtype(v, 'seq')) {
-      return v[1].map((h, pos) =>
-        nodePresenter(graph(val(h), h), h, metaOfNode(h, parent, pos))
-      );
-    }
-    return v;
-  };
+  const graph = (handle, parentHandle, pos) =>
+    valtype(val(handle), {
+      seq: ([, items]) =>
+        nodePresenter(
+          seq(
+            ...items.map((childHandle, childPos) =>
+              graph(childHandle, handle, childPos)
+            )
+          ),
+          handle,
+          metaOfNode(handle, parentHandle, pos)
+        ),
+      _: v => nodePresenter(v, handle, metaOfNode(handle, parentHandle, pos)),
+    });
 
-  return nodePresenter(
-    graph(val(rootNode), rootNode),
-    rootNode,
-    metaOfNode(rootNode)
-  );
+  return graph(rootNode);
 };
 
 module.exports = treeOf;

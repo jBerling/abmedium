@@ -10,6 +10,7 @@ const {
   valtype,
   lengthOf,
   editvalOf,
+  isEqual,
 } = require('./core');
 
 describe('core', () => {
@@ -103,5 +104,34 @@ describe('core', () => {
 
   test('seq items', () => {
     expect(seqItems(seq(num(1), num(2)))).toEqual([num(1), num(2)]);
+  });
+
+  describe('isEqual', () => {
+    const testEquality = (a, b, ...cs) => {
+      test('' + a + ' = ' + b, () => {
+        expect(isEqual(a, b)).toBe(true);
+      });
+      for (const c of cs) {
+        test('' + a + ' ≠ ' + c, () => {
+          expect(isEqual(a, c)).toBe(false);
+        });
+      }
+    };
+
+    testEquality(num(1), num(1), num(2));
+    testEquality(str('a'), str('a'), str('b'), sym('a'));
+    testEquality(sym('a'), sym('a'), sym('b'), str('a'));
+    testEquality(seq(1, 2, 3), seq(1, 2, 3), seq(3, 2, 1));
+    testEquality(nil, nil);
+    testEquality(
+      sim(str('a'), str('b')),
+      sim(str('b'), str('a')),
+      sim(str('a'), str('c'))
+    );
+    testEquality(
+      disagreement(str('a'), str('b'), str('c')),
+      disagreement(str('a'), str('b'), str('c')),
+      disagreement(str('b'), str('c'), str('a'))
+    );
   });
 });

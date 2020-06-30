@@ -27,11 +27,9 @@ describe('treeOf', () => {
 
   it('creates tree from root', () => {
     const d = doc();
-    expect(treeOf(d)).toEqual([
-      sym('+'),
-      num(10),
-      [sym('-'), num(20), num(30)],
-    ]);
+    expect(treeOf(d)).toEqual(
+      seq(sym('+'), num(10), seq(sym('-'), num(20), num(30)))
+    );
   });
 
   it('Handles nil values', () => {
@@ -51,7 +49,7 @@ describe('treeOf', () => {
     expect(res).toEqual({
       handle: 0,
       type: 'call',
-      value: [
+      value: seq(
         { handle: 'op', type: 'function', value: sym('+'), pos: 0, parent: 0 },
         { handle: 2, type: 'number', value: 10, pos: 1, parent: 0 },
         {
@@ -59,19 +57,19 @@ describe('treeOf', () => {
           parent: 0,
           pos: 2,
           type: 'call',
-          value: [
+          value: seq(
             { handle: 4, type: 'function', value: sym('-'), pos: 0, parent: 3 },
             { handle: 5, type: 'number', value: 20, pos: 1, parent: 3 },
-            { handle: 6, type: 'number', value: 30, pos: 2, parent: 3 },
-          ],
-        },
-      ],
+            { handle: 6, type: 'number', value: 30, pos: 2, parent: 3 }
+          ),
+        }
+      ),
     });
   });
 
   it('creates a tree with a custom root node', () => {
     const res = treeOf(proj(doc()), undefined, 3);
-    expect(res).toEqual([sym('-'), num(20), num(30)]);
+    expect(res).toEqual(seq(sym('-'), num(20), num(30)));
   });
 
   it('projection', () => {
@@ -90,6 +88,6 @@ describe('treeOf', () => {
       layer2: layer({ 2: num(12) }),
     });
     const projection = proj(d, [['layer1', ['layer1_1']]]);
-    expect(treeOf(projection)).toMatchObject([sym('+'), num(11), num(211)]);
+    expect(treeOf(projection)).toMatchObject(seq(sym('+'), num(11), num(211)));
   });
 });

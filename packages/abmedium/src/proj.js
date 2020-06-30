@@ -1,5 +1,5 @@
 const {
-  equal,
+  isEqual,
   valtype,
   disagreement,
   layer,
@@ -21,7 +21,7 @@ const projectValue = (projection, handl, newVal) => {
     return;
   }
 
-  if (!equal(oldVal, newVal.from)) {
+  if (!isEqual(oldVal, newVal.from)) {
     projection[handl] = disagreement(newVal.from, oldVal, newVal.to);
   } else {
     projection[handl] = newVal.to;

@@ -15,7 +15,7 @@ const {
   valtype,
   lengthOf,
   editvalOf,
-  equal,
+  isEqual,
 } = require('./src/core');
 
 const proj = require('./src/proj');
@@ -40,7 +40,7 @@ module.exports = {
   valtype,
   lengthOf,
   editvalOf,
-  equal,
+  isEqual,
 
   proj,
   treeOf,

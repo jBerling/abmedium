@@ -13,20 +13,8 @@ const document = (content = {}) => {
   return content;
 };
 
-const vtype = v => {
-  if (typeof v === 'string') return 'str';
-  if (typeof v === 'number') return 'num';
-  if (v === null) return 'nil';
-  if (Array.isArray(v)) {
-    const [type] = v;
-    return type;
-  }
-  // Not an Abmedium value type
-  return 'none';
-};
-
 const valtype = (v, flag, ...flags) => {
-  const vt = vtype(v);
+  const vt = valtype.vtype(v);
   if (!flag) return vt;
   if (typeof flag === 'string') {
     return [...flags, flag].includes(vt);
@@ -39,6 +27,18 @@ const valtype = (v, flag, ...flags) => {
     return typeof handler === 'function' ? handler(v) : handler;
   }
   throw new Error('unknown flag', flag);
+};
+
+valtype.vtype = v => {
+  if (typeof v === 'string') return 'str';
+  if (typeof v === 'number') return 'num';
+  if (v === null) return 'nil';
+  if (Array.isArray(v)) {
+    const [type] = v;
+    return type;
+  }
+  // Not an Abmedium value type
+  return 'none';
 };
 
 const sim = (...members) => {
@@ -100,20 +100,35 @@ const editvalOf = value =>
     _: ([, v]) => v,
   });
 
-const equal = (a, b) => {
-  if (Array.isArray(a)) {
-    if (a.length !== b.length) return false;
-    const max = a.length;
-    for (let i = 0; i < max; i++) {
-      if (a[i] !== b[i]) return false;
-    }
-    return true;
-  }
+const isEqual = (a, b) =>
+  valtype(a, {
+    sym: () => valtype(b, 'sym') && a[1] === b[1],
+    seq: () => {
+      if (!valtype(b, 'seq') || a.length !== b.length) {
+        return false;
+      }
+      for (const [i, aItem] of a[1].entries()) {
+        if (!isEqual(aItem, b[1][i])) return false;
+      }
+      return true;
+    },
+    sim: () => {
+      if (!valtype(b, 'sim') || a[1].length !== b[1].length) return false;
 
-  if (valtype(a, 'sym')) return a.name === b.name;
-
-  return a === b;
-};
+      for (const aItem of a[1]) {
+        if (!b[1].find(bItem => isEqual(aItem, bItem))) {
+          return false;
+        }
+      }
+      return true;
+    },
+    dis: () =>
+      valtype(b, 'dis') &&
+      isEqual(a[1].from, b[1].from) &&
+      isEqual(a[1].to, b[1].to) &&
+      isEqual(a[1].expected, b[1].expected),
+    _: () => a === b,
+  });
 
 module.exports = {
   LAYER,
@@ -134,5 +149,5 @@ module.exports = {
   valtype,
   lengthOf,
   editvalOf,
-  equal,
+  isEqual,
 };

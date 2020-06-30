@@ -4,14 +4,14 @@
 
 Big breaking changes.
 
-- To multi-repo
+- To multi-repo.
 - Remove dependency on delta-crdts. Put CRDTs based functionality in new package @abrovink/abmedium-crdt. With this change this package will rely on other packages to handle causality. This decision can be seen as part of an experiment. How far can we go without CRDTs?
-- Remove serialization
-- Remove dependency on uuids
+- Remove serialization.
+- Remove dependency on uuids.
 - Remove the Document type. Now we only work with objects. To handle an object as a document, the property with the name of the symbol abmedium/document need to be set to true.
-- Remove all functionality related to update a document. This will be handled in other packages.
-- Rename pres to treeOf. It can now create a tree with a custom root
-- Export sim and add isSim
+- Remove all functionality related to update a document. This will be handled in other packages, for example by the new package @abrovink/abmedium-automerge.
+- Rename pres to treeOf. It can now create a tree with a custom root.
+- Export sim and add isSim.
 - Change sim and seq to variadic functions.
 - Add nodes, a function that returns an iterator from a layer.
 - Add layers, a function that returns an iterator from a layer.
