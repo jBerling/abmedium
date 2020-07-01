@@ -1,4 +1,14 @@
-const { num, sym, str, nil, seq, document, layer } = require('./core');
+const {
+  num,
+  sym,
+  str,
+  nil,
+  seq,
+  document,
+  layer,
+  mapping,
+  sim,
+} = require('./core');
 
 const treeOf = require('./tree-of');
 const proj = require('./proj');
@@ -13,6 +23,9 @@ describe('treeOf', () => {
       4: sym('-'),
       5: num(20),
       6: num(30),
+      alt: layer({
+        6: mapping(num(32), num(31)),
+      }),
       type: layer({
         0: str('call'),
         op: str('function'),
@@ -26,25 +39,24 @@ describe('treeOf', () => {
   };
 
   it('creates tree from root', () => {
-    const d = doc();
-    expect(treeOf(d)).toEqual(
+    expect(treeOf(proj(doc()))).toEqual(
       seq(sym('+'), num(10), seq(sym('-'), num(20), num(30)))
     );
   });
 
   it('Handles nil values', () => {
     const d = document({ 0: nil });
-    expect(treeOf(d)).toEqual(nil);
+    expect(treeOf(proj(d))).toEqual(nil);
   });
 
   it('create tree from document with metalayers using node presenter', () => {
-    const d = doc();
+    let d = { ...doc(), 5: sim(num(20), num(21)) };
 
     const presenter = (value, handle, { type, parent, pos }) => {
       return { handle, value, type, parent, pos };
     };
 
-    const res = treeOf(proj(d, [], ['type']), presenter);
+    const res = treeOf(proj(d, ['alt'], ['type']), presenter);
 
     expect(res).toEqual({
       handle: 0,
@@ -59,8 +71,51 @@ describe('treeOf', () => {
           type: 'call',
           value: seq(
             { handle: 4, type: 'function', value: sym('-'), pos: 0, parent: 3 },
-            { handle: 5, type: 'number', value: 20, pos: 1, parent: 3 },
-            { handle: 6, type: 'number', value: 30, pos: 2, parent: 3 }
+            {
+              handle: 5,
+              parent: 3,
+              pos: 1,
+              type: 'number',
+              value: [
+                'sim',
+                [
+                  { handle: 5, type: 'number', value: 20, pos: 1, parent: 3 },
+                  { handle: 5, type: 'number', value: 21, pos: 1, parent: 3 },
+                ],
+              ],
+            },
+            {
+              handle: 6,
+              type: 'number',
+              pos: 2,
+              parent: 3,
+              value: [
+                'dis',
+                {
+                  actual: {
+                    handle: 6,
+                    type: 'number',
+                    value: 30,
+                    pos: 2,
+                    parent: 3,
+                  },
+                  expected: {
+                    handle: 6,
+                    type: 'number',
+                    value: 31,
+                    pos: 2,
+                    parent: 3,
+                  },
+                  to: {
+                    handle: 6,
+                    type: 'number',
+                    value: 32,
+                    pos: 2,
+                    parent: 3,
+                  },
+                },
+              ],
+            }
           ),
         }
       ),
@@ -72,6 +127,7 @@ describe('treeOf', () => {
     expect(res).toEqual(seq(sym('-'), num(20), num(30)));
   });
 
+  // TODO what does this test that is not tested in other tests?
   it('projection', () => {
     const d = document({
       0: seq(1, 2, 3),

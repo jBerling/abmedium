@@ -10,7 +10,7 @@ describe('disagreements', () => {
     expect(x.value()).toMatchObject({
       [root]: 'a',
       layer1: {
-        [root]: mapping('a', 'b'),
+        [root]: mapping('b', 'a'),
       },
     });
   });

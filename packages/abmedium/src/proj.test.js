@@ -1,4 +1,13 @@
-const { document, layer, seq, sym, num, str } = require('./core');
+const {
+  document,
+  layer,
+  seq,
+  sym,
+  num,
+  str,
+  mapping,
+  disagreement,
+} = require('./core');
 const proj = require('./proj');
 
 const doc = () =>
@@ -117,6 +126,87 @@ describe('proj', () => {
           // if the value is not set?
           2: num(1588321366606),
         }),
+      })
+    );
+  });
+
+  it('agreement', () => {
+    const x = document({
+      0: str('a'),
+      layer1: layer({ 0: mapping(str('b'), str('a')) }),
+    });
+
+    expect(proj(x, ['layer1'])).toEqual(layer({ 0: str('b') }));
+  });
+
+  it('agreement of two equal mappings', () => {
+    const x = document({
+      0: str('a'),
+      layer1: layer({ 0: mapping(str('b'), str('a')) }),
+      layer2: layer({ 0: mapping(str('b'), str('a')) }),
+    });
+
+    expect(proj(x, ['layer1', 'layer2'])).toEqual(layer({ 0: str('b') }));
+  });
+
+  it('disagreement', () => {
+    const x = document({
+      0: str('a'),
+      layer1: layer({ 0: mapping(str('c'), str('b')) }),
+    });
+
+    expect(proj(x, ['layer1'])).toEqual(
+      layer({ 0: disagreement(str('b'), str('a'), str('c')) })
+    );
+  });
+
+  it('disagreement, expected undefined was set', () => {
+    const x = document({
+      0: str('a'),
+      layer1: layer({ 0: mapping(str('c')) }),
+    });
+
+    expect(proj(x, ['layer1'])).toEqual(
+      layer({ 0: disagreement(undefined, str('a'), str('c')) })
+    );
+  });
+
+  it('agreement, expected undefined', () => {
+    const x = document({
+      layer1: layer({ 0: mapping(str('a')) }),
+    });
+
+    expect(proj(x, ['layer1'])).toEqual(layer({ 0: str('a') }));
+  });
+
+  it('disagreement, expected value was undefined', () => {
+    const x = document({
+      layer1: layer({ 0: mapping(str('c'), str('b')) }),
+    });
+
+    expect(proj(x, ['layer1'])).toEqual(
+      layer({ 0: disagreement(str('b'), undefined, str('c')) })
+    );
+  });
+
+  it('sequence agreement', () => {
+    const x = document({
+      0: seq(1, 2, 3),
+      layer1: layer({ 0: mapping(seq(3, 2, 1), seq(1, 2, 3)) }),
+    });
+
+    expect(proj(x, ['layer1'])).toMatchObject(layer({ 0: seq(3, 2, 1) }));
+  });
+
+  it('sequence disagreement', () => {
+    const x = document({
+      0: seq(1, 2, 3),
+      layer1: layer({ 0: mapping(seq(3, 2, 1), seq(1, 3, 2)) }),
+    });
+
+    expect(proj(x, ['layer1'])).toEqual(
+      layer({
+        0: disagreement(seq(1, 3, 2), seq(1, 2, 3), seq(3, 2, 1)),
       })
     );
   });

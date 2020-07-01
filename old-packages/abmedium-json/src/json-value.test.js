@@ -22,7 +22,7 @@ describe('Json value', () => {
       4: str('lorem ipsum'),
       5: nil,
       6: sim(str('humle'), str('dumle')),
-      sub: layer({ 2: mapping(num(333), num(334)) }),
+      sub: layer({ 2: mapping(num(334), num(333)) }),
     });
 
     const res = fromJson(jsonOf(value));

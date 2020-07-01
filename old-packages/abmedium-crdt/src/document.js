@@ -39,7 +39,7 @@ class CRDTDocument {
       handl,
       'mvreg',
       'write',
-      from !== undefined ? mapping(from, value) : value
+      from !== undefined ? mapping(value, from) : value
     );
   }
 

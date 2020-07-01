@@ -1,11 +1,11 @@
-const LAYER = '__layer__'; // Symbol('abmedium/layer');
+const LAYER = '__layer__';
 const isLayer = v => v !== null && Boolean(v[LAYER]);
 const layer = (content = {}) => {
   content[LAYER] = true;
   return content;
 };
 
-const DOCUMENT = '__document__'; // Symbol('abmedium/document');
+const DOCUMENT = '__document__';
 const isDocument = v => v !== null && Boolean(v[DOCUMENT]);
 const document = (content = {}) => {
   content[DOCUMENT] = true;
@@ -69,7 +69,7 @@ const seqItems = s => {
   }
   return s[1];
 };
-const mapping = (from, to) => ['mapping', { from, to }];
+const mapping = (to, from) => ['mapping', { from, to }];
 const nil = null;
 
 const lengthOf = v =>
@@ -81,6 +81,7 @@ const lengthOf = v =>
     sim: NaN,
     dis: NaN,
     nil: 0,
+    mapping: NaN,
     _: x => {
       let xStr;
       try {
@@ -128,6 +129,10 @@ const isEqual = (a, b) =>
       isEqual(a[1].to, b[1].to) &&
       isEqual(a[1].expected, b[1].expected),
     _: () => a === b,
+    mapping: () =>
+      valtype(b, 'mapping') &&
+      isEqual(a[1].from, b[1].from) &&
+      isEqual(a[1].to, b[1].to),
   });
 
 module.exports = {

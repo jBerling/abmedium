@@ -34,7 +34,7 @@ class Document {
     addInLayer(
       this.content,
       [...layers(path), handl],
-      from != undefined ? mapping(from, value) : value
+      from != undefined ? mapping(value, from) : value
     );
   }
 

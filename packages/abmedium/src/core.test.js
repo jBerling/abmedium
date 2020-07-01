@@ -7,6 +7,7 @@ const {
   nil,
   num,
   disagreement,
+  mapping,
   valtype,
   lengthOf,
   editvalOf,
@@ -22,6 +23,7 @@ describe('core', () => {
     expect(valtype(sim('a', 'b'))).toEqual('sim');
     expect(valtype(disagreement('a', 'b', 'c'))).toEqual('dis');
     expect(valtype(nil)).toEqual('nil');
+    expect(valtype(mapping(str('b'), str('a')))).toEqual('mapping');
   });
 
   test('valtype with conditional flag', () => {
@@ -34,6 +36,7 @@ describe('core', () => {
     expect(valtype(disagreement('a', 'b', 'c'), 'dis')).toBe(true);
     expect(valtype(sym('a'), 'str', 'num', 'sym')).toBe(true);
     expect(valtype(nil, 'nil')).toBe(true);
+    expect(valtype(mapping(str('b'), str('a')), 'mapping')).toBe(true);
   });
 
   test('valtype with switch flag', () => {
@@ -47,6 +50,7 @@ describe('core', () => {
     valtype(disagreement('a', 'b', 'c'), { dis: collect('dis') });
     valtype(sym('a'), { _: collect('_') });
     valtype(nil, { nil: collect('nil') });
+    valtype(mapping(str('b'), str('a')), { mapping: collect('mapping') });
     expect(collected).toMatchObject([
       ['seq', seq()],
       ['sym', sym('a')],
@@ -56,6 +60,7 @@ describe('core', () => {
       ['dis', disagreement('a', 'b', 'c')],
       ['_', sym('a')],
       ['nil', nil],
+      ['mapping', mapping(str('b'), str('a'))],
     ]);
     expect(valtype(sym('a'), { sym: 'foo' })).toEqual('foo');
   });
@@ -70,8 +75,9 @@ describe('core', () => {
         nil,
         sim('a', 'b'),
         disagreement('a', 'b', 'c'),
+        mapping(str('b'), str('a')),
       ].map(lengthOf)
-    ).toMatchObject([3, 2, 3, 4, 0, NaN, NaN]);
+    ).toMatchObject([3, 2, 3, 4, 0, NaN, NaN, NaN]);
   });
 
   test('editvalOf', () => {
@@ -82,8 +88,9 @@ describe('core', () => {
         str('abc'),
         num('1001'),
         nil,
-        sim('a', 'b'),
-        disagreement('a', 'b', 'c'),
+        sim(str('a'), str('b')),
+        disagreement(str('a'), str('b'), str('c')),
+        mapping(str('b'), str('a')),
       ].map(editvalOf)
     ).toMatchObject([
       [1, 2, 3],
@@ -93,6 +100,7 @@ describe('core', () => {
       '',
       ['a', 'b'],
       { expected: 'a', actual: 'b', to: 'c' },
+      { from: 'a', to: 'b' },
     ]);
   });
 
@@ -132,6 +140,11 @@ describe('core', () => {
       disagreement(str('a'), str('b'), str('c')),
       disagreement(str('a'), str('b'), str('c')),
       disagreement(str('b'), str('c'), str('a'))
+    );
+    testEquality(
+      mapping(str('b'), str('a')),
+      mapping(str('b'), str('a')),
+      mapping(str('a'), str('b'))
     );
   });
 });

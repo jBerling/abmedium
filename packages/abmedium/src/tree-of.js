@@ -1,4 +1,4 @@
-const { isLayer, valtype, seq } = require('./core');
+const { isLayer, valtype, seq, sim, disagreement } = require('./core');
 
 const treeOf = (docWithMetadata, nodePresenter = v => v, rootNode = 0) => {
   const doc = {};
@@ -22,20 +22,28 @@ const treeOf = (docWithMetadata, nodePresenter = v => v, rootNode = 0) => {
       { pos, parent }
     );
 
-  const graph = (handle, parentHandle, pos) =>
-    valtype(val(handle), {
+  const graph = (handle, parentHandle, pos) => {
+    const node = v =>
+      nodePresenter(v, handle, metaOfNode(handle, parentHandle, pos));
+
+    return valtype(val(handle), {
       seq: ([, items]) =>
-        nodePresenter(
+        node(
           seq(
             ...items.map((childHandle, childPos) =>
               graph(childHandle, handle, childPos)
             )
-          ),
-          handle,
-          metaOfNode(handle, parentHandle, pos)
+          )
         ),
-      _: v => nodePresenter(v, handle, metaOfNode(handle, parentHandle, pos)),
+
+      sim: ([, items]) => node(sim(...items.map(node))),
+
+      dis: ([, { expected, actual, to }]) =>
+        node(disagreement(node(expected), node(actual), node(to))),
+
+      _: v => node(v),
     });
+  };
 
   return graph(rootNode);
 };
