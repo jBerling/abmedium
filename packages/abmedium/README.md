@@ -15,6 +15,8 @@ Layers can get in a conflict when they are projected in a stack. This is called 
 - _Values_ are sequences, strings, symbols, numbers or nil.
 - _Projections_ are created when a projection stack is projected.
 - _Projection Stacks_ describes which layers, and in what order, to project.
+- _Disagreements_ are created during a projection. They represent a mismatch between an expected and actual value.
+- _Simultaneities_ are created when new values are added concurrently to the same node.
 
 ## Document Structure
 
@@ -98,24 +100,36 @@ If you project it again with an empty stack, the English strings will be project
 
 ## Disagreements and Simultaneities
 
-To add a safety mechanism that prevents you from project a value over an unexpected value, you add mappings instead of direct values. A mapping is created by calling `mapping` and pass the value to change to followed by the expected value.
+To add a safety mechanism that prevents you from project a value over an unexpected value, you add mappings instead of direct values. A mapping is created by calling `mapping` with the value to change _to_ followed by the _expected_ value.
 
 ```javascript
 treedoc = {
   ...treedoc,
   se: layer({
-    4: mapping(str("äpple"), "apple"),
-    6: mapping("banan", "banana"),
-    8: mapping("päron", "pear"),
+    4: mapping(str("äpple"), str("apple")),
+    6: mapping(str("banan"), str("banana")),
+    8: mapping(str("päron"), str("pear")),
   }),
 };
 ```
 
+If the actual values of the underlaying layer equals the expected ones they will be replaced by the new ones.
+
 ```javascript
 out = treeOf(proj(treedoc, ["se"]), stringPresenter);
-console.log("3.", out);
+console.log("4.", out);
 // 4. [["äpple", 1], ["banan", 2], ["päron", 3]]
 ```
+
+If it doesn't, a disagreement will replace the underlaying value.
+
+```javascript
+out = treeOf(proj({ ...treedoc, 4: str("lemon") }, ["se"]), stringPresenter);
+console.log("5.", out);
+// 5. [[»"apple" ≠ "lemon" → "äpple"«, 1], ["banan", 2], ["päron", 3]]
+```
+
+Abmedium also have the concept of a simultaneity. They are created when values are added concurrently to the same node. Since Abmedium does not handle concurrency by itelf, simultaneities are meant to be used together with other libraries that does.
 
 ## Examples
 
