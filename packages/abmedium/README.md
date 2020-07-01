@@ -119,4 +119,4 @@ console.log("3.", out);
 
 ## Examples
 
-Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/master/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/master/examples/from-readme.js) in that directory contains all the examples in this document.
+Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples/from-readme.js) in that directory contains all the examples in this document.
