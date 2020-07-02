@@ -2,21 +2,21 @@
 
 ## 0.9.0
 
-Big breaking changes. Make the scope of the package smaller.
+Big breaking changes. Make the scope of this package smaller.
 
 - To multi-repo.
 - Remove dependency on delta-crdts.
-- Remove serialization.
+- Remove serialization. This should be placed in other packages, for example @abrovink/abmedium-automerge if is an Automerge document.
 - Remove dependency on uuids.
 - Remove the Document type. Now we only work with objects.
-- Remove all functionality related to updating a document.
+- Remove all update functionality. Let this be handled by @abrovink/abmedium-automerge.
 - Rename pres to treeOf. It can now create a tree with a custom root.
 - Rename equal to isEqual.
 - Export sim and add isSim.
 - Change sim and seq to variadic functions.
 - Add nodes, a function that returns an iterator from a layer.
 - Add layers, a function that returns an iterator from a layer.
-- Reverse the parameter order of the mappings function. Change how mappings works a bit. A disagreement is now created if you try to project a mapping on a non-existing node, if the mapping do not expect it.
+- Reverse the parameter order of the mappings function. Change how mappings works a bit. A disagreement is now created if you try to project a mapping on a non-existing node, if the mapping does not expect it.
 - Numerous other smaller changes ...
 
 ## 0.8.3
