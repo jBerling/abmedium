@@ -1,6 +1,6 @@
 {
   "name": "@abrovink/abmedium-automerge",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "description": "A graph medium",
   "main": "index.js",
   "repository": "git@gitlab.com:berling/abmedium.git",
@@ -11,7 +11,7 @@
     "test": "jest --watch"
   },
   "dependencies": {
-    "@abrovink/abmedium": "0.8.3",
+    "@abrovink/abmedium": "^0.9.0",
     "automerge": "^0.14.1"
   },
   "publishConfig": {
