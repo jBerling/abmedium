@@ -1,6 +1,6 @@
 {
   "name": "@abrovink/abmedium",
-  "version": "0.9.0",
+  "version": "0.8.3",
   "description": "A graph medium",
   "main": "index.js",
   "repository": "git@gitlab.com:berling/abmedium.git",
@@ -9,5 +9,8 @@
   "private": false,
   "scripts": {
     "test": "jest --watch"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
