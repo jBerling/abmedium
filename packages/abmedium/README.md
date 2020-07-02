@@ -2,7 +2,7 @@
 
 Abmedium is a graph medium. Unlike text it can contain loops and nodes with multiple parents.
 
-It is made for distributed editing in multilingual environments. A node can have values in different _layers_. Layers can be placed in a projection stack and projected. This way different projections can be created from one document. This way feature toggles/branches can be emulated and content can be localized.
+It is made for distributed editing in multilingual environments. A node can have values in different _layers_. Layers can be placed in a projection stack and projected. This way different projections can be created from one document. Projections can contain localized content, and emulate feature toggles/branches.
 
 Layers can get in a conflict when they are projected in a stack. This is called a _disagreement_ and is one of the two types of conflicts Abmedium handles. The other type is _simultaneities_. They occur when a node is edited concurrently.
 
