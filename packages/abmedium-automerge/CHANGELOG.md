@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.0
+## 0.9.1
 
 The first version of this package (version synched with @abrovink/abmedium). This represent the first approach to combine Abmedium with Automerge. Basically it merges the exports of Automerge with those of Abmedium, and then this package replaces some of the exports.
 

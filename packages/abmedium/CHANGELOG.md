@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.0
+## 0.9.1
 
 Big breaking changes. Make the scope of this package smaller.
 
@@ -18,6 +18,10 @@ Big breaking changes. Make the scope of this package smaller.
 - Add layers, a function that returns an iterator from a layer.
 - Reverse the parameter order of the mappings function. Change how mappings works a bit. A disagreement is now created if you try to project a mapping on a non-existing node, if the mapping does not expect it.
 - Numerous other smaller changes ...
+
+## 0.9.0
+
+Lost in space. (Package was unpublished from NPM and a version number can not be reused)
 
 ## 0.8.3
 
