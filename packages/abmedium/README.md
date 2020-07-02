@@ -100,7 +100,7 @@ If you project it again with an empty stack, the English strings will be project
 
 ## Disagreements and Simultaneities
 
-To add a safety mechanism that prevents you from project a value over an unexpected value, you add mappings instead of direct values. A mapping is created by calling `mapping` with the value to change _to_ followed by the _expected_ value.
+To add a safety mechanism that prevents you from project a value over an unexpected value, you add mappings instead of direct values. A mapping is created by calling `mapping` with two values. The first value is the value of the projected node. The second value is the expected value of the underlaying node.
 
 ```javascript
 treedoc = {
@@ -113,7 +113,7 @@ treedoc = {
 };
 ```
 
-If the actual values of the underlaying layer equals the expected ones they will be replaced by the new ones.
+If an actual underlaying value equals the expected value the overlaying value will be projected.
 
 ```javascript
 out = treeOf(proj(treedoc, ["se"]), stringPresenter);
@@ -121,7 +121,7 @@ console.log("4.", out);
 // 4. [["äpple", 1], ["banan", 2], ["päron", 3]]
 ```
 
-If it doesn't, a disagreement will replace the underlaying value.
+However, if the actual and expected value differ a disagreement will be projected.
 
 ```javascript
 out = treeOf(proj({ ...treedoc, 4: str("lemon") }, ["se"]), stringPresenter);
@@ -133,4 +133,4 @@ Abmedium also have the concept of a simultaneity. They are created when values a
 
 ## Examples
 
-Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples/from-readme.js) in that directory contains all the examples in this document.
+Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples/from-readme.js) contains all the examples in this document.

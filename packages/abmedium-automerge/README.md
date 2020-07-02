@@ -83,4 +83,4 @@ For further information, read about [Text](https://github.com/automerge/automerg
 
 ## Examples
 
-Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium-automerge/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium-automerge/examples/from-readme.js) in that directory contains all the examples in this document.
+Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium-automerge/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium-automerge/examples/from-readme.js) contains all the examples in this document.
