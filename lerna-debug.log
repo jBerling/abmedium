@@ -1,9 +1,9 @@
-35 error Error: Command failed: git commit -m v0.9.0
-35 error På grenen master
-35 error Din gren är à jour med "origin/master".
-35 error
-35 error inget att checka in, arbetskatalogen ren
-35 error
-35 error     at makeError (/Users/johan/git/abmedium/node_modules/execa/index.js:174:9)
-35 error     at /Users/johan/git/abmedium/node_modules/execa/index.js:278:16
-35 error     at processTicksAndRejections (internal/process/task_queues.js:97:5)
+42 error Error: Command failed: git commit -m v0.9.0
+42 error På grenen master
+42 error Din gren är à jour med "origin/master".
+42 error
+42 error inget att checka in, arbetskatalogen ren
+42 error
+42 error     at makeError (/Users/johan/git/abmedium/node_modules/execa/index.js:174:9)
+42 error     at /Users/johan/git/abmedium/node_modules/execa/index.js:278:16
+42 error     at processTicksAndRejections (internal/process/task_queues.js:97:5)
