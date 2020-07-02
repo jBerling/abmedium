@@ -84,3 +84,7 @@ For further information, read about [Text](https://github.com/automerge/automerg
 ## Examples
 
 Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium-automerge/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium-automerge/examples/from-readme.js) contains all the examples in this document.
+
+## Maturity Status
+
+This package is not mature. It is not stable and will change a lot. It would be wonderful if you want to use it, but prepare for a bumpy ride. Maybe you want to [contribute](https://gitlab.com/berling/abmedium/-/blob/master/CONTRIBUTING.md) in that case?

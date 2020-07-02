@@ -134,3 +134,7 @@ Abmedium also have the concept of a simultaneity. They are created when values a
 ## Examples
 
 Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples/from-readme.js) contains all the examples in this document.
+
+## Maturity Status
+
+This package is not mature. It is not stable and will change a lot. It would be wonderful if you want to use it, but prepare for a bumpy ride. Maybe you want to [contribute](https://gitlab.com/berling/abmedium/-/blob/master/CONTRIBUTING.md) in that case?
