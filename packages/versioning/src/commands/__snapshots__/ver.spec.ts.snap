@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`abv ver adds first version 1`] = `
+Object {
+  ".abv": Object {
+    ".objects": Object {
+      "<foo>.md": "# Foo
+",
+    },
+    ".viewstack": "[]",
+    "foo": "{
+    \\"0\\": [
+        \\"seq\\",
+        [
+            null,
+            1
+        ]
+    ],
+    \\"1\\": \\"<foo>.md\\",
+    \\"counter\\": 2,
+    \\"__document__\\": true,
+    \\"__layer__\\": true,
+    \\"head\\": 0,
+    \\"timestamps\\": {
+        \\"0\\": \\"2020-07-20T18:36Z\\",
+        \\"__layer__\\": true
+    }
+}",
+  },
+  "foo.md": "# Foo
+",
+}
+`;
+
+exports[`abv ver adds second version 1`] = `
+Object {
+  ".abv": Object {
+    ".objects": Object {
+      "<foo>.md": "# Foo
+",
+    },
+    ".viewstack": "[]",
+    "foo": "{
+    \\"0\\": [
+        \\"seq\\",
+        [
+            null,
+            1
+        ]
+    ],
+    \\"1\\": \\"ver1.md\\",
+    \\"2\\": [
+        \\"seq\\",
+        [
+            0,
+            3
+        ]
+    ],
+    \\"3\\": \\"<foo>.md\\",
+    \\"counter\\": 4,
+    \\"head\\": 2,
+    \\"__document__\\": true,
+    \\"__layer__\\": true,
+    \\"timestamps\\": {
+        \\"2\\": \\"2020-07-20T18:36Z\\",
+        \\"__layer__\\": true
+    }
+}",
+  },
+  "foo.md": "# Foo
+",
+}
+`;

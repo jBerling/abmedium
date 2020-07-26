@@ -85,6 +85,21 @@ describe('proj', () => {
     );
   });
 
+  it('works with layers only existing in stack', () => {
+    const projection = proj(doc(), [
+      ['layer1', ['layer_y', 'layer1_1', 'layer_z']],
+      'layer_x',
+    ]);
+    expect(projection).toEqual(
+      layer({
+        0: seq(1, 2, 3),
+        1: sym('+'),
+        2: num(11),
+        3: num(211),
+      })
+    );
+  });
+
   it('root replacement', () => {
     const d = document({ 0: str('a'), replacement: layer({ 0: str('b') }) });
 

@@ -7,10 +7,11 @@ const {
   LAYER,
   DOCUMENT,
   isEqual,
-} = require('./core');
+} = require("./core");
 
-const projectValue = (projection, handl, newVal) =>
-  valtype(newVal, {
+const projectValue = (projection, handl, newVal) => {
+  if (newVal === undefined) return;
+  return valtype(newVal, {
     mapping: ([, { from: expected, to }]) => {
       const actual = projection[handl];
 
@@ -24,10 +25,11 @@ const projectValue = (projection, handl, newVal) =>
       projection[handl] = newVal;
     },
   });
+};
 
-const projectLayer = (projection, layer, stack = [], metalayers = []) => {
+const projectLayer = (projection, layer = {}, stack = [], metalayers = []) => {
   const val = handl => layer[handl];
-  if (!layer) throw new Error('no layer');
+
   for (const handl of Object.keys(layer)) {
     if (handl === LAYER || handl === DOCUMENT) continue;
     const v = val(handl);
@@ -49,9 +51,8 @@ const projectLayer = (projection, layer, stack = [], metalayers = []) => {
 };
 
 const proj = (doc, stack = [], metalayers = []) => {
-  if (!isDocument(doc)) {
-    throw new Error('Not a document');
-  }
+  if (!isDocument(doc)) throw new Error("Not a document");
+
   const projection = {};
   projectLayer(projection, doc, stack, metalayers);
   return layer(projection);

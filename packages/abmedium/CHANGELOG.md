@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0
+
+- Make proj work less strickt. It now works even if a layer in a stack does not exist.
+
 ## 0.9.1
 
 Big breaking changes. Make the scope of this package smaller.
