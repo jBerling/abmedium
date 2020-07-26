@@ -1,8 +1,8 @@
-const { isLayer } = require('./core');
+import { isLayer } from "./core";
 
-const layers = layer => {
+export const layers = (layer) => {
   if (!isLayer(layer)) {
-    throw new Error('Not a layer');
+    throw new Error("Not a layer");
   }
 
   const handles = Object.keys(layer);
@@ -35,5 +35,3 @@ const layers = layer => {
     },
   };
 };
-
-module.exports = layers;

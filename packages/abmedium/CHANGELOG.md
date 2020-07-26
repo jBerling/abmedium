@@ -4,6 +4,7 @@
 
 Migrate the project to TypeScript.
 
+- rename document to abDocument for TypeScript reasons. For some reason it caused an error and I've thought about changing the name anyway.
 - Make proj work less strict. It now works even if a layer in a stack does not exist.
 
 ## 0.9.1

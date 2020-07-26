@@ -1,7 +1,7 @@
-const { isLayer, LAYER, DOCUMENT } = require('./core');
-const layers = require('./layers');
+import { isLayer, LAYER, DOCUMENT } from "./core";
+import { layers } from "./layers";
 
-const nodes = document => {
+export const nodes = (document) => {
   const metalayers = [...layers(document)];
   const handles = Object.keys(document);
   let i = 0;
@@ -37,5 +37,3 @@ const nodes = document => {
     },
   };
 };
-
-module.exports = nodes;

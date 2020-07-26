@@ -1,4 +1,4 @@
-const {
+import {
   valtype,
   disagreement,
   layer,
@@ -7,7 +7,7 @@ const {
   LAYER,
   DOCUMENT,
   isEqual,
-} = require("./core");
+} from "./core";
 
 const projectValue = (projection, handl, newVal) => {
   if (newVal === undefined) return;
@@ -28,7 +28,7 @@ const projectValue = (projection, handl, newVal) => {
 };
 
 const projectLayer = (projection, layer = {}, stack = [], metalayers = []) => {
-  const val = handl => layer[handl];
+  const val = (handl) => layer[handl];
 
   for (const handl of Object.keys(layer)) {
     if (handl === LAYER || handl === DOCUMENT) continue;
@@ -50,12 +50,10 @@ const projectLayer = (projection, layer = {}, stack = [], metalayers = []) => {
   return projection;
 };
 
-const proj = (doc, stack = [], metalayers = []) => {
+export const proj = (doc, stack = [], metalayers = []) => {
   if (!isDocument(doc)) throw new Error("Not a document");
 
   const projection = {};
   projectLayer(projection, doc, stack, metalayers);
   return layer(projection);
 };
-
-module.exports = proj;

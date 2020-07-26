@@ -2,16 +2,24 @@
   "name": "@abrovink/abmedium",
   "version": "0.9.1",
   "description": "A graph medium",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": "git@gitlab.com:berling/abmedium.git",
   "author": "Johan Berling <johan.berling@abrovink.org>",
   "license": "AGPL-3.0",
   "private": false,
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test-watch": "jest watch",
+    "clean": "rm -rf ./dist",
+    "build": "tsc -p tsconfig.build.json",
+    "clean-build": "yarn clean && yarn build"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "typescript": "^3.9.7"
   },
   "gitHead": "c2dc173e2ee984a82bbd005f33fdd7da966df8e4"
 }

@@ -3,7 +3,7 @@ import { FileHandler } from "../util/types";
 import { testFileHandler, TestFiles } from "../util/mocking/test-file-handler";
 import proj from "./proj";
 import {
-  document,
+  abDocument,
   seq,
   str,
   num,
@@ -36,7 +36,7 @@ describe("abv-proj", () => {
           "foo-se-1.md": "# Foo\n\nEtt exempel.\n",
         },
         foo: JSON.stringify(
-          document({
+          abDocument({
             [head]: num(0),
             0: seq(nil, 1),
             1: str("foo-en-2.md"),

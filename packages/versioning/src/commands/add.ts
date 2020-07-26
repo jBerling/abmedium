@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 import { Argv } from "yargs";
-import { document, layer, num, nil } from "@abrovink/abmedium";
+import { abDocument, layer, num, nil } from "@abrovink/abmedium";
 import defaultFileHandler from "../util/file-handler";
 import { FileHandler } from "../util/types";
 import { mainDir, timestampsLayer, counter, head } from "../constants";
@@ -27,7 +27,7 @@ const add = ({
   return writeFile(
     resolve(archiveName, mainDir, id),
     JSON.stringify(
-      document({
+      abDocument({
         [head]: nil,
         [counter]: num(0),
         [timestampsLayer]: layer(),

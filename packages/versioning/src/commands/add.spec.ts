@@ -2,7 +2,7 @@ import { TestScheduler } from "rxjs/testing";
 import { FileHandler } from "../util/types";
 import { testFileHandler, TestFiles } from "../util/mocking/test-file-handler";
 import add from "./add";
-import { document, nil, num, layer } from "@abrovink/abmedium";
+import { abDocument, nil, num, layer } from "@abrovink/abmedium";
 import {
   mainDir,
   objectsDir,
@@ -51,7 +51,7 @@ describe("abv-add", () => {
         [mainDir]: {
           [objectsDir]: {},
           foo: JSON.stringify(
-            document({
+            abDocument({
               [head]: nil,
               [counter]: num(0),
               [timestampsLayer]: layer(),

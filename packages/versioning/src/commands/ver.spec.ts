@@ -2,7 +2,7 @@ import { TestScheduler } from "rxjs/testing";
 import { FileHandler } from "../util/types";
 import { testFileHandler, TestFiles } from "../util/mocking/test-file-handler";
 import ver from "./ver";
-import { document, num, seq, nil } from "@abrovink/abmedium";
+import { abDocument, num, seq, nil } from "@abrovink/abmedium";
 import { mainDir, objectsDir, counter, viewStack, head } from "../constants";
 
 const testScheduler = () =>
@@ -29,7 +29,7 @@ describe("abv ver", () => {
         [viewStack]: "[]",
         [objectsDir]: {},
         foo: JSON.stringify(
-          document({
+          abDocument({
             [counter]: num(0),
           }),
           null,
@@ -65,7 +65,7 @@ describe("abv ver", () => {
     run(({ expectObservable, flush }) => {
       // @ts-ignore
       archive[mainDir].foo = JSON.stringify(
-        document({
+        abDocument({
           [counter]: num(2),
           0: seq(nil, 1),
           1: "ver1.md",
