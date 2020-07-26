@@ -2,7 +2,9 @@
 
 ## 0.10.0
 
-- Make proj work less strickt. It now works even if a layer in a stack does not exist.
+Migrate the project to TypeScript.
+
+- Make proj work less strict. It now works even if a layer in a stack does not exist.
 
 ## 0.9.1
 
