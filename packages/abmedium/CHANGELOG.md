@@ -15,9 +15,9 @@ Once again big breaking changes. Migrate the project to TypeScript and make it s
 - add as<NodeType> functions
 - Layers are now either ordinary layers or metalayers. It is no longer up to proj to decide that. A metalayer must have a label that is prefixed with `m$`.
 - isLayer to asLayer and asMetalayer added.
-- TODO Refs (see 202008010757)
-- TODO Refseqs (see 202008010757)
-- TODO remove dis and sim NodeValue types?
+- Refs added as a new node value type.
+- TODO remove dis as node value type?
+- TODO remove sim as node value types?
 - TODO update disagreement example
 
 ## 0.9.1
