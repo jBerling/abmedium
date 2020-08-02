@@ -1,5 +1,3 @@
-export {};
-
 import {
   sym,
   sim,
@@ -9,6 +7,7 @@ import {
   nil,
   num,
   dis,
+  ref,
   valtype,
   valtypeIn,
   lengthOf,
@@ -24,6 +23,7 @@ describe("core", () => {
     expect(valtype(sim("a", "b"))).toEqual("sim");
     expect(valtype(dis("a", "b", "c"))).toEqual("dis");
     expect(valtype(nil)).toEqual("nil");
+    expect(valtype(ref(0))).toEqual("ref");
   });
 
   test("valtypeIn", () => {
@@ -48,8 +48,9 @@ describe("core", () => {
         nil,
         sim("a", "b"),
         dis("a", "b", "c"),
+        ref("root"),
       ].map(lengthOf)
-    ).toMatchObject([3, 2, 3, 4, 0, NaN, NaN]);
+    ).toMatchObject([3, 2, 3, 4, 0, NaN, NaN, NaN]);
   });
 
   test("sim of sims", () => {
@@ -77,6 +78,7 @@ describe("core", () => {
     testEquality(num(1), num(1), num(2));
     testEquality(str("a"), str("a"), str("b"), sym("a"));
     testEquality(sym("a"), sym("a"), sym("b"), str("a"));
+    testEquality(ref(0), ref("0"), ref(1));
     testEquality(seq(1, 2, 3), seq(1, 2, 3), seq(3, 2, 1));
     testEquality(nil, nil);
     testEquality(

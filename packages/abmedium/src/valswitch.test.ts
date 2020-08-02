@@ -1,4 +1,4 @@
-import { seq, sym, str, num, sim, dis, nil } from "./core";
+import { seq, sym, str, num, sim, dis, nil, ref } from "./core";
 import { valswitch } from "./valswitch";
 import { NodeValue } from "./types";
 
@@ -12,6 +12,7 @@ describe("valswitch", () => {
       sim: (s) => ["sim", s],
       dis: (d) => ["dis", d],
       nil: (n) => ["nil", n],
+      ref: (l) => ["ref", l],
       _: (v) => ["_", v],
     });
 
@@ -23,6 +24,7 @@ describe("valswitch", () => {
       switcher(sim(str("a"), str("b"))),
       switcher(dis("a", "b", "c")),
       switcher(nil),
+      switcher(ref(10)),
     ];
 
     expect(collected).toMatchObject([
@@ -33,6 +35,7 @@ describe("valswitch", () => {
       ["sim", sim("a", "b")],
       ["dis", dis("a", "b", "c")],
       ["nil", nil],
+      ["ref", ref(10)],
     ]);
   });
 

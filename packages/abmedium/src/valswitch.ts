@@ -1,4 +1,4 @@
-import { NodeValue, Str, Num, Sim, Dis, Sym, Seq, Nil } from "./types";
+import { NodeValue, Str, Num, Sim, Dis, Sym, Seq, Nil, Ref } from "./types";
 
 import { valtype } from "./core";
 
@@ -10,6 +10,7 @@ type Switch<R> = {
   sim?: ((sim: Sim, items: R[]) => R) | R;
   dis?: ((dis: Dis) => R) | R;
   nil?: ((nil: Nil) => R) | R;
+  ref?: ((ref: Ref) => R) | R;
   _?: ((v: NodeValue) => R) | R;
 };
 

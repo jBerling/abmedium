@@ -12,6 +12,7 @@ import {
   Seq,
   Nil,
   Scalar,
+  Ref,
 } from "./types";
 
 import {
@@ -22,8 +23,9 @@ import {
   strName,
   numName,
   nilName,
-  metaPrefix,
+  refName,
   scalarTypeNames,
+  metaPrefix,
 } from "./constants";
 
 import { valswitch } from "./valswitch";
@@ -99,6 +101,11 @@ export const sym = (name: string): Sym => [symName, name];
 export const asSym = (v: any): Sym | undefined =>
   valtypeIn(v, symName) && (v as Sym);
 
+export const ref = (label: Label): Ref => [refName, label];
+
+export const asRef = (v: any): Ref | undefined =>
+  valtypeIn(v, refName) && (v as Ref);
+
 export const str = (s: string): Str => s;
 
 export const asStr = (v: any): Str | undefined =>
@@ -127,6 +134,7 @@ export const lengthOf = (value) =>
     num: (n) => String(n).length,
     sim: NaN,
     dis: NaN,
+    ref: NaN,
     nil: 0,
   })(value);
 
@@ -138,6 +146,11 @@ export const isEqual = (a: NodeValue | undefined, b: NodeValue | undefined) => {
     sym: ([, aName]) => {
       const [, bName] = asSym(b) || [];
       return aName === bName;
+    },
+
+    ref: ([, aLabel]) => {
+      const [, bLabel] = asRef(b) || [];
+      return String(aLabel) === String(bLabel);
     },
 
     seq: ([, aItems]) => {

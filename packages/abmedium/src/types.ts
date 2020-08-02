@@ -6,6 +6,7 @@ import {
   strName,
   nilName,
   numName,
+  refName,
 } from "./constants";
 
 export type Nil = null;
@@ -21,8 +22,9 @@ export type Dis = [
   }
 ];
 export type Sym = [typeof symName, string];
+export type Ref = [typeof refName, Label];
 export type Seq = [typeof seqName, Array<Label>];
-export type Scalar = Nil | Str | Num | Sym;
+export type Scalar = Nil | Str | Num | Sym | Ref;
 export type CompoundValue = Sim | Dis | Seq;
 export type NodeValue = Scalar | CompoundValue;
 
@@ -33,7 +35,8 @@ export type NodeValueType =
   | typeof strName
   | typeof nilName
   | typeof numName
-  | typeof disName;
+  | typeof disName
+  | typeof refName;
 
 export type Label = string | number;
 
