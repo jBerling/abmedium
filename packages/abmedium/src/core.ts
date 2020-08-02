@@ -1,88 +1,137 @@
-export type Handle = string;
-export type Value = any; // TODO, type this fucker
-export type Nodes = Record<Handle, Value>;
+import {
+  Label,
+  NodeValue,
+  NodeValueType,
+  Layer,
+  Metalayer,
+  Doc,
+  Str,
+  Num,
+  Sim,
+  Dis,
+  Sym,
+  Seq,
+  Nil,
+  Scalar,
+} from "./types";
 
-export const LAYER = "__layer__";
-export type Layer = {
-  [LAYER]: true;
-} & Nodes;
-export const isLayer = (v: any): boolean => v !== null && Boolean(v[LAYER]);
-export const layer = (nodes: Nodes = {}): Layer => ({
+import {
+  docName,
+  disName,
+  simName,
+  symName,
+  seqName,
+  strName,
+  numName,
+  nilName,
+  metaPrefix,
+  scalarTypeNames,
+} from "./constants";
+
+import { valswitch } from "./valswitch";
+
+export const asLayer = (x: any): Layer | undefined =>
+  x !== null && !Array.isArray(x) && typeof x === "object"
+    ? (x as Layer)
+    : undefined;
+
+export const isMetalayerLabel = (label: Label): boolean =>
+  String(label).startsWith(metaPrefix);
+
+export const asMetalayer = (x: any): Metalayer | undefined =>
+  asLayer(x) ? (x as Metalayer) : undefined;
+
+export const asDoc = (v: any): Doc | undefined =>
+  v !== null && Boolean(v[docName]) ? (v as Doc) : undefined;
+
+// TODO remove?
+export const doc = (nodes: Layer = {}): Doc => ({
   ...nodes,
-  [LAYER]: true,
+  [docName]: true,
 });
 
-export const DOCUMENT = "__document__";
-export type Document = { [DOCUMENT]: true } & Layer;
-export const isDocument = (v) => v !== null && Boolean(v[DOCUMENT]);
-export const abDocument = (nodes: Nodes = {}): Document => ({
-  ...nodes,
-  [DOCUMENT]: true,
-  [LAYER]: true,
-});
-
-// TODO: break up into several functions
-export const valtype = (v: Value, flag?, ...flags) => {
-  const vt = valtype.vtype(v);
-  if (!flag) return vt;
-  if (typeof flag === "string") {
-    return [...flags, flag].includes(vt);
-  }
-  if (typeof flag === "object") {
-    const handler = flag[vt] !== undefined ? flag[vt] : flag._;
-    if (handler === undefined) {
-      throw new Error("no _ or " + vt + " handler");
-    }
-    return typeof handler === "function" ? handler(v) : handler;
-  }
-  throw new Error("unknown flag");
-};
-
-valtype.vtype = (v) => {
-  if (typeof v === "string") return "str";
-  if (typeof v === "number") return "num";
-  if (v === null) return "nil";
+export const valtype = (v: NodeValue): NodeValueType | null => {
+  if (typeof v === "string") return strName;
+  if (typeof v === "number") return numName;
+  if (v === null) return nilName;
   if (Array.isArray(v)) {
-    const [type] = v;
+    const [type] = v as any;
     return type;
   }
+
   // Not an Abmedium value type
-  return "none";
+  return null;
 };
 
-export const sim = (...members) => {
-  const s = new Set();
-  for (const member of members) {
-    valtype(member, {
-      sim: ([, values]) => {
-        for (const v of values) s.add(v);
-      },
-      _: () => {
-        s.add(member);
-      },
-    });
+export const valtypeIn = (
+  v: NodeValue,
+  ...types: NodeValueType[]
+): NodeValueType | undefined => {
+  const vt = valtype(v);
+  for (const vtype of types) {
+    if (vtype === vt) return vt;
   }
-  return ["sim", [...s.values()]];
+  return undefined;
 };
-export const disagreement = (expected, actual, to) => [
-  "dis",
-  { expected, actual, to },
-];
-export const sym = (name) => ["sym", name];
-export const str = (s) => s;
-export const num = (x) => (typeof x === "string" ? Number(x) : x);
-export const seq = (...items) => ["seq", items];
-export const seqItems = (s) => {
-  if (!valtype(s, "seq")) {
-    throw new Error("not a seq");
-  }
-  return s[1];
-};
-export const mapping = (to, from) => ["mapping", { from, to }];
-export const nil = null;
 
-export const lengthOf = (v) =>
-  valtype(v, {
+export const asScalar = (x: any): Scalar | undefined =>
+  valtypeIn(x, ...scalarTypeNames) ? (x as Scalar) : undefined;
+
+export const sim = (...members: NodeValue[]): Sim => {
+  const s = new Set<NodeValue>();
+
+  const swtch = valswitch({
+    sim: ([, values]) => {
+      for (const v of values) s.add(v);
+    },
+    _: (v) => {
+      s.add(v);
+    },
+  });
+
+  for (const member of members) swtch(member);
+
+  return [simName, [...s.values()]];
+};
+
+export const asSim = (v: any): Sim | undefined => valtypeIn(v, "sim") && v;
+
+export const dis = (
+  expected: NodeValue | undefined,
+  actual: NodeValue | undefined,
+  to: NodeValue
+): Dis => [disName, { expected, actual, to }];
+
+export const asDis = (v: any): Dis | undefined =>
+  valtypeIn(v, disName) && (v as Dis);
+
+export const sym = (name: string): Sym => [symName, name];
+
+export const asSym = (v: any): Sym | undefined =>
+  valtypeIn(v, symName) && (v as Sym);
+
+export const str = (s: string): Str => s;
+
+export const asStr = (v: any): Str | undefined =>
+  valtypeIn(v, strName) && (v as Str);
+
+export const num = (x: string | number): Num =>
+  typeof x === "string" ? Number(x) : x;
+
+export const asNum = (v: any): Num | undefined =>
+  valtypeIn(v, numName) && (v as Num);
+
+export const seq = (...items: Label[]): Seq => [seqName, items];
+
+export const seqItems = (s: Seq) => s[1];
+
+export const asSeq = (v: any): Seq | undefined =>
+  valtypeIn(v, seqName) && (v as Seq);
+
+export const nil: Nil = null;
+
+export const lengthOf = (value) =>
+  valswitch<number>({
     seq: ([, s]) => s.length,
     sym: ([, name]) => name.length,
     str: (s) => s.length,
@@ -90,56 +139,50 @@ export const lengthOf = (v) =>
     sim: NaN,
     dis: NaN,
     nil: 0,
-    mapping: NaN,
-    _: (x) => {
-      let xStr;
-      try {
-        xStr = JSON.stringify(x);
-      } catch (err) {
-        xStr = x;
-      }
-      throw new Error("Not a valid Abmedium value: " + xStr);
+  })(value);
+
+export const isEqual = (a: NodeValue | undefined, b: NodeValue | undefined) => {
+  if (a === undefined && b === undefined) return true;
+  if (a === undefined || b === undefined) return false;
+
+  return valswitch<boolean>({
+    sym: ([, aName]) => {
+      const [, bName] = asSym(b) || [];
+      return aName === bName;
     },
-  });
 
-export const editvalOf = (value) =>
-  valtype(value, {
-    str: () => value,
-    num: () => String(value),
-    nil: () => "",
-    _: ([, v]) => v,
-  });
-
-export const isEqual = (a, b) =>
-  valtype(a, {
-    sym: () => valtype(b, "sym") && a[1] === b[1],
-    seq: () => {
-      if (!valtype(b, "seq") || a.length !== b.length) {
-        return false;
-      }
-      for (const [i, aItem] of a[1].entries()) {
-        if (!isEqual(aItem, b[1][i])) return false;
+    seq: ([, aItems]) => {
+      const bSeq = asSeq(b);
+      if (!bSeq || aItems.length !== bSeq[1].length) return false;
+      for (const [i, aItem] of aItems.entries()) {
+        if (aItem !== bSeq[1][i]) return false;
       }
       return true;
     },
-    sim: () => {
-      if (!valtype(b, "sim") || a[1].length !== b[1].length) return false;
 
-      for (const aItem of a[1]) {
-        if (!b[1].find((bItem) => isEqual(aItem, bItem))) {
+    sim: ([, aItems]) => {
+      const bSim = asSim(b);
+      if (!bSim || aItems.length !== bSim[1].length) return false;
+      for (const aItem of aItems) {
+        if (!bSim[1].find((bItem) => isEqual(aItem, bItem))) {
           return false;
         }
       }
       return true;
     },
-    dis: () =>
-      valtype(b, "dis") &&
-      isEqual(a[1].from, b[1].from) &&
-      isEqual(a[1].to, b[1].to) &&
-      isEqual(a[1].expected, b[1].expected),
+
+    dis: ([, { actual: aActual, to: aTo, expected: aExpected }]) => {
+      const bDis = asDis(b);
+      if (!bDis) return false;
+      const [, { actual: bActual, to: bTo, expected: bExpected }] = bDis;
+
+      return (
+        isEqual(aActual, bActual) &&
+        isEqual(aTo, bTo) &&
+        isEqual(aExpected, bExpected)
+      );
+    },
+
     _: () => a === b,
-    mapping: () =>
-      valtype(b, "mapping") &&
-      isEqual(a[1].from, b[1].from) &&
-      isEqual(a[1].to, b[1].to),
-  });
+  })(a);
+};

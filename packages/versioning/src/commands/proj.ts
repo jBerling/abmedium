@@ -15,7 +15,7 @@ export const command = "proj";
 
 export const describe = "project layers";
 
-// TODO move these
+// TODO import from @abrovink/abmedium
 type LayerName = string;
 type LayerWithSublayers = [LayerName, ViewStack];
 type ViewStack = (LayerName | LayerWithSublayers)[];

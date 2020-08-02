@@ -8,11 +8,10 @@ import {
   str,
   nil,
   num,
-  disagreement,
-  mapping,
+  dis,
   valtype,
+  valtypeIn,
   lengthOf,
-  editvalOf,
   isEqual,
 } from "./core";
 
@@ -23,51 +22,20 @@ describe("core", () => {
     expect(valtype(str(""))).toEqual("str");
     expect(valtype(num(0))).toEqual("num");
     expect(valtype(sim("a", "b"))).toEqual("sim");
-    expect(valtype(disagreement("a", "b", "c"))).toEqual("dis");
+    expect(valtype(dis("a", "b", "c"))).toEqual("dis");
     expect(valtype(nil)).toEqual("nil");
-    expect(valtype(mapping(str("b"), str("a")))).toEqual("mapping");
   });
 
-  test("valtype with conditional flag", () => {
-    expect(valtype(sym("a"), "sym")).toBe(true);
-    expect(valtype(sym("a"), "seq")).toBe(false);
-    expect(valtype(seq(), "seq")).toBe(true);
-    expect(valtype(str(""), "str")).toBe(true);
-    expect(valtype(num(0), "num")).toBe(true);
-    expect(valtype(sim("a", "b"), "sim")).toBe(true);
-    expect(valtype(disagreement("a", "b", "c"), "dis")).toBe(true);
-    expect(valtype(sym("a"), "str", "num", "sym")).toBe(true);
-    expect(valtype(nil, "nil")).toBe(true);
-    expect(valtype(mapping(str("b"), str("a")), "mapping")).toBe(true);
-  });
-
-  test("valtype with switch flag", () => {
-    const collected = [];
-    const collect = (t) => (v) => collected.push([t, v]);
-
-    valtype(seq(), { seq: collect("seq") });
-    valtype(sym("a"), { sym: collect("sym") });
-    valtype(str(""), { str: collect("str") });
-    valtype(num(0), { num: collect("num") });
-    valtype(sim("a", "b"), { sim: collect("sim") });
-    valtype(disagreement("a", "b", "c"), { dis: collect("dis") });
-    valtype(sym("a"), { _: collect("_") });
-    valtype(nil, { nil: collect("nil") });
-    valtype(mapping(str("b"), str("a")), { mapping: collect("mapping") });
-
-    expect(collected).toMatchObject([
-      ["seq", seq()],
-      ["sym", sym("a")],
-      ["str", str("")],
-      ["num", num(0)],
-      ["sim", sim("a", "b")],
-      ["dis", disagreement("a", "b", "c")],
-      ["_", sym("a")],
-      ["nil", nil],
-      ["mapping", mapping(str("b"), str("a"))],
-    ]);
-
-    expect(valtype(sym("a"), { sym: "foo" })).toEqual("foo");
+  test("valtypeIn", () => {
+    expect(valtypeIn(sym("a"), "sym")).toBe("sym");
+    expect(valtypeIn(sym("a"), "seq")).toBe(undefined);
+    expect(valtypeIn(seq(), "seq")).toBe("seq");
+    expect(valtypeIn(str(""), "str")).toBe("str");
+    expect(valtypeIn(num(0), "num")).toBe("num");
+    expect(valtypeIn(sim("a", "b"), "sim")).toBe("sim");
+    expect(valtypeIn(dis("a", "b", "c"), "dis")).toBe("dis");
+    expect(valtypeIn(sym("a"), "str", "num", "sym")).toBe("sym");
+    expect(valtypeIn(nil, "nil")).toBe("nil");
   });
 
   test("lengthOf", () => {
@@ -79,34 +47,9 @@ describe("core", () => {
         num("1001"),
         nil,
         sim("a", "b"),
-        disagreement("a", "b", "c"),
-        mapping(str("b"), str("a")),
+        dis("a", "b", "c"),
       ].map(lengthOf)
-    ).toMatchObject([3, 2, 3, 4, 0, NaN, NaN, NaN]);
-  });
-
-  test("editvalOf", () => {
-    expect(
-      [
-        seq(1, 2, 3),
-        sym("ab"),
-        str("abc"),
-        num("1001"),
-        nil,
-        sim(str("a"), str("b")),
-        disagreement(str("a"), str("b"), str("c")),
-        mapping(str("b"), str("a")),
-      ].map(editvalOf)
-    ).toMatchObject([
-      [1, 2, 3],
-      "ab",
-      "abc",
-      "1001",
-      "",
-      ["a", "b"],
-      { expected: "a", actual: "b", to: "c" },
-      { from: "a", to: "b" },
-    ]);
+    ).toMatchObject([3, 2, 3, 4, 0, NaN, NaN]);
   });
 
   test("sim of sims", () => {
@@ -142,14 +85,9 @@ describe("core", () => {
       sim(str("a"), str("c"))
     );
     testEquality(
-      disagreement(str("a"), str("b"), str("c")),
-      disagreement(str("a"), str("b"), str("c")),
-      disagreement(str("b"), str("c"), str("a"))
-    );
-    testEquality(
-      mapping(str("b"), str("a")),
-      mapping(str("b"), str("a")),
-      mapping(str("a"), str("b"))
+      dis(str("a"), str("b"), str("c")),
+      dis(str("a"), str("b"), str("c")),
+      dis(str("b"), str("c"), str("a"))
     );
   });
 });

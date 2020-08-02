@@ -1,149 +1,141 @@
-import {
-  num,
-  sym,
-  str,
-  nil,
-  seq,
-  abDocument,
-  layer,
-  mapping,
-  sim,
-} from "./core";
-
+import { num, sym, str, nil, seq, sim, dis } from "./core";
+import { valswitch } from "./valswitch";
 import { treeOf } from "./tree-of";
 import { proj } from "./proj";
+import { NodePresenter, NodeValue, PresentationNode, Label } from "./types";
 
 describe("treeOf", () => {
-  const doc = () => {
-    return abDocument({
-      0: seq("op", 2, 3),
-      op: sym("+"),
-      2: num(10),
-      3: seq(4, 5, 6),
-      4: sym("-"),
-      5: num(20),
-      6: num(30),
-      alt: layer({
-        6: mapping(num(32), num(31)),
-      }),
-      type: layer({
-        0: str("call"),
-        op: str("function"),
-        2: str("number"),
-        3: str("call"),
-        4: str("function"),
-        5: str("number"),
-        6: str("number"),
-      }),
-    });
-  };
-
-  it("creates tree from root", () => {
-    expect(treeOf(proj(doc()))).toEqual(
-      seq(sym("+"), num(10), seq(sym("-"), num(20), num(30)))
-    );
+  it("creates a tree with default presenter", () => {
+    expect(
+      treeOf(
+        proj({
+          0: seq(1, 2, 3),
+          1: sym("+"),
+          2: seq(4, 5),
+          3: num(200),
+          4: sym("inc"),
+          5: num(10),
+        })
+      )
+    ).toEqual([sym("+"), [sym("inc"), num(10)], num(200)]);
   });
 
   it("Handles nil values", () => {
-    const d = abDocument({ 0: nil });
-    expect(treeOf(proj(d))).toEqual(nil);
-  });
-
-  it("create tree from document with metalayers using node presenter", () => {
-    let d = { ...doc(), 5: sim(num(20), num(21)) };
-
-    const presenter = (value, handle, { type, parent, pos }) => {
-      return { handle, value, type, parent, pos };
-    };
-
-    const res = treeOf(proj(d, ["alt"], ["type"]), presenter);
-
-    expect(res).toEqual({
-      handle: 0,
-      type: "call",
-      value: seq(
-        { handle: "op", type: "function", value: sym("+"), pos: 0, parent: 0 },
-        { handle: 2, type: "number", value: 10, pos: 1, parent: 0 },
-        {
-          handle: 3,
-          parent: 0,
-          pos: 2,
-          type: "call",
-          value: seq(
-            { handle: 4, type: "function", value: sym("-"), pos: 0, parent: 3 },
-            {
-              handle: 5,
-              parent: 3,
-              pos: 1,
-              type: "number",
-              value: [
-                "sim",
-                [
-                  { handle: 5, type: "number", value: 20, pos: 1, parent: 3 },
-                  { handle: 5, type: "number", value: 21, pos: 1, parent: 3 },
-                ],
-              ],
-            },
-            {
-              handle: 6,
-              type: "number",
-              pos: 2,
-              parent: 3,
-              value: [
-                "dis",
-                {
-                  actual: {
-                    handle: 6,
-                    type: "number",
-                    value: 30,
-                    pos: 2,
-                    parent: 3,
-                  },
-                  expected: {
-                    handle: 6,
-                    type: "number",
-                    value: 31,
-                    pos: 2,
-                    parent: 3,
-                  },
-                  to: {
-                    handle: 6,
-                    type: "number",
-                    value: 32,
-                    pos: 2,
-                    parent: 3,
-                  },
-                },
-              ],
-            }
-          ),
-        }
-      ),
-    });
+    expect(treeOf(proj({ 0: nil }))).toEqual(nil);
   });
 
   it("creates a tree with a custom root node", () => {
-    const res = treeOf(proj(doc()), undefined, 3);
-    expect(res).toEqual(seq(sym("-"), num(20), num(30)));
+    const res = treeOf(
+      proj({ 3: seq(4, 5), 4: str("a"), 5: str("b") }),
+      undefined,
+      3
+    );
+    expect(res).toEqual(["a", "b"]);
   });
 
-  // TODO what does this test that is not tested in other tests?
-  it("projection", () => {
-    const d = abDocument({
-      0: seq(1, 2, 3),
-      1: sym("+"),
-      2: num(1),
-      3: num(2),
-      layer1: layer({
-        2: num(11),
-        3: num(21),
-        layer1_1: layer({
-          3: num(211),
+  it("passes presentation nodes to the presenter", () => {
+    const expected: PresentationNode<PresentationNode> = {
+      label: 0,
+      value: seq(1, 2),
+      items: [
+        {
+          value: sym("inc"),
+          label: 1,
+          metadata: { type: sym("func") },
+          pos: 0,
+          parent: 0,
+          disagreement: {
+            expected: sym("+1"),
+            actual: sym("inc1"),
+            to: sym("inc"),
+          },
+        },
+        {
+          value: num(10),
+          label: 2,
+          metadata: { type: sym("number") },
+          pos: 1,
+          parent: 0,
+          simultaneities: [num(11), num(10)],
+        },
+      ],
+      metadata: { type: sym("call") },
+    };
+
+    expect(
+      // TODO find out how to replace the any type
+      treeOf<PresentationNode<any>>(
+        {
+          nodes: { 0: seq(1, 2), 1: sym("inc"), 2: num(10) },
+          metadata: {
+            type: { 0: sym("call"), 1: sym("func"), 2: sym("number") },
+          },
+          simultaneities: { 2: sim(num(11), num(10)) },
+          disagreements: { 1: dis(sym("+1"), sym("inc1"), sym("inc")) },
+        },
+        (n) => n
+      )
+    ).toEqual(expected);
+  });
+
+  it("uses a custom node presenter", () => {
+    type TreeNode = {
+      label: Label;
+      type?: NodeValue;
+      value: NodeValue | TreeNode[];
+      pos?: number;
+      parent?: Label;
+    };
+
+    const presenter: NodePresenter<TreeNode> = ({
+      value,
+      items,
+      label,
+      pos,
+      parent,
+      metadata: { type },
+    }: PresentationNode<TreeNode>): TreeNode =>
+      valswitch<TreeNode>({
+        seq: (_, items): TreeNode => ({
+          label,
+          pos,
+          parent,
+          type,
+          value: items,
         }),
+        _: (v): TreeNode => ({ label, pos, parent, type, value: v }),
+      })(value, items);
+
+    const res = treeOf<TreeNode>(
+      proj({
+        0: seq("op", 2, 3),
+        op: sym("+"),
+        2: num(10),
+        3: num(20),
+        m$type: {
+          0: sym("call"),
+          2: sym("number"),
+          3: sym("number"),
+          op: sym("function"),
+        },
       }),
-      layer2: layer({ 2: num(12) }),
+      presenter
+    );
+
+    expect(res).toEqual({
+      label: 0,
+      type: sym("call"),
+      value: [
+        {
+          label: "op",
+          type: sym("function"),
+          value: sym("+"),
+          pos: 0,
+          parent: 0,
+        },
+        { label: 2, type: sym("number"), value: num(10), pos: 1, parent: 0 },
+        { label: 3, type: sym("number"), value: num(20), pos: 2, parent: 0 },
+      ],
     });
-    const projection = proj(d, [["layer1", ["layer1_1"]]]);
-    expect(treeOf(projection)).toMatchObject(seq(sym("+"), num(11), num(211)));
   });
 });

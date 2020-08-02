@@ -1,24 +1,23 @@
-const {
-  document,
-  layer,
+import {
+  doc,
   seq,
   sym,
   str,
   treeOf,
   valtype,
-  mapping,
   proj,
-} = require('@abrovink/abmedium');
+  trackedLabel,
+} from "@abrovink/abmedium";
 
 // A node presenter function that returns the document as a string
-const sexpr = value =>
+const sexpr = (value) =>
   valtype(value, {
     sym: ([, name]) => name,
-    seq: ([, items]) => `(${items.join(' ')})`,
-    str: v => `"${v}"`,
+    seq: ([, items]) => `(${items.join(" ")})`,
+    str: (v) => `"${v}"`,
     dis: ([, { expected, actual, to }]) =>
       `(disagreement (${expected} ${actual} ${to}))`,
-    _: v => v,
+    _: (v) => v,
   });
 
 // Store the function greet!
@@ -27,57 +26,71 @@ const sexpr = value =>
 //       (send!
 //         (str "Hello " name "!")))
 //
-let greetDoc = document({
+let greetDoc = doc({
   0: seq(1, 2, 3, 5),
-  1: sym('fun'),
-  2: sym('greet!'),
+  1: sym("fun"),
+  2: sym("greet!"),
   3: seq(4),
-  4: sym('name'),
+  4: sym("name"),
   5: seq(6, 7),
-  6: sym('send!'),
+  6: sym("send!"),
   7: seq(8, 9, 4, 10),
-  8: sym('str'),
-  9: str('Hello '),
-  10: str('!'),
+  8: sym("str"),
+  9: str("Hello "),
+  10: str("!"),
 });
 
-console.log('1.', treeOf(greetDoc, sexpr));
+console.log("1.", treeOf(greetDoc, sexpr));
 // 1. (fun greet! (name) (send! (str "Hello " name "!")))
 
 // Add another parameter, greeting, to greet!
 // Do this in a layer named greeting-param
 greetDoc = {
   ...greetDoc,
-  'greeting-param': layer({
-    3: mapping(seq(4, 11), seq(4)),
-    7: mapping(seq(8, 11, 12, 4, 10), seq(8, 9, 4, 10)),
-    11: sym('greeting'),
-    12: str(' '),
-  }),
+  "greeting-param": {
+    3: seq(4, 11),
+    7: seq(8, 11, 12, 4, 10),
+    11: sym("greeting"),
+    12: str(" "),
+    [trackedLabel]: {
+      3: seq(4),
+      7: seq(8, 9, 4, 10),
+    },
+  },
 };
+
+const any = (x: any): any => x;
 
 // To "turn on" the feature, project the document
 // with the ['greeting-param'] view stack
-console.log('2.', treeOf(proj(greetDoc, ['greeting-param']), sexpr));
+console.log("2.", treeOf(proj(greetDoc, ["greeting-param"]), sexpr));
 // 2. (fun greet! (name greeting) (send! (str greeting " " name "!")))
 
 // To "turn off" the feature, project the document without a stack
-console.log('3.', treeOf(proj(greetDoc), sexpr));
+console.log("3.", treeOf(proj(greetDoc), sexpr));
 // 3. (fun greet! (name) (send! (str "Hello " name "!")))
 
 // Add sublayers to "greeting-param" representing the changes of john and alice
 greetDoc = {
   ...greetDoc,
-  'greeting-param': {
-    ...greetDoc['greeting-param'],
-    john: layer({
-      7: mapping(seq(13, 11, 4), seq(8, 11, 12, 4, 10)),
-      13: mapping(sym('as-template')),
-    }),
-    alice: layer({
-      11: mapping(sym('greeting-template'), sym('greeting')),
-      13: mapping(sym('message'), sym('as-template')),
-    }),
+  "greeting-param": {
+    // TODO find another way to handle this ugliness
+    ...any["greeting-param"],
+    john: {
+      7: seq(13, 11, 4),
+      13: sym("as-template"),
+      [trackedLabel]: {
+        7: seq(8, 11, 12, 4, 10),
+      },
+    },
+    alice: {
+      11: sym("greeting-template"),
+      13: sym("message"),
+      [trackedLabel]: {
+        11: sym("greeting"),
+        13: sym("as-template"),
+      },
+    },
   },
 };
 
@@ -92,8 +105,8 @@ greetDoc = {
 //         * alice
 //
 console.log(
-  '4.',
-  treeOf(proj(greetDoc, [['greeting-param', ['john', 'alice']]]), sexpr)
+  "4.",
+  treeOf(proj(greetDoc, [["greeting-param", ["john", "alice"]]]), sexpr)
 );
 // 4. (fun greet! (name greeting-template) (send! (message greeting-template name)
 
@@ -101,7 +114,7 @@ console.log(
 // projected in the right order. If you project john on top of alice you will
 // get a disagreement (actually a nested one, since both layers result in a disagreement)
 console.log(
-  '5.',
-  treeOf(proj(greetDoc, [['greeting-param', ['alice', 'john']]]), sexpr)
+  "5.",
+  treeOf(proj(greetDoc, [["greeting-param", ["alice", "john"]]]), sexpr)
 );
 // 5. (fun greet! (name greeting-template) (send! ((disagreement (undefined (disagreement (sym,as-template undefined sym,message)) as-template)) greeting-template name)))

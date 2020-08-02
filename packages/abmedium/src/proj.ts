@@ -1,59 +1,81 @@
+import { dis, asLayer, isMetalayerLabel, isEqual } from "./core";
+
+import { trackedLabel, docName, metaPrefix } from "./constants";
+
 import {
-  valtype,
-  disagreement,
-  layer,
-  isLayer,
-  isDocument,
-  LAYER,
-  DOCUMENT,
-  isEqual,
-} from "./core";
+  ViewStack,
+  Metalayer,
+  Projection,
+  Label,
+  NodeValue,
+  Layer,
+} from "./types";
 
-const projectValue = (projection, handl, newVal) => {
-  if (newVal === undefined) return;
-  return valtype(newVal, {
-    mapping: ([, { from: expected, to }]) => {
-      const actual = projection[handl];
+const projectValue = (
+  projection: Projection,
+  label: Label,
+  newVal: NodeValue,
+  trackedVal?: NodeValue
+): void => {
+  const actual = projection.nodes[label];
 
-      if (isEqual(actual, expected) || isEqual(actual, to)) {
-        projection[handl] = to;
-      } else {
-        projection[handl] = disagreement(expected, actual, to);
-      }
-    },
-    _: () => {
-      projection[handl] = newVal;
-    },
-  });
+  projection.nodes[label] = newVal as any;
+
+  if (!isEqual(actual, trackedVal)) {
+    projection.disagreements[label] = dis(trackedVal, actual, newVal);
+  }
 };
 
-const projectLayer = (projection, layer = {}, stack = [], metalayers = []) => {
-  const val = (handl) => layer[handl];
+const projectLayer = (
+  projection: Projection,
+  layer: Layer = {},
+  stack: ViewStack = []
+) => {
+  const trackedValues = layer[trackedLabel] || {};
 
-  for (const handl of Object.keys(layer)) {
-    if (handl === LAYER || handl === DOCUMENT) continue;
-    const v = val(handl);
-    if (isLayer(v)) continue;
-    projectValue(projection, handl, v);
+  for (const label of Object.keys(layer)) {
+    if (label === docName) continue;
+
+    const value = layer[label];
+
+    if (value === undefined) continue;
+
+    const sublayer = asLayer(value);
+    if (sublayer) {
+      if (!isMetalayerLabel(label)) continue;
+      // projection[label] = {
+      //   ...((projection[label] as any) || {}),
+      //   ...sublayer,
+      // };
+
+      const metaLabel = label.slice(metaPrefix.length);
+      projection.metadata[metaLabel] = {
+        ...(projection.metadata[metaLabel] || {}),
+        ...(sublayer as Metalayer),
+      };
+      continue;
+    }
+
+    projectValue(projection, label, value as any, trackedValues[label]);
   }
-  for (const _stack of stack) {
-    const [subLayerName, subStack = []] = Array.isArray(_stack)
-      ? _stack
-      : [_stack];
-    projectLayer(projection, val(subLayerName), subStack, metalayers);
+
+  for (const stackSegment of stack) {
+    const [sublayerName, substack = []] = Array.isArray(stackSegment)
+      ? stackSegment
+      : [stackSegment];
+    const sublayer = asLayer(layer[sublayerName]);
+    if (!sublayer) continue;
+    projectLayer(projection, sublayer, substack);
   }
-  for (const mlayer of metalayers) {
-    const metaValues = layer[mlayer];
-    if (!metaValues) continue;
-    projection[mlayer] = { ...metaValues, ...(projection[mlayer] || {}) };
-  }
+};
+
+export const proj = (layer: Layer, stack: ViewStack = []): Projection => {
+  const projection: Projection = {
+    nodes: {},
+    metadata: {},
+    simultaneities: {},
+    disagreements: {},
+  };
+  projectLayer(projection, layer, stack);
   return projection;
-};
-
-export const proj = (doc, stack = [], metalayers = []) => {
-  if (!isDocument(doc)) throw new Error("Not a document");
-
-  const projection = {};
-  projectLayer(projection, doc, stack, metalayers);
-  return layer(projection);
 };

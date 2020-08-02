@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.build.json",
 
   "compilerOptions": {
-    "strict": false,
+    // "strict": false,
     "outDir": "./dist",
     "rootDir": "./src"
   },

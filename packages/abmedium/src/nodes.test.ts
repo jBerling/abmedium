@@ -1,33 +1,36 @@
-import { num, layer, sym, abDocument } from "./core";
-import { proj } from "./proj";
+import { num, sym, str } from "./core";
 import { nodes } from "./nodes";
+import { Projection } from "./types";
 
 describe("nodes", () => {
+  // TODO: simultaneities and disagreements
   it("return nodes but not layers", () => {
-    const d = abDocument({
-      a: sym("A"),
-      two: num(2),
-      c: layer({ a: sym("AA") }),
-      type: layer({
-        a: "string",
-        two: "number",
-      }),
-      ts: layer({
-        a: "202007-14T23:34Z",
-        two: "202007-14T22:23Z",
-      }),
-    });
+    const projection: Projection = {
+      nodes: { a: sym("A"), two: num(2) },
+      metadata: {
+        type: {
+          a: str("string"),
+          two: str("number"),
+        },
+        ts: {
+          a: str("202007-14T23:34Z"),
+          two: str("202007-14T22:23Z"),
+        },
+      },
+      simultaneities: {},
+      disagreements: {},
+    };
 
-    expect([...nodes(proj(d, [], ["type", "ts"]))]).toEqual([
+    expect([...nodes(projection)]).toEqual([
       {
-        handle: "a",
+        label: "a",
         value: sym("A"),
-        metadata: { type: "string", ts: "202007-14T23:34Z" },
+        metadata: { type: str("string"), ts: str("202007-14T23:34Z") },
       },
       {
-        handle: "two",
+        label: "two",
         value: num(2),
-        metadata: { type: "number", ts: "202007-14T22:23Z" },
+        metadata: { type: str("number"), ts: str("202007-14T22:23Z") },
       },
     ]);
   });

@@ -8,10 +8,10 @@ Layers can get in a conflict when they are projected in a stack. This is called 
 
 ## Terminology
 
-- _Handles_ are identifiers. They can be numbers or strings.
+- All nodes have _Labels_. They can be numbers or strings.
 - _Layers_ are sets of nodes.
 - _Metalayers_ are layers with data about nodes.
-- _Nodes_ connects a handle with a value. A node is a handle–value pair.
+- _Nodes_ are values with a label.
 - _Values_ are sequences, strings, symbols, numbers or nil.
 - _Projections_ are created when a projection stack is projected.
 - _Projection Stacks_ describes which layers, and in what order, to project.

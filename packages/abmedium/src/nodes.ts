@@ -1,24 +1,37 @@
-import { isLayer, LAYER, DOCUMENT } from "./core";
-import { layers } from "./layers";
+import { asLayer } from "./core";
+import { docName } from "./constants";
+import { Projection, Metalayer, NodeValue, Label } from "./types";
 
-export const nodes = (document) => {
-  const metalayers = [...layers(document)];
-  const handles = Object.keys(document);
+const metadataOf = (
+  label: Label,
+  metadata: Record<Label, Metalayer>
+): Record<Label, NodeValue> =>
+  Object.keys(metadata).reduce(
+    (md, mlabel) => ({
+      ...md,
+      [mlabel]: metadata[mlabel]?.[label],
+    }),
+    {}
+  );
+
+export const nodes = (projection: Projection) => {
+  const labels = Object.keys(projection.nodes);
   let i = 0;
 
   const nextNode = () => {
-    const handle = handles[i++];
-    if (!handle || handle === LAYER || handle === DOCUMENT) return null;
-    const value = document[handle];
-    if (isLayer(value)) {
+    const label = labels[i++];
+    if (!label || label === docName) return null;
+
+    const value = projection.nodes[label];
+
+    if (asLayer(value)) {
       return nextNode();
     } else {
-      const metadata = {};
-      for (const { handle: layerHandle, layer } of metalayers) {
-        const metaValue = layer[handle];
-        if (metaValue) metadata[layerHandle] = metaValue;
-      }
-      return { handle, value, metadata };
+      return {
+        label: label,
+        value,
+        metadata: metadataOf(label, projection.metadata),
+      };
     }
   };
 

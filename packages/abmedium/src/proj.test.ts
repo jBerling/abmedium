@@ -1,228 +1,263 @@
-import {
-  abDocument,
-  layer,
-  seq,
-  sym,
-  num,
-  str,
-  mapping,
-  disagreement,
-} from "./core";
+import { seq, sym, num, str, dis } from "./core";
 import { proj } from "./proj";
+import { trackedLabel } from "./constants";
 
-const doc = () =>
-  abDocument({
-    0: seq(1, 2, 3),
-    1: sym("+"),
-    2: num(1),
-    3: num(2),
-    layer1: layer({
-      2: num(11),
-      3: num(21),
-      layer1_1: layer({
-        3: num(211),
-      }),
-    }),
-    layer2: layer({ 2: num(12) }),
-  });
+const testDoc = () => ({
+  0: seq(1, 2, 3),
+  1: sym("+"),
+  2: num(1),
+  3: num(2),
+
+  layer1: {
+    2: num(11),
+    3: num(21),
+    layer1_1: {
+      3: num(211),
+      [trackedLabel]: {
+        3: num(21),
+      },
+    },
+    [trackedLabel]: {
+      2: num(1),
+      3: num(2),
+    },
+  },
+
+  layer2: { 2: num(12) },
+});
 
 describe("proj", () => {
   it("only base layer", () => {
-    expect(proj(doc())).toEqual(
-      layer({
+    expect(proj(testDoc())).toEqual({
+      nodes: {
         0: seq(1, 2, 3),
         1: sym("+"),
         2: num(1),
         3: num(2),
-      })
-    );
-  });
-
-  it("one layer", () => {
-    const projection = proj(doc(), ["layer2"]);
-    expect(projection).toEqual(
-      layer({
-        0: seq(1, 2, 3),
-        1: sym("+"),
-        2: num(12),
-        3: num(2),
-      })
-    );
-  });
-
-  it("two sibling layers", () => {
-    const d = doc();
-    const projection = proj(d, ["layer1", "layer2"]);
-    expect(projection).toEqual(
-      layer({
-        0: seq(1, 2, 3),
-        1: sym("+"),
-        2: num(12),
-        3: num(21),
-      })
-    );
-
-    const projection2 = proj(d, ["layer2", "layer1"]);
-    expect(projection2).toEqual(
-      layer({
-        0: seq(1, 2, 3),
-        1: sym("+"),
-        2: num(11),
-        3: num(21),
-      })
-    );
+      },
+      metadata: {},
+      simultaneities: {},
+      disagreements: {},
+    });
   });
 
   it("layer with sublayers", () => {
-    const projection = proj(doc(), [["layer1", ["layer1_1"]]]);
-    expect(projection).toEqual(
-      layer({
-        0: seq(1, 2, 3),
-        1: sym("+"),
-        2: num(11),
-        3: num(211),
-      })
-    );
+    const projection = proj(testDoc(), [["layer1", ["layer1_1"]]]);
+    expect(projection).toEqual({
+      nodes: { 0: seq(1, 2, 3), 1: sym("+"), 2: num(11), 3: num(211) },
+      metadata: {},
+      simultaneities: {},
+      disagreements: {},
+    });
   });
 
   it("works with layers only existing in stack", () => {
-    const projection = proj(doc(), [
+    const projection = proj(testDoc(), [
       ["layer1", ["layer_y", "layer1_1", "layer_z"]],
       "layer_x",
     ]);
-    expect(projection).toEqual(
-      layer({
+    expect(projection).toEqual({
+      nodes: {
         0: seq(1, 2, 3),
         1: sym("+"),
         2: num(11),
         3: num(211),
-      })
-    );
+      },
+      metadata: {},
+      simultaneities: {},
+      disagreements: {},
+    });
   });
 
   it("root replacement", () => {
-    const d = abDocument({ 0: str("a"), replacement: layer({ 0: str("b") }) });
+    const d = {
+      0: str("a"),
+      replacement: { 0: str("b"), [trackedLabel]: { 0: str("a") } },
+    };
 
-    expect(proj(d, ["replacement"])).toEqual(
-      layer({
-        [0]: str("b"),
-      })
-    );
+    expect(proj(d, ["replacement"])).toEqual({
+      nodes: {
+        0: str("b"),
+      },
+      metadata: {},
+      simultaneities: {},
+      disagreements: {},
+    });
   });
 
   it("metalayers", () => {
-    const d = abDocument({
+    const d = {
       0: seq(1, 2),
       1: str("a"),
       2: str("b"),
-      descr: layer({ 1: str("small a"), 2: str("small b") }),
-      ts: layer({ 1: num(1588321340608), 2: num(1588321366606) }),
-      alt: layer({
+      m$descr: { 1: str("small a"), 2: str("small b") },
+      m$ts: {
+        1: num(1588321340608),
+        2: num(1588321366606),
+      },
+      alt: {
         2: str("B"),
-        descr: layer({ 2: str("big b") }),
-      }),
-    });
+        m$descr: { 2: str("big b") },
+        [trackedLabel]: { 2: str("b") },
+      },
+    };
 
-    const result = proj(d, ["alt"], ["descr", "ts"]);
+    const result = proj(d, ["alt"]);
 
-    expect(result).toEqual(
-      layer({
+    expect(result).toEqual({
+      nodes: {
         0: seq(1, 2),
         1: str("a"),
         2: str("B"),
-        descr: layer({
+      },
+      metadata: {
+        descr: {
           1: str("small a"),
           2: str("big b"),
-        }),
-        ts: layer({
+        },
+        ts: {
           1: num(1588321340608),
-          // TODO: ponder about the desired value in this case
-          // Do we really want to keep the metavalue of a layer below,
-          // if the value is not set?
           2: num(1588321366606),
-        }),
-      })
-    );
+        },
+      },
+      simultaneities: {},
+      disagreements: {},
+    });
   });
 
   it("agreement", () => {
-    const x = abDocument({
+    const x = {
       0: str("a"),
-      layer1: layer({ 0: mapping(str("b"), str("a")) }),
-    });
+      layer1: {
+        0: str("b"),
+        [trackedLabel]: { 0: str("a") },
+      },
+    };
 
-    expect(proj(x, ["layer1"])).toEqual(layer({ 0: str("b") }));
+    expect(proj(x, ["layer1"])).toEqual({
+      nodes: { 0: str("b") },
+      metadata: {},
+      simultaneities: {},
+      disagreements: {},
+    });
   });
 
-  it("agreement of two equal mappings", () => {
-    const x = abDocument({
+  // TODO will not support this for now. Not sure it is right anyway.
+  xit("agreement of two equal mappings", () => {
+    const x = {
       0: str("a"),
-      layer1: layer({ 0: mapping(str("b"), str("a")) }),
-      layer2: layer({ 0: mapping(str("b"), str("a")) }),
-    });
+      layer1: {
+        0: str("b"),
+        [trackedLabel]: { 0: str("a") },
+      },
+      layer2: {
+        0: str("b"),
+        [trackedLabel]: { 0: str("a") },
+      },
+    };
 
-    expect(proj(x, ["layer1", "layer2"])).toEqual(layer({ 0: str("b") }));
+    const res = proj(x, ["layer1", "layer2"]);
+    expect(res).toEqual({
+      nodes: { 0: str("b") },
+      metadata: {},
+      simultaneities: {},
+      disagreements: {},
+    });
   });
 
   it("disagreement", () => {
-    const x = abDocument({
+    const x = {
       0: str("a"),
-      layer1: layer({ 0: mapping(str("c"), str("b")) }),
-    });
+      layer1: {
+        0: str("c"),
+        [trackedLabel]: { 0: str("b") },
+      },
+    };
 
-    expect(proj(x, ["layer1"])).toEqual(
-      layer({ 0: disagreement(str("b"), str("a"), str("c")) })
-    );
+    expect(proj(x, ["layer1"])).toEqual({
+      nodes: { 0: str("c") },
+      metadata: {},
+      simultaneities: {},
+      disagreements: { 0: dis(str("b"), str("a"), str("c")) },
+    });
   });
 
   it("disagreement, expected undefined was set", () => {
-    const x = abDocument({
+    const x = {
       0: str("a"),
-      layer1: layer({ 0: mapping(str("c"), undefined) }),
-    });
+      layer1: { 0: str("c") },
+    };
 
-    expect(proj(x, ["layer1"])).toEqual(
-      layer({ 0: disagreement(undefined, str("a"), str("c")) })
-    );
+    expect(proj(x, ["layer1"])).toEqual({
+      nodes: {
+        0: str("c"),
+      },
+      metadata: {},
+      simultaneities: {},
+      disagreements: { 0: dis(undefined, str("a"), str("c")) },
+    });
   });
 
   it("agreement, expected undefined", () => {
-    const x = abDocument({
-      layer1: layer({ 0: mapping(str("a"), undefined) }),
-    });
+    const x = {
+      layer1: { 0: str("a") },
+    };
 
-    expect(proj(x, ["layer1"])).toEqual(layer({ 0: str("a") }));
+    expect(proj(x, ["layer1"])).toEqual({
+      nodes: { 0: str("a") },
+      metadata: {},
+      simultaneities: {},
+      disagreements: {},
+    });
   });
 
   it("disagreement, expected value was undefined", () => {
-    const x = abDocument({
-      layer1: layer({ 0: mapping(str("c"), str("b")) }),
-    });
+    const x = {
+      layer1: {
+        0: str("c"),
+        [trackedLabel]: { 0: str("b") },
+      },
+    };
 
-    expect(proj(x, ["layer1"])).toEqual(
-      layer({ 0: disagreement(str("b"), undefined, str("c")) })
-    );
+    expect(proj(x, ["layer1"])).toEqual({
+      nodes: { 0: str("c") },
+      metadata: {},
+      simultaneities: {},
+      disagreements: { 0: dis(str("b"), undefined, str("c")) },
+    });
   });
 
   it("sequence agreement", () => {
-    const x = abDocument({
+    const x = {
       0: seq(1, 2, 3),
-      layer1: layer({ 0: mapping(seq(3, 2, 1), seq(1, 2, 3)) }),
-    });
+      layer1: {
+        0: seq(3, 2, 1),
+        [trackedLabel]: { 0: seq(1, 2, 3) },
+      },
+    };
 
-    expect(proj(x, ["layer1"])).toMatchObject(layer({ 0: seq(3, 2, 1) }));
+    expect(proj(x, ["layer1"])).toMatchObject({
+      nodes: { 0: seq(3, 2, 1) },
+      metadata: {},
+      simultaneities: {},
+      disagreements: {},
+    });
   });
 
   it("sequence disagreement", () => {
-    const x = abDocument({
+    const x = {
       0: seq(1, 2, 3),
-      layer1: layer({ 0: mapping(seq(3, 2, 1), seq(1, 3, 2)) }),
-    });
+      layer1: {
+        0: seq(3, 2, 1),
+        [trackedLabel]: { 0: seq(1, 3, 2) },
+      },
+    };
 
-    expect(proj(x, ["layer1"])).toEqual(
-      layer({
-        0: disagreement(seq(1, 3, 2), seq(1, 2, 3), seq(3, 2, 1)),
-      })
-    );
+    expect(proj(x, ["layer1"])).toEqual({
+      nodes: { 0: seq(3, 2, 1) },
+      metadata: {},
+      simultaneities: {},
+      disagreements: { 0: dis(seq(1, 3, 2), seq(1, 2, 3), seq(3, 2, 1)) },
+    });
   });
 });

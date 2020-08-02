@@ -1,32 +1,28 @@
-import { isLayer } from "./core";
+import { asLayer } from "./core";
+import { Layer, Label } from "./types";
 
-export const layers = (layer) => {
-  if (!isLayer(layer)) {
-    throw new Error("Not a layer");
-  }
-
-  const handles = Object.keys(layer);
+export const layers = (
+  layer: Layer
+): Iterable<{ label: Label; layer: Layer }> => {
+  const labels = Object.keys(layer);
   let i = 0;
 
-  const nextLayer = () => {
-    const handle = handles[i++];
-    if (!handle) return null;
-    const sublayer = layer[handle];
-    if (isLayer(sublayer)) {
-      return [handle, sublayer];
-    } else {
-      return nextLayer();
-    }
+  const nextLayer = (): [Label, Layer] | null => {
+    const label = labels[i++];
+    if (!label) return null;
+    const sublayer = asLayer(layer[label]);
+    if (sublayer) return [label, sublayer];
+    else return nextLayer();
   };
 
   return {
-    [Symbol.iterator]() {
+    [Symbol.iterator](): Iterator<{ label: Label; layer: Layer }> {
       return {
-        next() {
+        next(): any {
           const node = nextLayer();
           if (node) {
-            const [handle, sublayer] = node;
-            return { done: false, value: { layer: sublayer, handle } };
+            const [label, sublayer] = node;
+            return { done: false, value: { layer: sublayer, label } };
           } else {
             return { done: true };
           }
