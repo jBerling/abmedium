@@ -1,6 +1,6 @@
 import { dis, asLayer, isMetalayerLabel, isEqual } from "./core";
 
-import { trackedLabel, docName, metaPrefix } from "./constants";
+import { trackedLabel, metaPrefix } from "./constants";
 
 import {
   ViewStack,
@@ -34,8 +34,6 @@ const projectLayer = (
   const trackedValues = layer[trackedLabel] || {};
 
   for (const label of Object.keys(layer)) {
-    if (label === docName) continue;
-
     const value = layer[label];
 
     if (value === undefined) continue;

@@ -2,9 +2,9 @@
 
 ## 0.10.0
 
-Migrate the project to TypeScript and make it support @abrovink/versioning.
+Once again big breaking changes. Migrate the project to TypeScript and make it support @abrovink/versioning.
 
-- rename document to doc for TypeScript reasons. For some reason document clashes with (DOM?) document, even though it shouldn't since it's declared in its own block, but I don't want to investigate further. I've thought about changing the name anyway.
+- remove document, only use layers
 - rename handles to labels
 - Make proj work less strict. It now works even if a layer in a stack does not exist.
 - Consider lables with `$` pre- and suffixes to be reserved for internal use by Abmedium.
@@ -14,7 +14,7 @@ Migrate the project to TypeScript and make it support @abrovink/versioning.
 - removed editval
 - add as<NodeType> functions
 - Layers are now either ordinary layers or metalayers. It is no longer up to proj to decide that. A metalayer must have a label that is prefixed with `m$`.
-- isDoc to asDoc, isLayer to asLayer and asMetalayer added.
+- isLayer to asLayer and asMetalayer added.
 - TODO `proj(layer1, layer2, ..., layerX)`
 - TODO Refs (see 202008010757)
 - TODO Refseqs (see 202008010757)

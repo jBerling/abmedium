@@ -1,24 +1,36 @@
 import {
-  doc,
   seq,
   sym,
   str,
   treeOf,
-  valtype,
   proj,
+  valswitch,
+  NodePresenter,
+  PresentationNode,
+  Layer,
   trackedLabel,
 } from "@abrovink/abmedium";
 
 // A node presenter function that returns the document as a string
-const sexpr = (value) =>
-  valtype(value, {
+const sexpr: NodePresenter<string> = ({
+  value,
+  label,
+  items,
+  disagreement,
+}: PresentationNode<string>) => {
+  if (disagreement) {
+    return `<<disagreement ${label}>>`;
+  }
+
+  return valswitch<string>({
     sym: ([, name]) => name,
-    seq: ([, items]) => `(${items.join(" ")})`,
+    seq: (_, sexprs) => `(${sexprs.join(" ")})`,
     str: (v) => `"${v}"`,
-    dis: ([, { expected, actual, to }]) =>
-      `(disagreement (${expected} ${actual} ${to}))`,
-    _: (v) => v,
-  });
+    // dis: ([, { expected, actual, to }]) =>
+    //   `(disagreement (${expected} ${actual} ${to}))`,
+    _: (v) => String(v),
+  })(value, items);
+};
 
 // Store the function greet!
 //
@@ -26,7 +38,7 @@ const sexpr = (value) =>
 //       (send!
 //         (str "Hello " name "!")))
 //
-let greetDoc = doc({
+let greetDoc: Layer = {
   0: seq(1, 2, 3, 5),
   1: sym("fun"),
   2: sym("greet!"),
@@ -38,9 +50,9 @@ let greetDoc = doc({
   8: sym("str"),
   9: str("Hello "),
   10: str("!"),
-});
+};
 
-console.log("1.", treeOf(greetDoc, sexpr));
+console.log("1.", treeOf(proj(greetDoc), sexpr));
 // 1. (fun greet! (name) (send! (str "Hello " name "!")))
 
 // Add another parameter, greeting, to greet!
@@ -59,8 +71,6 @@ greetDoc = {
   },
 };
 
-const any = (x: any): any => x;
-
 // To "turn on" the feature, project the document
 // with the ['greeting-param'] view stack
 console.log("2.", treeOf(proj(greetDoc, ["greeting-param"]), sexpr));
@@ -74,8 +84,7 @@ console.log("3.", treeOf(proj(greetDoc), sexpr));
 greetDoc = {
   ...greetDoc,
   "greeting-param": {
-    // TODO find another way to handle this ugliness
-    ...any["greeting-param"],
+    ...(greetDoc["greeting-param"] as Layer),
     john: {
       7: seq(13, 11, 4),
       13: sym("as-template"),
@@ -117,4 +126,4 @@ console.log(
   "5.",
   treeOf(proj(greetDoc, [["greeting-param", ["alice", "john"]]]), sexpr)
 );
-// 5. (fun greet! (name greeting-template) (send! ((disagreement (undefined (disagreement (sym,as-template undefined sym,message)) as-template)) greeting-template name)))
+// 5. (fun greet! (name greeting-template) (send! (<<disagreement 13>> greeting-template name)))

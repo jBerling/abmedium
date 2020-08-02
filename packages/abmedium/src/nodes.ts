@@ -1,5 +1,4 @@
 import { asLayer } from "./core";
-import { docName } from "./constants";
 import { Projection, Metalayer, NodeValue, Label } from "./types";
 
 const metadataOf = (
@@ -20,7 +19,7 @@ export const nodes = (projection: Projection) => {
 
   const nextNode = () => {
     const label = labels[i++];
-    if (!label || label === docName) return null;
+    if (!label) return null;
 
     const value = projection.nodes[label];
 

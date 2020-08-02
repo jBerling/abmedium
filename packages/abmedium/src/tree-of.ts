@@ -6,10 +6,11 @@ import {
   Projection,
   Scalar,
   NodeValue,
+  PresentationNode,
 } from "./types";
 import { asSeq } from "./core";
 
-const defaultNodePresenter: NodePresenter<Scalar | Scalar[]> = ({
+export const defaultNodePresenter: NodePresenter<Scalar | Scalar[]> = ({
   value,
   items,
 }) =>
@@ -33,6 +34,10 @@ const metadataOf = (
     }),
     {}
   );
+
+export const presentationNodePresenter: NodePresenter<PresentationNode<
+  PresentationNode
+>> = (node): PresentationNode<PresentationNode<any>> => node;
 
 export const treeOf = <R = Scalar>(
   projection: Projection,

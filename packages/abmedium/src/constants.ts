@@ -8,8 +8,6 @@ export const disagreementLabel = metaPrefix + "dis";
 
 export const disName = "dis";
 
-export const docName = "doc";
-
 export const simName = "sim";
 
 export const symName = "sym";

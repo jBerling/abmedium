@@ -1,5 +1,4 @@
 import {
-  docName,
   simName,
   symName,
   seqName,
@@ -47,13 +46,6 @@ export type Metalayer = Record<Label, NodeValue>;
 export type LayerWithSublayers = [Label, ViewStack];
 
 export type ViewStack = (Label | LayerWithSublayers)[];
-
-// TODO remove?
-type DocRecord<T> = { [docName]: true } & Record<
-  Label,
-  T | SubLayerRecord<T> | true
->;
-export type Doc = DocRecord<NodeValue>;
 
 export type Projection = {
   nodes: Record<Label, NodeValue>;

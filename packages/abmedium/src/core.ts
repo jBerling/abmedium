@@ -4,7 +4,6 @@ import {
   NodeValueType,
   Layer,
   Metalayer,
-  Doc,
   Str,
   Num,
   Sim,
@@ -16,7 +15,6 @@ import {
 } from "./types";
 
 import {
-  docName,
   disName,
   simName,
   symName,
@@ -40,15 +38,6 @@ export const isMetalayerLabel = (label: Label): boolean =>
 
 export const asMetalayer = (x: any): Metalayer | undefined =>
   asLayer(x) ? (x as Metalayer) : undefined;
-
-export const asDoc = (v: any): Doc | undefined =>
-  v !== null && Boolean(v[docName]) ? (v as Doc) : undefined;
-
-// TODO remove?
-export const doc = (nodes: Layer = {}): Doc => ({
-  ...nodes,
-  [docName]: true,
-});
 
 export const valtype = (v: NodeValue): NodeValueType | null => {
   if (typeof v === "string") return strName;
