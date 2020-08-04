@@ -57,21 +57,23 @@ export type Projection = {
   disagreements: Record<Label, Dis>;
 };
 
-export type PresentationNode<R = Scalar> = {
+export type ProjectionNode = {
   value: NodeValue;
-  items?: R[];
   label: Label;
+  metadata: Record<Label, NodeValue>;
+  disagreement?: Dis;
+  simultaneities?: Sim;
+};
+
+// TODO rename to TreeNode?
+export type PresentationNode<R = Scalar> = ProjectionNode & {
+  items?: R[];
   parent?: Label;
   pos?: number;
+  // TODO: remove?
   dis?: NodeValue;
+  // TODO: remove?
   sim?: NodeValue;
-  metadata: Record<string, NodeValue>;
-  disagreement?: {
-    expected?: NodeValue;
-    actual?: NodeValue;
-    to: NodeValue;
-  };
-  simultaneities?: NodeValue[];
 };
 
 export type NodePresenter<R = Scalar> = (node: PresentationNode<R>) => R;
