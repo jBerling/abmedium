@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`abv ver adds first version 1`] = `
+exports[`abv ver adds the first version 1`] = `
 Object {
   ".abv": Object {
     ".objects": Object {
@@ -9,22 +9,16 @@ Object {
     },
     ".viewstack": "[]",
     "foo": "{
-    \\"0\\": [
-        \\"seq\\",
-        [
-            null,
-            1
-        ]
-    ],
-    \\"1\\": \\"<foo>.md\\",
-    \\"counter\\": 2,
-    \\"__document__\\": true,
-    \\"__layer__\\": true,
-    \\"head\\": 0,
-    \\"timestamps\\": {
-        \\"0\\": \\"2020-07-20T18:36Z\\",
-        \\"__layer__\\": true
-    }
+    \\"0\\": \\"<foo>.md\\",
+    \\"counter\\": 1,
+    \\"m$ts\\": {
+        \\"0\\": \\"2020-07-20T18:36Z\\"
+    },
+    \\"m$prev\\": {},
+    \\"head\\": [
+        \\"ref\\",
+        0
+    ]
 }",
   },
   "foo.md": "# Foo
@@ -32,7 +26,7 @@ Object {
 }
 `;
 
-exports[`abv ver adds second version 1`] = `
+exports[`abv ver adds the second version 1`] = `
 Object {
   ".abv": Object {
     ".objects": Object {
@@ -41,29 +35,21 @@ Object {
     },
     ".viewstack": "[]",
     "foo": "{
-    \\"0\\": [
-        \\"seq\\",
-        [
-            null,
-            1
-        ]
+    \\"0\\": \\"ver1.md\\",
+    \\"1\\": \\"<foo>.md\\",
+    \\"counter\\": 2,
+    \\"head\\": [
+        \\"ref\\",
+        1
     ],
-    \\"1\\": \\"ver1.md\\",
-    \\"2\\": [
-        \\"seq\\",
-        [
-            0,
-            3
+    \\"m$ts\\": {
+        \\"1\\": \\"2020-07-20T18:36Z\\"
+    },
+    \\"m$prev\\": {
+        \\"1\\": [
+            \\"ref\\",
+            0
         ]
-    ],
-    \\"3\\": \\"<foo>.md\\",
-    \\"counter\\": 4,
-    \\"head\\": 2,
-    \\"__document__\\": true,
-    \\"__layer__\\": true,
-    \\"timestamps\\": {
-        \\"2\\": \\"2020-07-20T18:36Z\\",
-        \\"__layer__\\": true
     }
 }",
   },

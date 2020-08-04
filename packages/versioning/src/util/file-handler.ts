@@ -18,7 +18,7 @@ import {
 import { resolve } from "path";
 import { FileHandler } from "./types";
 
-const fileHandler: FileHandler = {
+export const fileHandler: FileHandler = {
   resolve,
 
   readFile,
@@ -37,5 +37,3 @@ const fileHandler: FileHandler = {
     glob: pipeGlob,
   },
 };
-
-export default fileHandler;

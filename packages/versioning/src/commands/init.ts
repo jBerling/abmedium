@@ -1,14 +1,12 @@
 import { Observable, forkJoin, throwError } from "rxjs";
 import { mergeMapTo, catchError } from "rxjs/operators";
-import defaultFileHandler from "../util/file-handler";
+import { fileHandler as defaultFileHandler } from "../util/file-handler";
 import { FileHandler } from "../util/types";
 import { mainDir, objectsDir, viewStack } from "../constants";
 
 export const command = "init";
 
 export const describe = "initialize a new archive";
-
-// export const builder = () => {};
 
 const init = ({
   fileHandler: { ensureDir, resolve, writeFile } = defaultFileHandler,

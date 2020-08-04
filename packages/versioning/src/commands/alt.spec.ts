@@ -2,8 +2,16 @@ import { TestScheduler } from "rxjs/testing";
 import { FileHandler } from "../util/types";
 import { testFileHandler, TestFiles } from "../util/mocking/test-file-handler";
 import alt, { layerStacking, layerByPath } from "./alt";
-import { document, num, seq, nil, layer } from "@abrovink/abmedium";
-import { mainDir, objectsDir, counter, viewStack, head } from "../constants";
+import { num, str, ref } from "@abrovink/abmedium";
+import {
+  mainDir,
+  objectsDir,
+  counter,
+  viewStack,
+  head,
+  prev,
+  timestampsLayer,
+} from "../constants";
 
 const testScheduler = () =>
   new TestScheduler((actual, expected) => {
@@ -29,12 +37,17 @@ describe("abv alt", () => {
         [viewStack]: `["sub-layer", "alt-layer"]`,
         [objectsDir]: {},
         foo: JSON.stringify(
-          document({
+          {
             [counter]: num(2),
-            0: seq(nil, 1),
+            [head]: ref(1),
             1: "ver1.md",
-            [head]: num(0),
-          }),
+            [prev]: {
+              1: ref(0),
+            },
+            [timestampsLayer]: {
+              1: str("2020-01-01T10:11:12Z"),
+            },
+          },
           null,
           4
         ),
@@ -96,12 +109,12 @@ describe("layerByPath", () => {
   test("...", () => {
     expect(
       layerByPath(
-        layer({
-          a: layer({ b: layer({ c: layer({ name: "right" }) }) }),
-          c: layer({ name: "wrong" }),
-        }),
+        {
+          a: { b: { c: { name: "right" } } },
+          c: { name: "wrong" },
+        },
         ["a", "b", "c"]
       )
-    ).toEqual(layer({ name: "right" }));
+    ).toEqual({ name: "right" });
   });
 });

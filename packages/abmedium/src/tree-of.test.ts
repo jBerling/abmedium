@@ -44,11 +44,14 @@ describe("treeOf", () => {
           metadata: { type: sym("func") },
           pos: 0,
           parent: 0,
-          disagreement: {
-            expected: sym("+1"),
-            actual: sym("inc1"),
-            to: sym("inc"),
-          },
+          disagreement: [
+            "dis",
+            {
+              expected: sym("+1"),
+              actual: sym("inc1"),
+              to: sym("inc"),
+            },
+          ],
         },
         {
           value: num(10),
@@ -56,7 +59,7 @@ describe("treeOf", () => {
           metadata: { type: sym("number") },
           pos: 1,
           parent: 0,
-          simultaneities: [num(11), num(10)],
+          simultaneities: ["sim", [num(11), num(10)]],
         },
       ],
       metadata: { type: sym("call") },

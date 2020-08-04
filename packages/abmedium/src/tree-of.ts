@@ -66,8 +66,8 @@ export const treeOf = <R = Scalar>(
     pos,
     parent,
     label: rootLabel,
-    disagreement: disagreement && disagreement[1],
-    simultaneities: simultaneities && simultaneities[1],
+    disagreement: disagreement,
+    simultaneities: simultaneities,
     metadata: metadataOf(rootLabel, projection.metadata),
   });
 };

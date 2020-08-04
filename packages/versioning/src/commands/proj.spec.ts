@@ -2,16 +2,8 @@ import { TestScheduler } from "rxjs/testing";
 import { FileHandler } from "../util/types";
 import { testFileHandler, TestFiles } from "../util/mocking/test-file-handler";
 import proj from "./proj";
-import {
-  abDocument,
-  seq,
-  str,
-  num,
-  nil,
-  layer,
-  mapping,
-} from "@abrovink/abmedium";
-import { mainDir, objectsDir, head, viewStack } from "../constants";
+import { ref, str, nil, trackedLabel } from "@abrovink/abmedium";
+import { mainDir, objectsDir, head, viewStack, prev } from "../constants";
 
 const testScheduler = () =>
   new TestScheduler((actual, expected) => {
@@ -36,17 +28,16 @@ describe("abv-proj", () => {
           "foo-se-1.md": "# Foo\n\nEtt exempel.\n",
         },
         foo: JSON.stringify(
-          abDocument({
-            [head]: num(0),
-            0: seq(nil, 1),
+          {
+            [head]: ref(1),
+            [prev]: { 0: nil, 1: ref(0) },
+            0: str("foo-en-1.md"),
             1: str("foo-en-2.md"),
-            se: layer({
-              1: mapping(str("foo-se-1.md"), str("foo-en-2.md")),
-            }),
-            se2: layer({
-              1: mapping(str("foo-se-1.md"), str("foo-en-1.md")),
-            }),
-          }),
+            se: {
+              1: str("foo-se-1.md"),
+              [trackedLabel]: { 1: str("foo-en-2.md"), [head]: ref(1) },
+            },
+          },
           null,
           4
         ),
@@ -85,14 +76,8 @@ describe("abv-proj", () => {
 
   xtest(
     "projects disagreement",
-    run(({ expectObservable, flush }) => {
-      archive[mainDir][viewStack] = `["se2"]`;
-
-      expectObservable(proj({ fileHandler, archiveName: "" }));
-
-      flush();
-
-      expect(archive["foo.md"]).toEqual("# Foo\n\nEtt exempel.\n");
+    run((/*{ expectObservable, flush }*/) => {
+      throw "not implemented";
     })
   );
 });

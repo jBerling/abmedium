@@ -1,6 +1,6 @@
 import fs from "fs";
 import glob_ from "glob";
-import fromCallback from "./from-callback-operator";
+import { fromCallback } from "./from-callback-operator";
 
 export const readFile = (encoding: "utf8") =>
   fromCallback<string, string>((fileName, next, errorHandler) => {

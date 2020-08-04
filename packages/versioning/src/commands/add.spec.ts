@@ -2,14 +2,8 @@ import { TestScheduler } from "rxjs/testing";
 import { FileHandler } from "../util/types";
 import { testFileHandler, TestFiles } from "../util/mocking/test-file-handler";
 import add from "./add";
-import { abDocument, nil, num, layer } from "@abrovink/abmedium";
-import {
-  mainDir,
-  objectsDir,
-  timestampsLayer,
-  counter,
-  head,
-} from "../constants";
+import { num } from "@abrovink/abmedium";
+import { mainDir, objectsDir, counter } from "../constants";
 
 const testScheduler = () =>
   new TestScheduler((actual, expected) => {
@@ -51,11 +45,9 @@ describe("abv-add", () => {
         [mainDir]: {
           [objectsDir]: {},
           foo: JSON.stringify(
-            abDocument({
-              [head]: nil,
+            {
               [counter]: num(0),
-              [timestampsLayer]: layer(),
-            }),
+            },
             null,
             4
           ),

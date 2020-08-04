@@ -1,36 +1,23 @@
 import { Observable, of, forkJoin, combineLatest, throwError } from "rxjs";
 import { map, catchError, mergeMap } from "rxjs/operators";
-import { proj, valtype } from "@abrovink/abmedium";
-import defaultFileHandler from "../util/file-handler";
-import { FileHandler } from "../util/types";
 import {
-  mainDir,
-  objectsDir,
-  timestampsLayer,
-  head,
-  viewStack,
-} from "../constants";
+  proj,
+  ViewStack,
+  node,
+  asRef,
+  asStr,
+  Str,
+  Dis,
+} from "@abrovink/abmedium";
+import { fileHandler as defaultFileHandler } from "../util/file-handler";
+import { FileHandler } from "../util/types";
+import { mainDir, objectsDir, head, viewStack } from "../constants";
 
 export const command = "proj";
 
 export const describe = "project layers";
 
-// TODO import from @abrovink/abmedium
-type LayerName = string;
-type LayerWithSublayers = [LayerName, ViewStack];
-type ViewStack = (LayerName | LayerWithSublayers)[];
-
 const last = (a: Array<any>): any => a[a.length - 1];
-
-const valueObjectName = (doc): string => {
-  const name = doc[doc[doc[head]][1][1]];
-
-  if (!name) {
-    throw new Error("No value object name could be found");
-  }
-
-  return name;
-};
 
 const fileEnding = (fileName: string): string =>
   "." + last(fileName.split("."));
@@ -67,24 +54,52 @@ const projCommand = ({
     )
   ).pipe(
     mergeMap(([stack, { id, rawDoc }]) => {
-      const projected = proj(rawDoc, stack, [timestampsLayer]);
-      return forkJoin(
-        valtype(valueObjectName(projected), {
-          str: (objectName) => ({
-            fileName: of(resolve(archivePath, id + fileEnding(objectName))),
-            data: readFile(resolve(objectsDirPath, objectName), "utf8"),
-          }),
-          dis: ([, { expected, actual, to: objectName }]) => ({
-            expected: readFile(resolve(objectsDirPath, expected), "utf8"),
-            actual: readFile(resolve(objectsDirPath, actual), "utf8"),
-            fileName: of(resolve(archivePath, id + fileEnding(objectName))),
-            data: readFile(resolve(objectsDirPath, objectName), "utf8"),
-          }),
-        })
-      );
+      const projection = proj(rawDoc, stack);
+
+      console.log("pong!", projection);
+
+      const headRef = asRef(projection.nodes[head]);
+      if (!headRef) throw new Error("not handled");
+      const currentNode = node(projection, headRef);
+      if (!currentNode) throw new Error("not handled");
+      const { value, disagreement } = currentNode;
+      const objectFileName = value as Str;
+
+      if (!disagreement) {
+        return forkJoin({
+          fileName: of(resolve(archivePath, id + fileEnding(objectFileName))),
+          data: readFile(resolve(objectsDirPath, objectFileName), "utf8"),
+        });
+      } else {
+        const [
+          ,
+          { actual: _actual, expected: _expected },
+        ] = disagreement as Dis;
+        const actualFileName = asStr(_actual);
+        const expectedFileName = asStr(_expected);
+
+        let actual, expected;
+
+        if (actualFileName) {
+          actual = readFile(resolve(objectsDirPath, actualFileName), "utf8");
+        }
+
+        if (expectedFileName) {
+          expected = readFile(
+            resolve(objectsDirPath, expectedFileName),
+            "utf8"
+          );
+        }
+
+        return forkJoin({
+          expected,
+          actual,
+          fileName: of(resolve(archivePath, id + fileEnding(objectFileName))),
+          data: readFile(resolve(objectsDirPath, objectFileName), "utf8"),
+        });
+      }
     }),
-    mergeMap(({ fileName, data, expected, actual }: any) => {
-      console.log({ fileName, data, expected, actual });
+    mergeMap(({ fileName, data /* expected, actual */ }: any) => {
       return writeFile(fileName, data, "utf8");
     }),
     catchError((err, catched) => {

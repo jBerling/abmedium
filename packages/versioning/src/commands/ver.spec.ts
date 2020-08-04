@@ -2,8 +2,16 @@ import { TestScheduler } from "rxjs/testing";
 import { FileHandler } from "../util/types";
 import { testFileHandler, TestFiles } from "../util/mocking/test-file-handler";
 import ver from "./ver";
-import { abDocument, num, seq, nil } from "@abrovink/abmedium";
-import { mainDir, objectsDir, counter, viewStack, head } from "../constants";
+import { ref, num } from "@abrovink/abmedium";
+import {
+  mainDir,
+  objectsDir,
+  counter,
+  viewStack,
+  head,
+  prev,
+  timestampsLayer,
+} from "../constants";
 
 const testScheduler = () =>
   new TestScheduler((actual, expected) => {
@@ -29,9 +37,9 @@ describe("abv ver", () => {
         [viewStack]: "[]",
         [objectsDir]: {},
         foo: JSON.stringify(
-          abDocument({
+          {
             [counter]: num(0),
-          }),
+          },
           null,
           4
         ),
@@ -42,7 +50,7 @@ describe("abv ver", () => {
   });
 
   test(
-    "adds first version",
+    "adds the first version",
     run(({ expectObservable, flush }) => {
       expectObservable(
         ver({
@@ -61,16 +69,17 @@ describe("abv ver", () => {
   );
 
   test(
-    "adds second version",
+    "adds the second version",
     run(({ expectObservable, flush }) => {
       // @ts-ignore
       archive[mainDir].foo = JSON.stringify(
-        abDocument({
-          [counter]: num(2),
-          0: seq(nil, 1),
-          1: "ver1.md",
-          [head]: num(0),
-        }),
+        {
+          [counter]: num(1),
+          0: "ver1.md",
+          [head]: ref(0),
+          [timestampsLayer]: {},
+          [prev]: {},
+        },
         null,
         4
       );
@@ -90,25 +99,4 @@ describe("abv ver", () => {
       expect(archive).toMatchSnapshot();
     })
   );
-
-  // test(
-  //   "adds the first version ",
-  //   run(({ expectObservable, flush }) => {
-  //     archive[mainDir][viewStack] = '[["a", ["b", "c"]]]';
-
-  //     expectObservable(
-  //       ver({
-  //         fileHandler,
-  //         hasher,
-  //         now,
-  //         archiveName: "",
-  //         id: "foo",
-  //       })
-  //     ).toBe("(a|)", { a: undefined });
-
-  //     flush();
-
-  //     expect(archive).toMatchSnapshot();
-  //   })
-  // );
 });

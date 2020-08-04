@@ -3,8 +3,19 @@ import { enc } from "crypto-js";
 import { Observable, of, throwError, forkJoin, combineLatest } from "rxjs";
 import { Argv } from "yargs";
 import { map, mergeMap, mergeAll, catchError } from "rxjs/operators";
-import { seq, layer, proj, mapping } from "@abrovink/abmedium";
-import defaultFileHandler from "../util/file-handler";
+import {
+  proj,
+  ViewStack,
+  Label,
+  Layer,
+  asLayer,
+  asRef,
+  asNum,
+  NodeValue,
+  str,
+  trackedLabel,
+} from "@abrovink/abmedium";
+import { fileHandler as defaultFileHandler } from "../util/file-handler";
 import { FileHandler } from "../util/types";
 import {
   mainDir,
@@ -14,10 +25,11 @@ import {
   head,
   viewStack,
 } from "../constants";
+import { addIn } from "../util/add-in";
 
-export const command = "alt [id]";
+export const command = "alt <id>";
 
-export const describe = "---";
+export const describe = "add an alt value";
 
 export const builder = (yargs): Argv<{ id: string }> => {
   return yargs.positional("id", {
@@ -25,23 +37,15 @@ export const builder = (yargs): Argv<{ id: string }> => {
   });
 };
 
-// TODO move these
-type LayerName = string;
-type LayerWithSublayers = [LayerName, ViewStack];
-type ViewStack = (LayerName | LayerWithSublayers)[];
-type Layer = Object;
-
-const any = (x: any): any => x;
-
+// Todo: move to @abrovink/abmedium?
 export const layerStacking = (
   stack: ViewStack,
-  path: string[] = [],
-  stacking: string[][] = []
-): string[][] => {
+  path: Label[] = [],
+  stacking: Label[][] = []
+): Label[][] => {
   for (const item of stack) {
     if (!item) continue;
-
-    if (typeof item === "string") {
+    else if (typeof item === "string" || typeof item === "number") {
       stacking.push([...path, item]);
     } else {
       const [layerName, children] = item;
@@ -52,15 +56,20 @@ export const layerStacking = (
   return stacking;
 };
 
-export const layerByPath = (
-  layer: Layer,
-  path: string[]
-): Layer | undefined => {
+// Warning: this has the unorthodox behavior of creating layers
+// if they don't exist.
+export const layerByPath = (layer: Layer, path: Label[]): Layer | undefined => {
   let ret = layer;
 
-  for (const handle of path) {
-    ret = ret[handle];
-    if (!ret) return undefined;
+  for (const label of path) {
+    const layer = asLayer(ret[label]);
+    if (layer) {
+      ret = layer;
+    } else {
+      const newLayer: Layer = {};
+      ret[label] = newLayer;
+      ret = newLayer;
+    }
   }
 
   return ret;
@@ -109,28 +118,39 @@ const alt = ({
     mergeMap(([stack, doc, { hashedName: altValue }]) => {
       const [altPath, ...rest] = layerStacking(stack).reverse();
 
-      if (!altPath) {
-        throw new Error("alt can not be used on the base layer");
-      }
+      if (!altPath) throw new Error("alt can not be used on the base layer");
 
-      const altLayer = layerByPath(doc, altPath);
+      const projection = proj(doc, stack);
 
-      const projection = proj(doc, stack, [timestampsLayer]);
+      let {
+        nodes: { [head]: h },
+      } = projection;
 
-      let { [head]: h } = projection;
+      const currentHead = asRef(h);
+      if (!currentHead) throw new Error("not a ref");
+      let sourceValue = projection.nodes[currentHead[1]];
 
-      let sourceValue;
       for (const sourcePath of [...rest, []]) {
         const sourceLayer = layerByPath(doc, sourcePath);
 
         if (!sourceLayer) continue;
-        sourceValue = sourceLayer[h];
+        sourceValue = sourceLayer[currentHead[1]] as NodeValue;
         if (sourceValue !== undefined) break;
       }
 
-      let c = doc[counter];
+      let c = asNum(doc[counter]);
 
       doc[counter] = c;
+
+      if (layerByPath(doc, altPath) !== undefined) {
+        console.warn("handle!");
+      }
+
+      addIn(doc, [...altPath, currentHead[1]], altValue);
+      addIn(doc, [...altPath, timestampsLayer, currentHead[1]], str(now()));
+      addIn(doc, [...altPath, trackedLabel, currentHead[1]], sourceValue);
+      addIn(doc, [...altPath, head], currentHead);
+      addIn(doc, [...altPath, trackedLabel, head], currentHead);
 
       return writeFile(idFileName, JSON.stringify(doc, null, 4), "utf8");
     }),

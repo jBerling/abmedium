@@ -8,7 +8,9 @@ type Callback<In, Out> = (
   errorHandler: (err: Error | string) => void
 ) => void;
 
-export default <T, R>(cb: Callback<T, R>) => (source: Observable<T>) =>
+export const fromCallback = <T, R>(cb: Callback<T, R>) => (
+  source: Observable<T>
+) =>
   new Observable((observer: Observer<R>) => {
     let items = 0;
     let completed = 0;

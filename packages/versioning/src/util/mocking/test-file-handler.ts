@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 import { FileHandler } from "../types";
-import fromCallback from "../../util/from-callback-operator";
+import { fromCallback } from "../../util/from-callback-operator";
 import { Minimatch } from "minimatch";
 
 type Directory<T> = Record<string, string | T>;

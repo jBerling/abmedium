@@ -3,19 +3,21 @@ import { enc } from "crypto-js";
 import { Observable, of, throwError, forkJoin, combineLatest } from "rxjs";
 import { Argv } from "yargs";
 import { map, mergeMap, mergeAll, catchError } from "rxjs/operators";
-import { seq, layer, proj, mapping } from "@abrovink/abmedium";
-import defaultFileHandler from "../util/file-handler";
+import { ref, proj, str, num, ViewStack, Layer } from "@abrovink/abmedium";
+import { fileHandler as defaultFileHandler } from "../util/file-handler";
 import { FileHandler } from "../util/types";
 import {
   mainDir,
   objectsDir,
   timestampsLayer,
+  prev,
   counter,
   head,
   viewStack,
 } from "../constants";
+import { addIn } from "../util/add-in";
 
-export const command = "ver [id]";
+export const command = "ver <id>";
 
 export const describe = "add the current value to the version history";
 
@@ -33,26 +35,21 @@ export const builder = (yargs): Argv<{ id: string; all: boolean }> => {
     });
 };
 
-// TODO move these
-type LayerName = string;
-type LayerWithSublayers = [LayerName, ViewStack];
-type ViewStack = (LayerName | LayerWithSublayers)[];
-type Layer = Object;
-
 const last = (a: Array<any>) => a[a.length - 1];
 
+// TODO move to @abrovink/abmedium?
 const activeLayer = (stack: ViewStack, parentLayer: Layer): Layer => {
   const item = last(stack);
-  if (!item) {
-    return parentLayer;
-  } else if (typeof item === "string") {
-    parentLayer[item] = parentLayer[item] || layer();
-    return parentLayer[item];
-  } else {
-    const [layerName, children] = item;
-    parentLayer[layerName] = parentLayer[layerName] || layer();
-    return activeLayer(children, parentLayer[layerName]);
+  if (!item) return parentLayer;
+
+  if (typeof item === "string" || typeof item === "number") {
+    if (!parentLayer[item]) parentLayer[item] = {};
+    return parentLayer[item] as Layer;
   }
+
+  const [layerName, children] = item;
+  parentLayer[layerName] = parentLayer[layerName] || {};
+  return activeLayer(children, parentLayer[layerName] as Layer);
 };
 
 const ver = ({
@@ -96,29 +93,28 @@ const ver = ({
     )
   ).pipe(
     mergeMap(([stack, doc, { hashedName }]) => {
-      const projected = proj(doc, stack, [timestampsLayer]);
-      const { [counter]: currentCounter, [head]: previous } = projected;
+      const projected = proj(doc, stack);
+      const {
+        nodes: { [counter]: currentCounter, [head]: previous },
+      } = projected;
 
-      let c = currentCounter;
-      let itemHandle = c++;
-      let versionHandle = c++;
+      let c = currentCounter as number;
+      let versionLabel = c++;
 
-      doc[counter] = c;
+      doc[counter] = num(c);
 
-      const m = stack.length ? mapping : (x, _) => x;
+      const layer = activeLayer(stack, doc);
+      layer[versionLabel] = hashedName;
 
-      const layr = activeLayer(stack, doc);
-      layr[head] = m(itemHandle, previous);
-      layr[itemHandle] = m(seq(previous, versionHandle), projected[itemHandle]);
-      layr[versionHandle] = m(hashedName, projected[versionHandle]);
-      layr[timestampsLayer] = layr[timestampsLayer] || layer({});
-      layr[timestampsLayer][itemHandle] = m(
-        now(),
-        layr[timestampsLayer][itemHandle]
-      );
+      if (previous) addIn(layer, [prev, versionLabel], previous);
+
+      layer[head] = ref(versionLabel);
+
+      addIn(layer, [timestampsLayer, versionLabel], str(now()));
 
       return writeFile(idFileName, JSON.stringify(doc, null, 4), "utf8");
     }),
+
     catchError((err) => {
       console.error(err);
       return throwError(err);

@@ -1,7 +1,7 @@
-import { from, of } from 'rxjs';
-import { toArray, catchError } from 'rxjs/operators';
-import { TestScheduler } from 'rxjs/testing';
-import fromCallback from './from-callback-operator';
+import { from, of } from "rxjs";
+import { toArray, catchError } from "rxjs/operators";
+import { TestScheduler } from "rxjs/testing";
+import { fromCallback } from "./from-callback-operator";
 
 const testScheduler = new TestScheduler((actual, expected) => {
   expect(actual).toEqual(expected);
@@ -13,20 +13,20 @@ const testRun = (description: string, fn) => {
   });
 };
 
-describe('fromCallback operator', () => {
-  it('can be tested the old-school way', () => {
-    from(['humle', 'dumle'])
+describe("fromCallback operator", () => {
+  it("can be tested the old-school way", () => {
+    from(["humle", "dumle"])
       .pipe(
         fromCallback<string, string>((v, next) => next(v.toUpperCase())),
         toArray()
       )
       .subscribe((result) => {
-        expect(result).toEqual(['HUMLE', 'DUMLE']);
+        expect(result).toEqual(["HUMLE", "DUMLE"]);
       });
   });
 
-  it('can be tested the old-school way asynchronously', (ok) => {
-    from(['humle', 'dumle'])
+  it("can be tested the old-school way asynchronously", (ok) => {
+    from(["humle", "dumle"])
       .pipe(
         fromCallback<string, string>((v, next) => {
           setTimeout(() => {
@@ -36,27 +36,27 @@ describe('fromCallback operator', () => {
         toArray()
       )
       .subscribe((result) => {
-        expect(result).toEqual(['HUMLE', 'DUMLE']);
+        expect(result).toEqual(["HUMLE", "DUMLE"]);
         ok();
       });
   });
 
-  testRun('can be tested using marble-tests', ({ expectObservable }) => {
-    const $ = from(['foo', 'bar']).pipe(
+  testRun("can be tested using marble-tests", ({ expectObservable }) => {
+    const $ = from(["foo", "bar"]).pipe(
       fromCallback<string, string>((v, next) => {
         next(v.toUpperCase());
       }),
       toArray()
     );
-    expectObservable($).toBe('(a|)', { a: ['FOO', 'BAR'] });
+    expectObservable($).toBe("(a|)", { a: ["FOO", "BAR"] });
   });
 
-  it('handles errors', (ok) => {
-    from(['humle', 'dumle'])
+  it("handles errors", (ok) => {
+    from(["humle", "dumle"])
       .pipe(
         fromCallback<string, string>((value, next, error) => {
-          if (value === 'dumle') {
-            error('Oh, no!');
+          if (value === "dumle") {
+            error("Oh, no!");
           }
           next(value);
         }),
@@ -66,7 +66,7 @@ describe('fromCallback operator', () => {
         toArray()
       )
       .subscribe((result) => {
-        expect(result).toEqual(['humle', 'Oh, no!']);
+        expect(result).toEqual(["humle", "Oh, no!"]);
         ok();
       });
   });
