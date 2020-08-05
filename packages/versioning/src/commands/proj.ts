@@ -56,8 +56,6 @@ const projCommand = ({
     mergeMap(([stack, { id, rawDoc }]) => {
       const projection = proj(rawDoc, stack);
 
-      console.log("pong!", projection);
-
       const headRef = asRef(projection.nodes[head]);
       if (!headRef) throw new Error("not handled");
       const currentNode = node(projection, headRef);

@@ -157,7 +157,7 @@ describe("test file handler", () => {
             resolve("sub/temporary.txt"),
             "I am temporary.\n",
           ]).pipe(writeFile("utf8"))
-        ).toBe("(a|)", { a: "I am temporary.\n" });
+        ).toBe("(a|)", { a: undefined });
 
         flush();
 
