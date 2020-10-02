@@ -22,7 +22,7 @@ describe("valswitch", () => {
       switcher(str("")),
       switcher(num(0)),
       switcher(sim(str("a"), str("b"))),
-      switcher(dis("a", "b", "c")),
+      switcher(dis({ expected: "a", actual: "b", to: "c" })),
       switcher(nil),
       switcher(ref(10)),
     ];
@@ -33,7 +33,7 @@ describe("valswitch", () => {
       ["str", str("")],
       ["num", num(0)],
       ["sim", sim("a", "b")],
-      ["dis", dis("a", "b", "c")],
+      ["dis", dis({ expected: "a", actual: "b", to: "c" })],
       ["nil", nil],
       ["ref", ref(10)],
     ]);

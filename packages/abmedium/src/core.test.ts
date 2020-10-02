@@ -21,7 +21,9 @@ describe("core", () => {
     expect(valtype(str(""))).toEqual("str");
     expect(valtype(num(0))).toEqual("num");
     expect(valtype(sim("a", "b"))).toEqual("sim");
-    expect(valtype(dis("a", "b", "c"))).toEqual("dis");
+    expect(valtype(dis({ expected: "a", actual: "b", to: "c" }))).toEqual(
+      "dis"
+    );
     expect(valtype(nil)).toEqual("nil");
     expect(valtype(ref(0))).toEqual("ref");
   });
@@ -33,7 +35,9 @@ describe("core", () => {
     expect(valtypeIn(str(""), "str")).toBe("str");
     expect(valtypeIn(num(0), "num")).toBe("num");
     expect(valtypeIn(sim("a", "b"), "sim")).toBe("sim");
-    expect(valtypeIn(dis("a", "b", "c"), "dis")).toBe("dis");
+    expect(valtypeIn(dis({ expected: "a", actual: "b", to: "c" }), "dis")).toBe(
+      "dis"
+    );
     expect(valtypeIn(sym("a"), "str", "num", "sym")).toBe("sym");
     expect(valtypeIn(nil, "nil")).toBe("nil");
   });
@@ -47,7 +51,7 @@ describe("core", () => {
         num("1001"),
         nil,
         sim("a", "b"),
-        dis("a", "b", "c"),
+        dis({ expected: "a", actual: "b", to: "c" }),
         ref("root"),
       ].map(lengthOf)
     ).toMatchObject([3, 2, 3, 4, 0, NaN, NaN, NaN]);
@@ -87,9 +91,9 @@ describe("core", () => {
       sim(str("a"), str("c"))
     );
     testEquality(
-      dis(str("a"), str("b"), str("c")),
-      dis(str("a"), str("b"), str("c")),
-      dis(str("b"), str("c"), str("a"))
+      dis({ expected: str("a"), actual: str("b"), to: str("c") }),
+      dis({ expected: str("a"), actual: str("b"), to: str("c") }),
+      dis({ expected: str("b"), actual: str("c"), to: str("a") })
     );
   });
 });

@@ -43,8 +43,6 @@ describe("proj", () => {
         2: { label: 2, value: num(1) },
         3: { label: 3, value: num(2) },
       },
-      simultaneities: {},
-      disagreements: {},
     });
   });
 
@@ -66,8 +64,6 @@ describe("proj", () => {
         2: { label: 2, value: num(11) },
         3: { label: 3, value: num(211) },
       },
-      simultaneities: {},
-      disagreements: {},
     });
   });
 
@@ -94,8 +90,6 @@ describe("proj", () => {
         2: { label: 2, value: num(11) },
         3: { label: 3, value: num(211) },
       },
-      simultaneities: {},
-      disagreements: {},
     });
   });
 
@@ -116,8 +110,6 @@ describe("proj", () => {
       nodes: {
         0: { label: 0, value: str("b") },
       },
-      simultaneities: {},
-      disagreements: {},
     });
   });
 
@@ -177,8 +169,6 @@ describe("proj", () => {
           metadata: { descr: str("big b") },
         },
       },
-      simultaneities: {},
-      disagreements: {},
     });
   });
 
@@ -202,8 +192,6 @@ describe("proj", () => {
 
     expect(proj(x)).toMatchObject({
       nodes: { 0: { label: 0, value: str("b"), tracked: str("a") } },
-      simultaneities: {},
-      disagreements: {},
     });
   });
 
@@ -235,8 +223,6 @@ describe("proj", () => {
     const res = proj(x);
     expect(res).toEqual({
       nodes: { 0: { label: 0, value: str("b"), tracked: str("a") } },
-      simultaneities: {},
-      disagreements: {},
     });
   });
 
@@ -259,10 +245,17 @@ describe("proj", () => {
     });
 
     expect(proj(x)).toMatchObject({
-      nodes: { 0: { label: 0, value: str("c"), tracked: str("b") } },
-      simultaneities: {},
-      disagreements: {
-        0: dis(str("b"), str("a"), str("c")),
+      nodes: {
+        0: {
+          label: 0,
+          value: str("c"),
+          tracked: str("b"),
+          disagreement: dis({
+            expected: str("b"),
+            actual: str("a"),
+            to: str("c"),
+          }),
+        },
       },
     });
   });
@@ -282,10 +275,16 @@ describe("proj", () => {
     });
 
     expect(proj(x)).toMatchObject({
-      nodes: { 0: { label: 0, value: str("c") } },
-      simultaneities: {},
-      disagreements: {
-        0: dis(undefined, str("a"), str("c")),
+      nodes: {
+        0: {
+          label: 0,
+          value: str("c"),
+          disagreement: dis({
+            expected: undefined,
+            actual: str("a"),
+            to: str("c"),
+          }),
+        },
       },
     });
   });
@@ -304,8 +303,6 @@ describe("proj", () => {
 
     expect(proj(x)).toMatchObject({
       nodes: { 0: { label: 0, value: str("a") } },
-      simultaneities: {},
-      disagreements: {},
     });
   });
 
@@ -326,9 +323,18 @@ describe("proj", () => {
     });
 
     expect(proj(x)).toMatchObject({
-      nodes: { 0: { label: 0, value: str("c"), tracked: str("b") } },
-      simultaneities: {},
-      disagreements: { 0: dis(str("b"), undefined, str("c")) },
+      nodes: {
+        0: {
+          label: 0,
+          value: str("c"),
+          tracked: str("b"),
+          disagreement: dis({
+            expected: str("b"),
+            actual: undefined,
+            to: str("c"),
+          }),
+        },
+      },
     });
   });
 
@@ -352,8 +358,6 @@ describe("proj", () => {
 
     expect(proj(x)).toMatchObject({
       nodes: { 0: { label: 0, value: seq(3, 2, 1), tracked: seq(1, 2, 3) } },
-      simultaneities: {},
-      disagreements: {},
     });
   });
 
@@ -376,9 +380,18 @@ describe("proj", () => {
     });
 
     expect(proj(x)).toMatchObject({
-      nodes: { 0: { label: 0, value: seq(3, 2, 1), tracked: seq(1, 3, 2) } },
-      simultaneities: {},
-      disagreements: { 0: dis(seq(1, 3, 2), seq(1, 2, 3), seq(3, 2, 1)) },
+      nodes: {
+        0: {
+          label: 0,
+          value: seq(3, 2, 1),
+          tracked: seq(1, 3, 2),
+          disagreement: dis({
+            expected: seq(1, 3, 2),
+            actual: seq(1, 2, 3),
+            to: seq(3, 2, 1),
+          }),
+        },
+      },
     });
   });
 });

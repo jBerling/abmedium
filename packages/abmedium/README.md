@@ -8,19 +8,19 @@ Layers can get in a conflict when they are projected in a stack. This is called 
 
 ## Terminology
 
-- All nodes have _Labels_. They can be numbers or strings.
+- _Documents_ is a collection of layers and compositions.
 - _Layers_ are sets of nodes.
-- _Metalayers_ are layers with data about nodes.
+- All nodes have _Labels_. They can be numbers or strings.
 - _Nodes_ are values with a label.
-- _Values_ are sequences, strings, symbols, numbers or nil.
-- _Projections_ are created when a projection stack is projected.
-- _Projection Stacks_ describes which layers, and in what order, to project.
+- _Values_ are sequences, strings, symbols, numbers, refs or nil.
+- _Projections_ are created when a composition is projected.
+- _Layer Composition_ describes which layers, and in what order, to project.
 - _Disagreements_ are created during a projection. They represent a mismatch between an expected and actual value.
 - _Simultaneities_ are created when new values are added concurrently to the same node.
 
 ## Document Structure
 
-Let's put the content `[["a", 1], ["b", 2], ["c", 3]]` into an Abmedium document.
+Let's put the content `[["a", 1], ["b", 2], ["c", 3]]` into an Abmedium document. This is done by destructuring the content into nodes.
 
 ```javascript
 let doc = document({
@@ -37,7 +37,9 @@ let doc = document({
 });
 ```
 
-This is a very cumbersome format. Just to make sure we have not lost our content structure, let's rebuild it.
+This is a very cumbersome format. Don't be frightened! The library is meant to be used in the background and not manipulated directly as in this document.
+
+To make sure we have not lost our content structure, let's rebuild it!
 
 ```javascript
 const stringPresenter = (value) =>

@@ -10,7 +10,7 @@ test("editvalOf", () => {
       num("1001"),
       nil,
       sim(str("a"), str("b")),
-      dis(str("a"), str("b"), str("c")),
+      dis({ expected: str("a"), actual: str("b"), to: str("c") }),
     ].map(editvalOf)
   ).toMatchObject([
     [1, "two", 3],

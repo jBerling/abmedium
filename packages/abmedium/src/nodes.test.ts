@@ -18,8 +18,6 @@ describe("nodes", () => {
           metadata: { type: sym("number"), ts: str("202007-14T22:23Z") },
         },
       },
-      simultaneities: {},
-      disagreements: {},
     };
 
     expect([...nodes(projection)]).toEqual([

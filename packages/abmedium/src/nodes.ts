@@ -7,16 +7,7 @@ export const node = <M extends Metadata>(
 ): ProjectionNode<M> | undefined => {
   const ref = asRef(labelOrRef);
   const label = ref ? ref[1] : (labelOrRef as Label);
-  const node = projection.nodes[label];
-
-  if (node === undefined) return undefined;
-
-  return {
-    ...node,
-    simultaneities:
-      projection.simultaneities && projection.simultaneities[label],
-    disagreement: projection.disagreements && projection.disagreements[label],
-  };
+  return projection.nodes[label];
 };
 
 export const nodes = <M extends Metadata>(

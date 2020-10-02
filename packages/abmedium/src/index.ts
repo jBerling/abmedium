@@ -7,3 +7,4 @@ export * from "./nodes";
 export * from "./layers";
 export * from "./valswitch";
 export * from "./editvalOf";
+export * from "./document";
