@@ -1,16 +1,8 @@
 import { valswitch } from "./valswitch";
-import {
-  Label,
-  NodePresenter,
-  Metalayer,
-  Projection,
-  Scalar,
-  NodeValue,
-  PresentationNode,
-} from "./types";
+import { Label, NodePresenter, Projection, Scalar, Metadata } from "./types";
 import { asSeq } from "./core";
 
-export const defaultNodePresenter: NodePresenter<Scalar | Scalar[]> = ({
+export const defaultNodePresenter: NodePresenter<any, Scalar | Scalar[]> = ({
   value,
   items,
 }) =>
@@ -23,51 +15,27 @@ export const defaultNodePresenter: NodePresenter<Scalar | Scalar[]> = ({
     _: value as Scalar,
   })(value, items);
 
-const metadataOf = (
-  label: Label,
-  metadata: Record<Label, Metalayer>
-): Record<Label, NodeValue> =>
-  Object.keys(metadata).reduce(
-    (md, mlabel) => ({
-      ...md,
-      [mlabel]: metadata[mlabel]?.[label],
-    }),
-    {}
-  );
-
-export const presentationNodePresenter: NodePresenter<PresentationNode<
-  PresentationNode
->> = (node): PresentationNode<PresentationNode<any>> => node;
-
-export const treeOf = <R = Scalar>(
-  projection: Projection,
-  nodePresenter: NodePresenter<R> = defaultNodePresenter as any,
+export const treeOf = <M extends Metadata, R>(
+  projection: Projection<M>,
+  nodePresenter: NodePresenter<M, R> = defaultNodePresenter as any,
   rootLabel: Label = 0,
   pos?: number,
   parent?: Label
 ): R => {
-  const value = projection.nodes[rootLabel] as NodeValue;
+  const node = projection.nodes[rootLabel];
 
   let items: R[] | undefined;
-  const seq = asSeq(value);
+  const seq = asSeq(node.value);
   if (seq) {
     items = seq[1].map((label, pos) =>
       treeOf(projection, nodePresenter, label, pos, rootLabel)
     );
   }
 
-  const disagreement = projection.disagreements[rootLabel];
-
-  const simultaneities = projection.simultaneities[rootLabel];
-
   return nodePresenter({
-    value,
+    ...node,
     items,
     pos,
     parent,
-    label: rootLabel,
-    disagreement: disagreement,
-    simultaneities: simultaneities,
-    metadata: metadataOf(rootLabel, projection.metadata),
   });
 };

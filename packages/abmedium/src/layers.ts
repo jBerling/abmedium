@@ -1,28 +1,25 @@
-import { asLayer } from "./core";
-import { Layer, Label } from "./types";
+import { Document, Layer, Metadata } from "./types";
+import Automerge from "automerge";
 
-export const layers = (
-  layer: Layer
-): Iterable<{ label: Label; layer: Layer }> => {
-  const labels = Object.keys(layer);
+export const layers = <M extends Metadata>(
+  document: Automerge.FreezeObject<Document<M>>
+): Iterable<Layer<M>> => {
+  const labels = Object.keys(document.layers);
   let i = 0;
 
-  const nextLayer = (): [Label, Layer] | null => {
+  const nextLayer = () => {
     const label = labels[i++];
     if (!label) return null;
-    const sublayer = asLayer(layer[label]);
-    if (sublayer) return [label, sublayer];
-    else return nextLayer();
+    return document.layers[label];
   };
 
   return {
-    [Symbol.iterator](): Iterator<{ label: Label; layer: Layer }> {
+    [Symbol.iterator](): Iterator<Layer<M>> {
       return {
         next(): any {
-          const node = nextLayer();
-          if (node) {
-            const [label, sublayer] = node;
-            return { done: false, value: { layer: sublayer, label } };
+          const value = nextLayer();
+          if (value) {
+            return { done: false, value };
           } else {
             return { done: true };
           }

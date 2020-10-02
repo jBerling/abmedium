@@ -40,40 +40,45 @@ export type NodeValueType =
 
 export type Label = string | number;
 
-type LayerRecord<T> = Record<Label, T | SubLayerRecord<T>>;
-export interface SubLayerRecord<T> extends LayerRecord<T> {}
-export type Layer = LayerRecord<NodeValue>;
+export type Metadata = Record<Label, NodeValue | undefined>;
 
-export type Metalayer = Record<Label, NodeValue>;
-
-export type LayerWithSublayers = [Label, ViewStack];
-
-export type ViewStack = (Label | LayerWithSublayers)[];
-
-export type Projection = {
-  nodes: Record<Label, NodeValue>;
-  metadata: Record<Label, Metalayer>;
-  simultaneities: Record<Label, Sim>;
-  disagreements: Record<Label, Dis>;
+export type Node<M extends Metadata> = {
+  label: Label;
+  tracked?: NodeValue;
+  value: NodeValue;
+  metadata?: M;
 };
 
-export type ProjectionNode = {
-  value: NodeValue;
+export type Layer<M extends Metadata> = {
   label: Label;
-  metadata: Record<Label, NodeValue>;
+  nodes: Record<Label, Node<M>>;
+};
+
+export type LayerComposition = {
+  label: Label;
+  layers?: LayerComposition[];
+};
+
+export type Document<M extends Metadata> = {
+  compositions: Record<Label, LayerComposition>;
+  layers: Record<Label, Layer<M>>;
+};
+
+export type ProjectionNode<M extends Metadata> = Node<M> & {
   disagreement?: Dis;
   simultaneities?: Sim;
 };
 
-// TODO rename to TreeNode?
-export type PresentationNode<R = Scalar> = ProjectionNode & {
+export type Projection<M extends Metadata> = {
+  nodes: Record<Label, ProjectionNode<M>>;
+};
+
+export type PresentationNode<M extends Metadata, R> = ProjectionNode<M> & {
   items?: R[];
   parent?: Label;
   pos?: number;
-  // TODO: remove?
-  dis?: NodeValue;
-  // TODO: remove?
-  sim?: NodeValue;
 };
 
-export type NodePresenter<R = Scalar> = (node: PresentationNode<R>) => R;
+export type NodePresenter<M extends Metadata, R> = (
+  node: PresentationNode<M, R>
+) => R;

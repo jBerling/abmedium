@@ -1,49 +1,31 @@
 import { asRef } from "./core";
-import {
-  Projection,
-  Metalayer,
-  NodeValue,
-  Label,
-  Ref,
-  ProjectionNode,
-} from "./types";
+import { Projection, Label, Ref, ProjectionNode, Metadata } from "./types";
 
-const metadataOf = (
-  label: Label,
-  metadata: Record<Label, Metalayer>
-): Record<Label, NodeValue> =>
-  Object.keys(metadata).reduce(
-    (md, mlabel) => ({
-      ...md,
-      [mlabel]: metadata[mlabel]?.[label],
-    }),
-    {}
-  );
-
-export const node = (
-  projection: Projection,
+export const node = <M extends Metadata>(
+  projection: Projection<M>,
   labelOrRef: Label | Ref
-): ProjectionNode | undefined => {
+): ProjectionNode<M> | undefined => {
   const ref = asRef(labelOrRef);
   const label = ref ? ref[1] : (labelOrRef as Label);
-  const value = projection.nodes[label];
+  const node = projection.nodes[label];
 
-  if (value === undefined) return undefined;
+  if (node === undefined) return undefined;
 
   return {
-    label,
-    value,
-    metadata: metadataOf(label, projection.metadata),
-    simultaneities: projection.simultaneities[label],
-    disagreement: projection.disagreements[label],
+    ...node,
+    simultaneities:
+      projection.simultaneities && projection.simultaneities[label],
+    disagreement: projection.disagreements && projection.disagreements[label],
   };
 };
 
-export const nodes = (projection: Projection): Iterable<ProjectionNode> => {
+export const nodes = <M extends Metadata>(
+  projection: Projection<M>
+): Iterable<ProjectionNode<M>> => {
   const labels = Object.keys(projection.nodes);
   let i = 0;
 
-  const nextNode = (): ProjectionNode | undefined => {
+  const nextNode = (): ProjectionNode<M> | undefined => {
     const label = labels[i++];
     if (!label) return undefined;
     return node(projection, label);

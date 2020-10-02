@@ -1,23 +1,48 @@
-import { num, sym } from "./core";
+import { num, sym, layer } from "./core";
 import { layers } from "./layers";
+import { document } from "./document";
+import Automerge from "automerge";
 
 describe("layers", () => {
   it("return layers but not nodes", () => {
-    const p = {
-      a: sym("A"),
-      two: num(2),
-      c: { a: sym("AA") },
-      d: { a: sym("a") },
-    };
+    let doc = Automerge.change(document<{}>(), (doc) => {
+      doc.layers.base.nodes.a = { label: "a", value: sym("A") };
+      doc.layers.base.nodes.two = { label: "two", value: num(2) };
+      doc.layers.c = layer<{}>("c", { a: { label: "a", value: sym("AA") } });
+      doc.layers.d = layer<{}>("d", { a: { label: "a", value: sym("a") } });
+    });
 
-    expect([...layers(p)]).toEqual([
+    expect([...layers(doc)]).toMatchObject([
+      {
+        label: "base",
+        nodes: {
+          a: {
+            label: "a",
+            value: sym("A"),
+          },
+          two: {
+            label: "two",
+            value: num(2),
+          },
+        },
+      },
       {
         label: "c",
-        layer: { a: sym("AA") },
+        nodes: {
+          a: {
+            label: "a",
+            value: sym("AA"),
+          },
+        },
       },
       {
         label: "d",
-        layer: { a: sym("a") },
+        nodes: {
+          a: {
+            label: "a",
+            value: sym("a"),
+          },
+        },
       },
     ]);
   });

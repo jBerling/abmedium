@@ -2,21 +2,17 @@
 
 ## 0.10.0
 
-Once again big breaking changes. Migrate the project to TypeScript and make it support @abrovink/versioning.
+Once again big breaking changes. Migrate the project to TypeScript and make it support @abrovink/versioning. Get rid of @abrovink/automerge and make this package dependent on Automerge directly.
 
-- remove document, only use layers
-- rename handles to labels
-- Make proj work less strict. It now works even if a layer in a stack does not exist.
-- Consider lables with `$` pre- and suffixes to be reserved for internal use by Abmedium.
-- Replace mappings with a tracking layer.
-- Put disagreements in a disagreement layer.
+- Rethink how layers work. They are now implemented using Automerge tables.
+- Metalayers are removed. Instead metadata is now added directly on each node.
+- Replace view stacks with layer compositions. Compositions are more verbose but easier to read.
+- Rename handles to labels
 - valtype broken apart into valtype, valtypeIn and valswitch.
-- removed editval
+- remove editval
 - add as<NodeType> functions
-- Layers are now either ordinary layers or metalayers. It is no longer up to proj to decide that. A metalayer must have a label that is prefixed with `m$`.
-- isLayer to asLayer and asMetalayer added.
 - Refs added as a new node value type.
-- Add node function.
+- ... and more!
 - TODO remove dis as node value type?
 - TODO remove sim as node value types?
 - TODO update disagreement example

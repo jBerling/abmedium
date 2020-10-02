@@ -3,7 +3,7 @@ import {
   NodeValue,
   NodeValueType,
   Layer,
-  Metalayer,
+  Node,
   Str,
   Num,
   Sim,
@@ -13,6 +13,7 @@ import {
   Nil,
   Scalar,
   Ref,
+  Metadata,
 } from "./types";
 
 import {
@@ -30,16 +31,20 @@ import {
 
 import { valswitch } from "./valswitch";
 
-export const asLayer = (x: any): Layer | undefined =>
+// TODO: remove?
+export const asLayer = <M extends Metadata>(x: any): Layer<M> | undefined =>
   x !== null && !Array.isArray(x) && typeof x === "object"
-    ? (x as Layer)
+    ? (x as Layer<M>)
     : undefined;
 
+export const layer = <M extends Metadata>(
+  label: Label,
+  nodes: Record<Label, Node<M>> = {}
+): Layer<M> => ({ label, nodes });
+
+// TODO: remove?
 export const isMetalayerLabel = (label: Label): boolean =>
   String(label).startsWith(metaPrefix);
-
-export const asMetalayer = (x: any): Metalayer | undefined =>
-  asLayer(x) ? (x as Metalayer) : undefined;
 
 export const valtype = (v: NodeValue): NodeValueType | null => {
   if (typeof v === "string") return strName;
@@ -87,11 +92,11 @@ export const sim = (...members: NodeValue[]): Sim => {
 
 export const asSim = (v: any): Sim | undefined => valtypeIn(v, "sim") && v;
 
-export const dis = (
-  expected: NodeValue | undefined,
-  actual: NodeValue | undefined,
-  to: NodeValue
-): Dis => [disName, { expected, actual, to }];
+export const dis = (args: {
+  expected: NodeValue | undefined;
+  actual: NodeValue | undefined;
+  to: NodeValue;
+}): Dis => [disName, args];
 
 export const asDis = (v: any): Dis | undefined =>
   valtypeIn(v, disName) && (v as Dis);

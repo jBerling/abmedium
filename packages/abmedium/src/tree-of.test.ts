@@ -1,40 +1,56 @@
 import { num, sym, str, nil, seq, sim, dis } from "./core";
 import { valswitch } from "./valswitch";
 import { treeOf } from "./tree-of";
-import { proj } from "./proj";
-import { NodePresenter, NodeValue, PresentationNode, Label } from "./types";
+import {
+  NodePresenter,
+  NodeValue,
+  PresentationNode,
+  Label,
+  Sym,
+  Metadata,
+} from "./types";
 
 describe("treeOf", () => {
   it("creates a tree with default presenter", () => {
     expect(
-      treeOf(
-        proj({
-          0: seq(1, 2, 3),
-          1: sym("+"),
-          2: seq(4, 5),
-          3: num(200),
-          4: sym("inc"),
-          5: num(10),
-        })
-      )
+      treeOf({
+        nodes: {
+          0: { label: 0, value: seq(1, 2, 3) },
+          1: { label: 1, value: sym("+") },
+          2: { label: 2, value: seq(4, 5) },
+          3: { label: 3, value: num(200) },
+          4: { label: 4, value: sym("inc") },
+          5: { label: 5, value: num(10) },
+        },
+      })
     ).toEqual([sym("+"), [sym("inc"), num(10)], num(200)]);
   });
 
   it("Handles nil values", () => {
-    expect(treeOf(proj({ 0: nil }))).toEqual(nil);
+    expect(treeOf({ nodes: { 0: { label: 0, value: nil } } })).toEqual(nil);
   });
 
   it("creates a tree with a custom root node", () => {
     const res = treeOf(
-      proj({ 3: seq(4, 5), 4: str("a"), 5: str("b") }),
+      {
+        nodes: {
+          3: { label: 3, value: seq(4, 5) },
+          4: { label: 4, value: str("a") },
+          5: { label: 5, value: str("b") },
+        },
+      },
       undefined,
       3
     );
     expect(res).toEqual(["a", "b"]);
   });
 
+  type TestNode<M extends Metadata> = PresentationNode<M, ITestNode<M>>;
+  interface ITestNode<M extends Metadata> extends TestNode<M> {}
+  type TestMeta = { type?: Sym };
+
   it("passes presentation nodes to the presenter", () => {
-    const expected: PresentationNode<PresentationNode> = {
+    const expected: TestNode<TestMeta> = {
       label: 0,
       value: seq(1, 2),
       items: [
@@ -65,20 +81,34 @@ describe("treeOf", () => {
       metadata: { type: sym("call") },
     };
 
-    expect(
-      // TODO find out how to replace the any type
-      treeOf<PresentationNode<any>>(
-        {
-          nodes: { 0: seq(1, 2), 1: sym("inc"), 2: num(10) },
-          metadata: {
-            type: { 0: sym("call"), 1: sym("func"), 2: sym("number") },
+    const res = treeOf<TestMeta, TestNode<TestMeta>>(
+      {
+        nodes: {
+          0: { label: 0, value: seq(1, 2), metadata: { type: sym("call") } },
+          1: {
+            label: 1,
+            value: sym("inc"),
+            metadata: { type: sym("func") },
+            disagreement: dis({
+              expected: sym("+1"),
+              actual: sym("inc1"),
+              to: sym("inc"),
+            }),
           },
-          simultaneities: { 2: sim(num(11), num(10)) },
-          disagreements: { 1: dis(sym("+1"), sym("inc1"), sym("inc")) },
+          2: {
+            label: 2,
+            value: num(10),
+            metadata: {
+              type: sym("number"),
+            },
+            simultaneities: sim(num(11), num(10)),
+          },
         },
-        (n) => n
-      )
-    ).toEqual(expected);
+      },
+      (n) => n
+    );
+
+    expect(res).toEqual(expected);
   });
 
   it("uses a custom node presenter", () => {
@@ -90,14 +120,14 @@ describe("treeOf", () => {
       parent?: Label;
     };
 
-    const presenter: NodePresenter<TreeNode> = ({
+    const presenter: NodePresenter<TestMeta, TreeNode> = ({
       value,
       items,
       label,
       pos,
       parent,
-      metadata: { type },
-    }: PresentationNode<TreeNode>): TreeNode =>
+      metadata: { type } = {},
+    }: PresentationNode<TestMeta, TreeNode>): TreeNode =>
       valswitch<TreeNode>({
         seq: (_, items): TreeNode => ({
           label,
@@ -109,19 +139,25 @@ describe("treeOf", () => {
         _: (v): TreeNode => ({ label, pos, parent, type, value: v }),
       })(value, items);
 
-    const res = treeOf<TreeNode>(
-      proj({
-        0: seq("op", 2, 3),
-        op: sym("+"),
-        2: num(10),
-        3: num(20),
-        m$type: {
-          0: sym("call"),
-          2: sym("number"),
-          3: sym("number"),
-          op: sym("function"),
+    const res = treeOf<TestMeta, TreeNode>(
+      {
+        nodes: {
+          0: {
+            label: 0,
+            value: seq("op", 2, 3),
+            metadata: { type: sym("call") },
+          },
+          op: {
+            label: "op",
+            value: sym("+"),
+            metadata: {
+              type: sym("function"),
+            },
+          },
+          2: { label: 2, value: num(10), metadata: { type: sym("number") } },
+          3: { label: 3, value: num(20), metadata: { type: sym("number") } },
         },
-      }),
+      },
       presenter
     );
 
