@@ -38,9 +38,8 @@ export const asLayer = <M extends Metadata>(x: any): Layer<M> | undefined =>
     : undefined;
 
 export const layer = <M extends Metadata>(
-  label: Label,
   nodes: Record<Label, Node<M>> = {}
-): Layer<M> => ({ label, nodes });
+): Layer<M> => nodes;
 
 // TODO: remove?
 export const isMetalayerLabel = (label: Label): boolean =>

@@ -1,4 +1,4 @@
-import { seq, sym, str, num, sim, dis, nil, ref } from "./core";
+import { seq, sym, str, num, nil, ref } from "./core";
 import { nodeswitch } from "./nodeswitch";
 import { Node } from "./types";
 
@@ -32,6 +32,8 @@ describe("valswitch", () => {
       ["ref", { label: 0, value: ref(10) }],
     ]);
   });
+
+  test("Use PresentationNode", () => {});
 
   test("_", () => {
     expect(nodeswitch({ _: "foo" })({ label: 0, value: sym("a") })).toEqual(

@@ -24,6 +24,10 @@ export const treeOf = <M extends Metadata, R>(
 ): R => {
   const node = projection.nodes[rootLabel];
 
+  if (!node) {
+    throw new Error("No node with label " + rootLabel);
+  }
+
   let items: R[] | undefined;
   const seq = asSeq(node.value);
   if (seq) {

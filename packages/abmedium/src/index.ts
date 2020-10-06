@@ -6,5 +6,6 @@ export * from "./tree-of";
 export * from "./nodes";
 export * from "./layers";
 export * from "./valswitch";
+export * from "./nodeswitch";
 export * from "./editvalOf";
 export * from "./document";

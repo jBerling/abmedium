@@ -2,7 +2,7 @@
 
 Abmedium is a graph medium. Unlike text it can contain loops and nodes with multiple parents.
 
-It is made for distributed editing in multilingual environments. A node can have values in different _layers_. Layers can be placed in a projection stack and projected. This way different projections can be created from one document. Projections can contain localized content, and emulate feature toggles/branches.
+It is made for distributed, structured editing in multilingual environments. A node can have values in different _layers_. Layers can be put in layer compositions and projected. This way different projections can be created from one document. Projections can contain localized content, and emulate feature toggles/branches.
 
 Layers can get in a conflict when they are projected in a stack. This is called a _disagreement_ and is one of the two types of conflicts Abmedium handles. The other type is _simultaneities_. They occur when a node is edited concurrently.
 
@@ -23,17 +23,17 @@ Layers can get in a conflict when they are projected in a stack. This is called 
 Let's put the content `[["a", 1], ["b", 2], ["c", 3]]` into an Abmedium document. This is done by destructuring the content into nodes.
 
 ```javascript
-let doc = document({
-  0: seq(1, 2, 3),
-  1: seq(4, 5),
-  2: seq(6, 7),
-  3: seq(8, 9),
-  4: str("a"),
-  5: num(1),
-  6: str("b"),
-  7: num(2),
-  8: str("c"),
-  9: num(3),
+let fruits = Automerge.change(document<{}>(), (doc) => {
+  doc.layers.base.nodes[0] = { label: 0, value: seq(1, 2, 3) };
+  doc.layers.base.nodes[1] = { label: 1, value: seq(4, 5) };
+  doc.layers.base.nodes[2] = { label: 2, value: seq(6, 7) };
+  doc.layers.base.nodes[3] = { label: 3, value: seq(8, 9) };
+  doc.layers.base.nodes[4] = { label: 4, value: str("apple") };
+  doc.layers.base.nodes[5] = { label: 5, value: num(1) };
+  doc.layers.base.nodes[6] = { label: 6, value: str("banana") };
+  doc.layers.base.nodes[7] = { label: 7, value: num(2) };
+  doc.layers.base.nodes[8] = { label: 8, value: str("pear") };
+  doc.layers.base.nodes[9] = { label: 9, value: num(3) };
 });
 ```
 
@@ -42,96 +42,154 @@ This is a very cumbersome format. Don't be frightened! The library is meant to b
 To make sure we have not lost our content structure, let's rebuild it!
 
 ```javascript
-const stringPresenter = (value) =>
-  valtype(value, {
-    seq: ([, items]) => `[${items.join(", ")}]`,
+const stringPresenter: NodePresenter<{}, string> = ({ value, items }) =>
+  valswitch({
+    seq: (_, items) => `[${items.join(", ")}]`,
     str: () => `"${value}"`,
-    _: (v) => v,
-  });
+    _: (v) => String(v),
+  })(value, items);
 
-let out = treeOf(proj(treedoc), stringPresenter);
+let out = treeOf(proj(fruits), stringPresenter);
 console.log("1.", out);
-// 1. [["a", 1], ["b", 2], ["c", 3]]
+// ⇒ 1. [(["apple", 1], ["banana", 2], ["pear", 3])];
 ```
 
 There is a lot going on here. To begin with, let's talk about the elephant in the room. Why this strange structure?
 
-One big reason is that every node get a handle. This way we can easily target specific nodes. This is handy when the document is edited, or if you want to link to a specific node.
+One big reason is that every node get a handle. This way we can easily target specific nodes. This is handy when the document is edited, or if you want to link to a specific node. Remember, Abmedium is not a text medium. Therefore we need a way to pinpoint a specific place in the document the way you can point to a specific character at a specific line.
 
 Another reason is that it let's us express other graphs than trees. The example above is a tree, but let's say we want to express a [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph).
 
 ```javascript
-onst dagdoc = document({
-  0: seq(1, 1),
-  1: str('a'),
+let dag = Automerge.change(document<{}>(), (doc) => {
+  doc.layers.base.nodes[0] = { label: 0, value: seq(1, 1) };
+  doc.layers.base.nodes[1] = { label: 1, value: str("same") };
 });
-
-out = treeOf(proj(dagdoc), stringPresenter);
-console.log('2.', out);
-// 2. ["a", "a"]
 ```
 
-It is also an important part of how layers and projection works.
+If we want to print it we need to turn it to a tree again.
+
+```javascript
+out = treeOf(proj(dag), stringPresenter);
+console.log("2.", out);
+// ⇒ 2. ["same", "same"]
+```
+
+The structure also works with layers and projections.
+
+By the way, Abmedium is built on top of [Automerge](https://github.com/automerge/automerge). If it is new for you, you should probably take a look at it before you continue to read.
 
 ## Layers and Projections
 
-A document has layers. Every layer is basically an object where every property represents a node. The property name is the handle, and the value is the ... value.
+A document has layers. It is a collection of nodes.
 
-There are two types of layers: (ordinary) layers and metalayers. A layer is a set of nodes. So far we have only worked with one layer, the base layer which always is a part of a document. Let's add another layer.
+So far we have only worked with one layer, the base layer which is part of a document by default. Let's add another layer.
 
 ```javascript
-treedoc = {
-  ...treedoc,
-  se: layer({
-    4: str("äpple"),
-    6: str("banan"),
-    8: str("päron"),
-  }),
-};
+fruits = Automerge.change(fruits, (doc) => {
+  doc.layers.se = layer < {} > "se";
+  doc.compositions.se = {
+    label: "base",
+    layers: [{ label: "se" }],
+  };
+});
 ```
 
-This layer contains Swedish translations. The `proj` function used above in the examples returns a projection. In a projection the layers in a projection stack is projected. The empty projection stack `[]` will only project the base layer. In the examples above this is what happened since the empty stack is passed by default. Let's pass a projection stack `["se"]` together with the document.
+Above we add a layer with the layer "se". We also add a _layer composition_, which is used to define the relation between layers. In this case we specify that se is on top of base. !!!!!!!TODO!!!!!! If you want to better understand how compositions work, take a look at the [compositions](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples/compositions.ts) example in the [examples](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples) directory.
+
+The se layer should contain Swedish content. Let's add it.
 
 ```javascript
-out = treeOf(proj(treedoc, ["se"]), stringPresenter);
+fruits = Automerge.change(fruits, (doc) => {
+  doc.layers.se.nodes[4] = { label: 4, value: str("äpple") };
+  doc.layers.se.nodes[6] = { label: 6, value: str("banan") };
+  doc.layers.se.nodes[8] = { label: 8, value: str("päron") };
+});
+```
+
+To use the Swedish content we _project_ the se composition. Since se is on top of base its nodes will cover (overwrite) the base nodes.
+
+To create a projection we call the `proj` function, which already has been present in the previous examples. The first parameter is the document and the second optional parameter is the composition. If no composition argument is passed the default composition is projected. A simple default composition is added to a document when it is created. It only contains the base layer, but can be edited if you wish to.
+
+Let's log the se composition.
+
+```javascript
+out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter);
 console.log("3.", out);
-// 3. [["äpple", 1], ["banan", 2], ["päron", 3]]
+// ⇒ 3. [["äpple", 1], ["banan", 2], ["päron", 3]]
 ```
 
-If you project it again with an empty stack, the English strings will be projected as before.
+If you project the default composition, the English strings will be projected as before.
 
-## Disagreements and Simultaneities
+## Disagreements
 
-To add a safety mechanism that prevents you from project a value over an unexpected value, you add mappings instead of direct values. A mapping is created by calling `mapping` with two values. The first value is the value of the projected node. The second value is the expected value of the underlaying node.
+A disagreement is a safety mechanism that prevents you from project a value over an unexpected value. When you add a node you also add the value it expects to cover. Implicitly this is undefined.
+
+We have already created disagreements. All of the nodes of se expects to cover an undefined value, but in fact they cover English content. Why are the disagreements hidden?
+
+The answer lies in the `stringPresenter` function we previously, silently defined. This function evaluates a projection when passed to `treeOf` (TODO rename). If we want to display disagreements we need to pass a different function. Let's do it.
 
 ```javascript
-treedoc = {
-  ...treedoc,
-  se: layer({
-    4: mapping(str("äpple"), str("apple")),
-    6: mapping(str("banan"), str("banana")),
-    8: mapping(str("päron"), str("pear")),
-  }),
-};
+const stringPresenter2: NodePresenter<{}, string> = (node) =>
+  nodeswitch<{}, string, NodeValue, PresentationNode<{}, string>>({
+    seq: ({ items = [] }) => `[${items.join(", ")}]`,
+    str: ({ value, disagreement }) => {
+      if (disagreement) {
+        const [, { expected, actual, to }] = disagreement;
+        return `»${expected} ≠ ${actual} → ${to}«`;
+      } else return `"${value}"`;
+    },
+    _: ({ value }) => String(value),
+  })(node);
 ```
 
-If an actual underlaying value equals the expected value the overlaying value will be projected.
+Then pass this function to `treeOf`.
 
 ```javascript
-out = treeOf(proj(treedoc, ["se"]), stringPresenter);
+out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter2);
 console.log("4.", out);
-// 4. [["äpple", 1], ["banan", 2], ["päron", 3]]
+// ⇒ 4. [[»undefined ≠ apple → äpple«, 1], [»undefined ≠ banana → banan«, 2], [»undefined ≠ pear → päron«, 3]]
 ```
 
-However, if the actual and expected value differ a disagreement will be projected.
+Now the disagreements are rendered the way we programmed in `stringPresenter2`.
+
+Let's fix the disagreements, now that we have been shown they exist.
 
 ```javascript
-out = treeOf(proj({ ...treedoc, 4: str("lemon") }, ["se"]), stringPresenter);
+fruits = Automerge.change(fruits, (doc) => {
+  doc.layers.se.nodes[4] = {
+    label: 4,
+    value: str("äpple"),
+    tracked: str("apple"),
+  };
+
+  doc.layers.se.nodes[6] = {
+    label: 6,
+    value: str("banan"),
+    tracked: str("banana"),
+  };
+
+  doc.layers.se.nodes[8] = {
+    label: 8,
+    value: str("päron"),
+    tracked: str("pear"),
+  };
+});
+```
+
+Then call `treeOf` with the projected se composition to verify the disagreemets are gone.
+
+```javascript
+out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter2);
 console.log("5.", out);
-// 5. [[»"apple" ≠ "lemon" → "äpple"«, 1], ["banan", 2], ["päron", 3]]
+// ⇒ 5. [["äpple", 1], ["banan", 2], ["päron", 3]]
 ```
 
 Abmedium also have the concept of a simultaneity. They are created when values are added concurrently to the same node. Since Abmedium does not handle concurrency by itelf, simultaneities are meant to be used together with other libraries that does.
+
+## Simultaneities
+
+In addition to disagreements Abmedium also have the concept of simultaneities. A simultaneity is created when a node is updated concurrently.
 
 ## Examples
 

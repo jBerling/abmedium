@@ -2,16 +2,18 @@
 
 ## 0.10.0
 
-Once again big breaking changes. Migrate the project to TypeScript and make it support @abrovink/versioning. Get rid of @abrovink/automerge and make this package dependent on Automerge directly.
+Once again big breaking changes. Migrate the project to TypeScript, make it dependent on Automerge, and make it support @abrovink/versioning.
 
+- TODO Add simultaneities directly in this package again.
 - Rethink how layers work. They are now implemented using Automerge tables.
 - Metalayers are removed. Instead metadata is now added directly on each node.
 - Replace view stacks with layer compositions. Compositions are more verbose but easier to read.
 - Rename handles to labels
-- valtype broken apart into valtype, valtypeIn and valswitch.
+- valtype broken apart into valtype, valtypeIn, valswitch and nodeswitch.
 - remove editval
 - add as<NodeType> functions
-- Refs added as a new node value type.
+- new node value type added: Ref
+- TODO new node value type added: Txt
 - ... and more!
 - TODO remove dis as node value type?
 - TODO remove sim as node value types?

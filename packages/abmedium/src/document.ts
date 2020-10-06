@@ -4,8 +4,8 @@ import { layer } from "./core";
 
 export const document = <M extends Metadata>() =>
   Automerge.from({
-    layers: { base: layer<M>("base") },
+    layers: { base: layer<M>() },
     compositions: {
-      default: { label: "base", visible: true },
+      default: { label: "base" },
     },
   } as Document<M>);

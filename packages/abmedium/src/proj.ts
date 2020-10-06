@@ -14,7 +14,7 @@ const projectLayer = <M extends Metadata>(
   projection: Projection<M>,
   layer: Layer<M>
 ) => {
-  for (const node of Object.values(layer.nodes)) {
+  for (const node of Object.values(layer)) {
     const { label, value, tracked } = node;
     const actual = projection.nodes[label]?.value;
     projection.nodes[label] = node;

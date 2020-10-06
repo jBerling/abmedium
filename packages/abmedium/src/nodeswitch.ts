@@ -1,33 +1,30 @@
-import {
-  NodeValue,
-  Node,
-  Str,
-  Num,
-  Sim,
-  Dis,
-  Sym,
-  Seq,
-  Nil,
-  Ref,
-  Metadata,
-} from "./types";
+import { Node, NodeValue, Metadata } from "./types";
 
 import { valtype } from "./core";
 
-type Switch<M extends Metadata, R> = {
-  seq?: ((node: Node<M, Seq>, items: R[]) => R) | R;
-  sym?: ((sym: Node<M, Sym>) => R) | R;
-  str?: ((str: Node<M, Str>) => R) | R;
-  num?: ((num: Node<M, Num>) => R) | R;
-  nil?: ((nil: Node<M, Nil>) => R) | R;
-  ref?: ((ref: Node<M, Ref>) => R) | R;
-  _?: ((v: Node<M>) => R) | R;
+type Switch<
+  M extends Metadata,
+  R,
+  T extends NodeValue = NodeValue,
+  N extends Node<M, T> = Node<M, T>
+> = {
+  seq?: ((node: N, items: R[]) => R) | R;
+  sym?: ((sym: N) => R) | R;
+  str?: ((str: N) => R) | R;
+  num?: ((num: N) => R) | R;
+  nil?: ((nil: N) => R) | R;
+  ref?: ((ref: N) => R) | R;
+  _?: ((v: N) => R) | R;
 };
 
-export const nodeswitch = <M extends Metadata, R>(sw: Switch<M, R>) => (
-  v: Node<M>,
-  items?: R[]
-): R => {
+export const nodeswitch = <
+  M extends Metadata,
+  R,
+  T extends NodeValue = NodeValue,
+  N extends Node<M, T> = Node<M, T>
+>(
+  sw: Switch<M, R, T, N>
+) => (v: N, items?: R[]): R => {
   const vt = valtype(v.value);
   if (!vt) {
     // TODO handle
