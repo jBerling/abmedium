@@ -394,28 +394,53 @@ describe("proj", () => {
     });
   });
 
-  // TODO !!! Continue here !!! This is not working in a satisfactory way.
-  it("simultaneity", () => {
-    let x = document<{}>();
-    let y = document<{}>();
+//   it("simultaneity", () => {
+//     let x = document<{}>();
+//     let y: typeof x = Automerge.merge(Automerge.init(), x);
 
-    x = Automerge.change(x, (doc) => {
-      doc.layers.base.a = { label: "a", value: str("X") };
-    });
+//     x = Automerge.change(x, (doc) => {
+//       doc.layers.base.a = { label: "a", value: str("X") };
+//     });
 
-    y = Automerge.change(y, (doc) => {
-      doc.layers.base.a = { label: "a", value: str("X") };
-    });
+//     y = Automerge.change(y, (doc) => {
+//       doc.layers.base.a = { label: "b", value: str("Y") };
+//     });
 
-    x = Automerge.merge(x, y);
+//     x = Automerge.merge(x, y);
 
-    console.log(
-      JSON.stringify(x, null, 4),
-      "\n---\n",
+//     console.log(
+//       JSON.stringify(x, null, 4),
+//       "\n---\n",
+//       JSON.stringify(Automerge.getConflicts(x, "layers"), null, 4)
+//     );
+//   });
 
-      // It does not work to pass (x.layers.base, "a")
-      // (x, "layers") work, but it makes the diff harder to interpret.
-      JSON.stringify(Automerge.getConflicts(x, "layers"), null, 4)
-    );
-  });
-});
+//   it("simultaneity2", () => {
+//     // let x = Automerge.change(
+//     //   Automerge.init<{ fruits: Record<string, string> }>(),
+//     //   (doc) => {
+//     //     doc.fruits = {};
+//     //   }
+//     // );
+
+//     let x = Automerge.from<{ fruits: Record<string, string> }>({ fruits: {} });
+
+//     let y = Automerge.merge(
+//       Automerge.init<{ fruits: Record<string, string> }>(),
+//       x
+//     );
+
+//     y = Automerge.change(y, (doc) => {
+//       doc.fruits.a = "banana";
+//     });
+
+//     x = Automerge.change(x, (doc) => {
+//       doc.fruits.a = "apple";
+//     });
+
+//     x = Automerge.merge(x, y);
+
+//     console.log(Automerge.getConflicts(x, "fruits"));
+//     // undefined
+//   });
+// });

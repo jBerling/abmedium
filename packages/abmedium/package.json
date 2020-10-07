@@ -23,6 +23,6 @@
   },
   "gitHead": "c2dc173e2ee984a82bbd005f33fdd7da966df8e4",
   "dependencies": {
-    "automerge": "^0.14.1"
+    "automerge": "https://github.com/automerge/automerge#performance"
   }
 }
