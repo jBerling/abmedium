@@ -24,16 +24,16 @@ Let's put the content `[["a", 1], ["b", 2], ["c", 3]]` into an Abmedium document
 
 ```javascript
 let fruits = Automerge.change(document<{}>(), (doc) => {
-  doc.layers.base.nodes[0] = { label: 0, value: seq(1, 2, 3) };
-  doc.layers.base.nodes[1] = { label: 1, value: seq(4, 5) };
-  doc.layers.base.nodes[2] = { label: 2, value: seq(6, 7) };
-  doc.layers.base.nodes[3] = { label: 3, value: seq(8, 9) };
-  doc.layers.base.nodes[4] = { label: 4, value: str("apple") };
-  doc.layers.base.nodes[5] = { label: 5, value: num(1) };
-  doc.layers.base.nodes[6] = { label: 6, value: str("banana") };
-  doc.layers.base.nodes[7] = { label: 7, value: num(2) };
-  doc.layers.base.nodes[8] = { label: 8, value: str("pear") };
-  doc.layers.base.nodes[9] = { label: 9, value: num(3) };
+  doc.layers.base[0] = { label: 0, value: seq(1, 2, 3) };
+  doc.layers.base[1] = { label: 1, value: seq(4, 5) };
+  doc.layers.base[2] = { label: 2, value: seq(6, 7) };
+  doc.layers.base[3] = { label: 3, value: seq(8, 9) };
+  doc.layers.base[4] = { label: 4, value: str("apple") };
+  doc.layers.base[5] = { label: 5, value: num(1) };
+  doc.layers.base[6] = { label: 6, value: str("banana") };
+  doc.layers.base[7] = { label: 7, value: num(2) };
+  doc.layers.base[8] = { label: 8, value: str("pear") };
+  doc.layers.base[9] = { label: 9, value: num(3) };
 });
 ```
 
@@ -62,8 +62,8 @@ Another reason is that it let's us express other graphs than trees. The example 
 
 ```javascript
 let dag = Automerge.change(document<{}>(), (doc) => {
-  doc.layers.base.nodes[0] = { label: 0, value: seq(1, 1) };
-  doc.layers.base.nodes[1] = { label: 1, value: str("same") };
+  doc.layers.base[0] = { label: 0, value: seq(1, 1) };
+  doc.layers.base[1] = { label: 1, value: str("same") };
 });
 ```
 
@@ -87,7 +87,7 @@ So far we have only worked with one layer, the base layer which is part of a doc
 
 ```javascript
 fruits = Automerge.change(fruits, (doc) => {
-  doc.layers.se = layer < {} > "se";
+  doc.layers.se = layer<{}>();
   doc.compositions.se = {
     label: "base",
     layers: [{ label: "se" }],
@@ -101,9 +101,9 @@ The se layer should contain Swedish content. Let's add it.
 
 ```javascript
 fruits = Automerge.change(fruits, (doc) => {
-  doc.layers.se.nodes[4] = { label: 4, value: str("äpple") };
-  doc.layers.se.nodes[6] = { label: 6, value: str("banan") };
-  doc.layers.se.nodes[8] = { label: 8, value: str("päron") };
+  doc.layers.se[4] = { label: 4, value: str("äpple") };
+  doc.layers.se[6] = { label: 6, value: str("banan") };
+  doc.layers.se[8] = { label: 8, value: str("päron") };
 });
 ```
 
@@ -153,23 +153,23 @@ console.log("4.", out);
 
 Now the disagreements are rendered the way we programmed in `stringPresenter2`.
 
-Let's fix the disagreements, now that we have been shown they exist.
+Let's fix the disagreements, now that we have been shown that they exist.
 
 ```javascript
 fruits = Automerge.change(fruits, (doc) => {
-  doc.layers.se.nodes[4] = {
+  doc.layers.se[4] = {
     label: 4,
     value: str("äpple"),
     tracked: str("apple"),
   };
 
-  doc.layers.se.nodes[6] = {
+  doc.layers.se[6] = {
     label: 6,
     value: str("banan"),
     tracked: str("banana"),
   };
 
-  doc.layers.se.nodes[8] = {
+  doc.layers.se[8] = {
     label: 8,
     value: str("päron"),
     tracked: str("pear"),
@@ -185,13 +185,81 @@ console.log("5.", out);
 // ⇒ 5. [["äpple", 1], ["banan", 2], ["päron", 3]]
 ```
 
-Abmedium also have the concept of a simultaneity. They are created when values are added concurrently to the same node. Since Abmedium does not handle concurrency by itelf, simultaneities are meant to be used together with other libraries that does.
-
 ## Simultaneities
 
-In addition to disagreements Abmedium also have the concept of simultaneities. A simultaneity is created when a node is updated concurrently.
+In addition to disagreements Abmedium also have the concept of simultaneities. A simultaneity is created when a node is updated concurrently. Abmedium relies on Automerge to keep track of concurrent updates.
 
-## Examples
+Let's create a new document from the existing one. In a more realistic example this other document would live on another device (or at least another process).
+
+```javascript
+let fruits2 = Automerge.merge(Automerge.init<Document<{}>>(), fruits);
+```
+
+Now update the original document.
+
+```javascript
+fruits = Automerge.change(fruits, (doc) => {
+  doc.layers.se[4] = { label: 4, value: str("Äpple") };
+});
+```
+
+Then update the copy.
+
+```javascript
+fruits2 = Automerge.change(fruits2, (doc) => {
+  doc.layers.se[4] = { label: 4, value: str("ÄPPLE") };
+});
+```
+
+Then merge the original with the copy.
+
+```javascript
+fruits = Automerge.merge(fruits, fruits2);
+```
+
+What we just did was to update the documents concurrently. It means both of the documents were updated without knowing the other one was updated. Depending on the context documents might go on for weeks without knowing what happens in other documents. Or they might know if a document is updated in less than a millisecond. Abmedium is designed to handle both contexts. If you cooperate tightly on a document, it is probably a good idea to work in the same layer, though you might want to shield yourself from others changes, and therefore place yourself in a sublayer. If documents are merged more seldom the changes should probably happen in different layers, and then perhaps merged into a superlayer.
+
+Just as with disagreements you need to update the stringPresenter function, otherwise one of the simultaneous values will randomly be selected and the other ones silently discarded.
+
+```javascript
+const stringPresenter3: NodePresenter<{}, string> = (node) =>
+  nodeswitch<{}, string, NodeValue, PresentationNode<{}, string>>({
+    seq: ({ items = [] }) => `[${items.join(", ")}]`,
+    str: ({ value, disagreement, simultaneities }) => {
+      if (simultaneities) {
+        return `{${simultaneities[1].map((value) => `"${value}"`).join(" ")}}`;
+      } else if (disagreement) {
+        const [, { expected, actual, to }] = disagreement;
+        return `»"${expected}" ≠ "${actual}" → "${to}"«`;
+      } else {
+        return `"${value}"`;
+      }
+    },
+    _: ({ value }) => String(value),
+  })(node);
+```
+
+Now let's render the document with the simultaneities visible inside of the curly brackets, which we decided was the way to represent them in this case.
+
+```javascript
+out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter3);
+console.log("6.", out);
+// ⇒ 6. [[{"Äpple" "ÄPPLE"}, 1], ["banan", 2], ["päron", 3]]
+```
+
+To get rid of the simultaneity just update the troublesome node again. In a real situation this means that you first have seen the simultaneity and then chosen the value you want to keep.
+
+```javascript
+fruits = Automerge.change(fruits, (doc) => {
+  doc.layers.se[4] = { label: 4, value: str("Äpple"), tracked: "apple" };
+});
+
+out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter3);
+console.log("7.", out);
+// ⇒ 7. [["Äpple", 1], ["banan", 2], ["päron", 3]]
+```
+
+## Examples !!!TODO update!!!
 
 Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples/from-readme.js) contains all the examples in this document.
 

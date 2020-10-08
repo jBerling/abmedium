@@ -5,7 +5,7 @@ import Automerge from "automerge";
 
 describe("layers", () => {
   it("return layers but not nodes", () => {
-    let doc = Automerge.change(document<{}>(), (doc) => {
+    let doc = Automerge.change(Automerge.from(document<{}>()), (doc) => {
       doc.layers.base.a = { label: "a", value: sym("A") };
       doc.layers.base.two = { label: "two", value: num(2) };
       doc.layers.c = layer<{}>({ a: { label: "a", value: sym("AA") } });

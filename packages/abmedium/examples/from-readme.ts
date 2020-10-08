@@ -9,6 +9,7 @@ import {
   NodePresenter,
   NodeValue,
   PresentationNode,
+  Document,
   document,
   layer,
 } from "@abrovink/abmedium";
@@ -17,7 +18,9 @@ import Automerge from "automerge";
 
 // ## Document Structure
 
-let fruits = Automerge.change(document<{}>(), (doc) => {
+let fruits = Automerge.from(document<{}>());
+
+fruits = Automerge.change(fruits, (doc) => {
   doc.layers.base[0] = { label: 0, value: seq(1, 2, 3) };
   doc.layers.base[1] = { label: 1, value: seq(4, 5) };
   doc.layers.base[2] = { label: 2, value: seq(6, 7) };
@@ -41,7 +44,7 @@ let out = treeOf(proj(fruits), stringPresenter);
 console.log("1.", out);
 // ⇒ 1. [(["apple", 1], ["banana", 2], ["pear", 3])];
 
-let dag = Automerge.change(document<{}>(), (doc) => {
+let dag = Automerge.change(Automerge.from(document<{}>()), (doc) => {
   doc.layers.base[0] = { label: 0, value: seq(1, 1) };
   doc.layers.base[1] = { label: 1, value: str("same") };
 });
@@ -118,3 +121,43 @@ console.log("5.", out);
 // ⇒ 5. [["äpple", 1], ["banan", 2], ["päron", 3]]
 
 // ## Simultaneities
+
+let fruits2 = Automerge.merge(Automerge.init<Document<{}>>(), fruits);
+
+fruits = Automerge.change(fruits, (doc) => {
+  doc.layers.se[4] = { label: 4, value: str("Äpple"), tracked: str("apple") };
+});
+
+fruits2 = Automerge.change(fruits2, (doc) => {
+  doc.layers.se[4] = { label: 4, value: str("ÄPPLE"), tracked: str("apple") };
+});
+
+fruits = Automerge.merge(fruits, fruits2);
+
+const stringPresenter3: NodePresenter<{}, string> = (node) =>
+  nodeswitch<{}, string, NodeValue, PresentationNode<{}, string>>({
+    seq: ({ items = [] }) => `[${items.join(", ")}]`,
+    str: ({ value, disagreement, simultaneities }) => {
+      if (simultaneities) {
+        return `{${simultaneities[1].map((value) => `"${value}"`).join(" ")}}`;
+      } else if (disagreement) {
+        const [, { expected, actual, to }] = disagreement;
+        return `»"${expected}" ≠ "${actual}" → "${to}"«`;
+      } else {
+        return `"${value}"`;
+      }
+    },
+    _: ({ value }) => String(value),
+  })(node);
+
+out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter3);
+console.log("6.", out);
+// ⇒ 6. [[{"Äpple" "ÄPPLE"}, 1], ["banan", 2], ["päron", 3]]
+
+fruits = Automerge.change(fruits, (doc) => {
+  doc.layers.se[4] = { label: 4, value: str("Äpple"), tracked: "apple" };
+});
+
+out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter3);
+console.log("7.", out);
+// ⇒ 7. [["Äpple", 1], ["banan", 2], ["päron", 3]]

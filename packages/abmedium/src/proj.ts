@@ -1,6 +1,6 @@
 import Automerge from "automerge";
 
-import { dis, isEqual } from "./core";
+import { dis, sim, isEqual } from "./core";
 
 import {
   Projection,
@@ -8,16 +8,27 @@ import {
   LayerComposition,
   Layer,
   Metadata,
+  NodeValue,
 } from "./types";
 
 const projectLayer = <M extends Metadata>(
   projection: Projection<M>,
-  layer: Layer<M>
+  layer: Automerge.FreezeObject<Layer<M>>
 ) => {
-  for (const node of Object.values(layer)) {
+  for (const node of Object.values(layer as Layer<M>)) {
     const { label, value, tracked } = node;
     const actual = projection.nodes[label]?.value;
     projection.nodes[label] = node;
+
+    const simultaneities = Automerge.getConflicts(layer, label);
+    if (simultaneities) {
+      projection.nodes[label].simultaneities = sim(
+        node.value,
+        ...(Object.values(simultaneities) as any).map(
+          (n: typeof node): NodeValue => n.value
+        )
+      );
+    }
 
     if (!isEqual(actual, tracked)) {
       projection.nodes[label].disagreement = dis({
@@ -31,7 +42,7 @@ const projectLayer = <M extends Metadata>(
 
 const projectLayers = <M extends Metadata>(
   projection: Projection<M>,
-  document: Document<M>,
+  document: Automerge.FreezeObject<Document<M>>,
   composition: LayerComposition
 ) => {
   const layer = document.layers[composition.label];
@@ -55,7 +66,7 @@ export const proj = <M extends Metadata>(
     nodes: {},
   };
 
-  projectLayers(projection, document as Document<M>, composition);
+  projectLayers(projection, document, composition);
 
   return projection;
 };
