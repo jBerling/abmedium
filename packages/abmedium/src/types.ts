@@ -40,14 +40,35 @@ export type NodeValueType =
 
 export type Label = string | number;
 
+export type ActorId = string;
+
 export type Metadata = Record<Label, NodeValue | undefined>;
 
 export type Node<M extends Metadata, T extends NodeValue = NodeValue> = {
   label: Label;
   tracked?: NodeValue;
   value: T;
-  metadata?: M;
+  // TODO
+  // type: "number" | "text" | "string" | "symbol" | "seq";
+  metadata: M;
 };
+
+/*
+
+const symbolNode = {
+  label: 1,
+  value: "+",
+  type: "symbol",
+  metadata: {}
+}
+
+or 
+
+const symbolNode = sym(1, "+")
+
+
+
+*/
 
 export type Layer<M extends Metadata, T extends NodeValue = NodeValue> = Record<
   Label,
@@ -69,11 +90,12 @@ export type ProjectionNode<
   T extends NodeValue = NodeValue
 > = Node<M, T> & {
   disagreement?: Dis;
-  simultaneities?: Sim;
+  simultaneities?: Record<ActorId, Partial<Node<M, T>>>;
 };
 
 export type Projection<M extends Metadata, T extends NodeValue = NodeValue> = {
   nodes: Record<Label, ProjectionNode<M, T>>;
+  simultaneities?: Record<ActorId, Partial<Node<M>>>;
 };
 
 export type PresentationNode<

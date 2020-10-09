@@ -1,9 +1,13 @@
+// TODO remove
 export const metaPrefix = "m$";
 
+// TODO remove
 export const reservedPrefix = "r$";
 
+// TODO remove
 export const trackedLabel = reservedPrefix + "tracked";
 
+// TODO remove
 export const disagreementLabel = metaPrefix + "dis";
 
 export const disName = "dis";

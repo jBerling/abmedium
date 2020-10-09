@@ -2,6 +2,8 @@ import Automerge from "automerge";
 
 import { dis, sim, isEqual } from "./core";
 
+import { mSetIn } from "./util";
+
 import {
   Projection,
   Document,
@@ -9,34 +11,94 @@ import {
   Layer,
   Metadata,
   NodeValue,
+  Node,
 } from "./types";
 
 const projectLayer = <M extends Metadata>(
   projection: Projection<M>,
   layer: Automerge.FreezeObject<Layer<M>>
 ) => {
-  for (const node of Object.values(layer as Layer<M>)) {
+  for (const node of Object.values(layer)) {
     const { label, value, tracked } = node;
     const actual = projection.nodes[label]?.value;
-    projection.nodes[label] = node;
+    projection.nodes[label] = node as Node<M, NodeValue>;
 
-    const simultaneities = Automerge.getConflicts(layer, label);
-    if (simultaneities) {
-      projection.nodes[label].simultaneities = sim(
-        node.value,
-        ...(Object.values(simultaneities) as any).map(
-          (n: typeof node): NodeValue => n.value
-        )
+    // const simultaneities = Automerge.getConflicts(layer, label);
+    // if (simultaneities) {
+    //   projection.nodes[label].simultaneities = sim(
+    //     node.value,
+    //     ...(Object.values(simultaneities) as any).map(
+    //       (n: typeof node): NodeValue => n.value
+    //     )
+    //   );
+    // }
+
+    // const simultaneities: Record<string, NodeValue> = Automerge.getConflicts(
+    //   layer[label],
+    //   "value"
+    // );
+    // if (simultaneities) {
+    //   projection.nodes[label].simultaneities = sim(
+    //     node.value,
+    //     ...Object.values(simultaneities)
+    //   );
+    // }
+
+    const nodeSimultaneities = Automerge.getConflicts(layer, label);
+
+    if (nodeSimultaneities) {
+      projection.simultaneities = Object.keys(nodeSimultaneities).reduce(
+        (acc, key) => {
+          const actorId = key.split("@")[1];
+          const actorSims = acc[actorId] || {};
+
+          return {
+            ...acc,
+            [actorId]: { ...actorSims, [label]: nodeSimultaneities[key] },
+          };
+        },
+        projection.simultaneities || {}
       );
     }
 
-    if (!isEqual(actual, tracked)) {
-      projection.nodes[label].disagreement = dis({
-        expected: tracked,
-        actual,
-        to: value,
-      });
+    for (const prop of Object.keys(node)) {
+      const conflicts = Automerge.getConflicts(node, prop as keyof Node<M>);
+      if (!conflicts) continue;
+
+      for (const key of Object.keys(conflicts)) {
+        const actorId = key.split("@")[1];
+
+        mSetIn(
+          projection.nodes,
+          [String(label), "simultaneities", actorId, prop],
+          conflicts[key]
+        );
+      }
     }
+
+    for (const prop of Object.keys(node.metadata)) {
+      const conflicts = Automerge.getConflicts(node.metadata, prop);
+      if (!conflicts) continue;
+
+      for (const key of Object.keys(conflicts)) {
+        const actorId = key.split("@")[1];
+
+        mSetIn(
+          projection.nodes,
+          [String(label), "simultaneities", actorId, "metadata", prop],
+          conflicts[key]
+        );
+      }
+    }
+
+    // if (!isEqual(actual, tracked)) {
+    //   // TODO: remove use of dis, just create {expected, actual, to} directly
+    //   projection.nodes[label].disagreement = dis({
+    //     expected: tracked,
+    //     actual,
+    //     to: value,
+    //   });
+    // }
   }
 };
 
