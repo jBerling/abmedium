@@ -11,7 +11,7 @@ import {
   NodeValue,
 } from "./types";
 
-export const treeOf = <M extends Metadata, R, T extends NodeValue = NodeValue>(
+export const pres = <M extends Metadata, R, T extends NodeValue = NodeValue>(
   projection: Projection<M, T>,
   nodePresenter: NodePresenter<M, R, T> = presNodeswitch<M, R, T>({
     _: (n: any) => n,
@@ -30,7 +30,7 @@ export const treeOf = <M extends Metadata, R, T extends NodeValue = NodeValue>(
 
   if (valtype(node) === "seq") {
     items = (node as Seq).value.map((label, pos) =>
-      treeOf(projection, nodePresenter, label, pos, rootLabel)
+      pres(projection, nodePresenter, label, pos, rootLabel)
     );
   }
 

@@ -1,5 +1,5 @@
 import { numn, sym, symn, strn, niln, seqn } from "./core";
-import { treeOf } from "./tree-of";
+import { pres } from "./pres";
 import { PresNode, Sym } from "./types";
 import { presNodeswitch } from "./nodeswitch";
 
@@ -10,7 +10,7 @@ describe("treeOf", () => {
     const number = sym("number");
     const symbol = sym("symbol");
     expect(
-      treeOf<Meta, PresNode<Meta, PresNode<Meta, any>>>({
+      pres<Meta, PresNode<Meta, PresNode<Meta, any>>>({
         nodes: {
           0: seqn(0, [1, 2, 3], { type: call }),
           1: symn(1, "+", { type: symbol }),
@@ -39,11 +39,11 @@ describe("treeOf", () => {
   });
 
   it("Handles nil values", () => {
-    expect(treeOf({ nodes: { 0: niln(0, {}) } })).toEqual(niln(0, {}));
+    expect(pres({ nodes: { 0: niln(0, {}) } })).toEqual(niln(0, {}));
   });
 
   it("creates a tree with a custom root node", () => {
-    const res = treeOf(
+    const res = pres(
       {
         nodes: {
           3: seqn(3, [4, 5], {}),
@@ -66,7 +66,7 @@ describe("treeOf", () => {
   it("uses a custom node presenter", () => {
     type Sexpr = string;
 
-    const res = treeOf(
+    const res = pres(
       {
         nodes: {
           0: seqn(0, [1, 2, 3], {}),

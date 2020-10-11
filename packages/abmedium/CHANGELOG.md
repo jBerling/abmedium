@@ -16,7 +16,7 @@ Some of the changes:
 - add Ref NodeValue type. Also add ref and refn functions
 - remove Dis NodeValue type
 - remove Sim NodeValue type
-- TODO rename treeOf back to pres
+- rename treeOf back to pres
 - TODO new node value type added: Txt
 - ... and more!
 - TODO update disagreement example
