@@ -8,7 +8,7 @@ import {
   nodeswitch,
   NodePresenter,
   NodeValue,
-  PresentationNode,
+  PresNode,
   Document,
   document,
   layer,
@@ -76,7 +76,7 @@ console.log("3.", out);
 // ## Disagreements
 
 const stringPresenter2: NodePresenter<{}, string> = (node) =>
-  nodeswitch<{}, string, NodeValue, PresentationNode<{}, string>>({
+  nodeswitch<{}, string, NodeValue, PresNode<{}, string>>({
     seq: ({ items = [] }) => `[${items.join(", ")}]`,
     str: ({ value, disagreement }) => {
       if (disagreement) {
@@ -135,7 +135,7 @@ fruits2 = Automerge.change(fruits2, (doc) => {
 fruits = Automerge.merge(fruits, fruits2);
 
 const stringPresenter3: NodePresenter<{}, string> = (node) =>
-  nodeswitch<{}, string, NodeValue, PresentationNode<{}, string>>({
+  nodeswitch<{}, string, NodeValue, PresNode<{}, string>>({
     seq: ({ items = [] }) => `[${items.join(", ")}]`,
     str: ({ value, disagreement, simultaneities }) => {
       if (simultaneities) {

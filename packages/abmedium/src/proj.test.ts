@@ -1,4 +1,4 @@
-import { seq, sym, num, str, dis, sim, layer } from "./core";
+import { seq, seqn, symn, num, numn, str, strn, layer } from "./core";
 import { proj } from "./proj";
 import Automerge from "automerge";
 import { document } from "./document";
@@ -7,39 +7,20 @@ import { Num, Str, Document } from "./types";
 const testDoc = () =>
   Automerge.change(Automerge.from(document<{}>()), (doc) => {
     const base = doc.layers.base;
-    base[1] = { label: 1, value: sym("+"), metadata: {} };
-    base[2] = { label: 2, value: num(1), metadata: {} };
-    base[3] = { label: 3, value: num(2), metadata: {} };
-    base[0] = {
-      label: 0,
-      value: seq(1, 2, 3),
-      metadata: {},
-    };
+    base[1] = symn(1, "+", {});
+    base[2] = numn(2, 1, {});
+    base[3] = numn(3, 2, {});
+    base[0] = seqn(0, [1, 2, 3], {});
 
     doc.layers.layer1 = layer<{}>();
-    doc.layers.layer1[2] = {
-      label: 2,
-      value: num(11),
-      tracked: num(1),
-      metadata: {},
-    };
-    doc.layers.layer1[3] = {
-      label: 3,
-      value: num(21),
-      tracked: num(2),
-      metadata: {},
-    };
+    doc.layers.layer1[2] = numn(2, 11, {}, num(1));
+    doc.layers.layer1[3] = numn(3, 21, {}, num(2));
 
     doc.layers.layer1_1 = layer<{}>();
-    doc.layers.layer1_1[3] = {
-      label: 3,
-      value: num(211),
-      tracked: num(21),
-      metadata: {},
-    };
+    doc.layers.layer1_1[3] = numn(3, 211, {}, num(21));
 
     doc.layers.layer2 = layer<{}>();
-    doc.layers.layer2[2] = { label: 2, value: num(12), metadata: {} };
+    doc.layers.layer2[2] = numn(2, 12, {});
   });
 
 // TODO write a test that handles metadata conflicts
@@ -48,10 +29,10 @@ describe("proj", () => {
   it("only base layer", () => {
     expect(proj(testDoc())).toEqual({
       nodes: {
-        0: { label: 0, value: seq(1, 2, 3), metadata: {} },
-        1: { label: 1, value: sym("+"), metadata: {} },
-        2: { label: 2, value: num(1), metadata: {} },
-        3: { label: 3, value: num(2), metadata: {} },
+        0: seqn(0, [1, 2, 3], {}),
+        1: symn(1, "+", {}),
+        2: numn(2, 1, {}),
+        3: numn(3, 2, {}),
       },
     });
   });
@@ -69,10 +50,10 @@ describe("proj", () => {
 
     expect(projection).toEqual({
       nodes: {
-        0: { label: 0, value: seq(1, 2, 3), metadata: {} },
-        1: { label: 1, value: sym("+"), metadata: {} },
-        2: { label: 2, value: num(11), tracked: num(1), metadata: {} },
-        3: { label: 3, value: num(211), tracked: num(21), metadata: {} },
+        0: seqn(0, [1, 2, 3], {}),
+        1: symn(1, "+", {}),
+        2: numn(2, 11, {}, num(1)),
+        3: numn(3, 211, {}, num(21)),
       },
     });
   });
@@ -95,110 +76,37 @@ describe("proj", () => {
 
     expect(projection).toEqual({
       nodes: {
-        0: { label: 0, value: seq(1, 2, 3), metadata: {} },
-        1: { label: 1, value: sym("+"), metadata: {} },
-        2: { label: 2, value: num(11), tracked: num(1), metadata: {} },
-        3: { label: 3, value: num(211), tracked: num(21), metadata: {} },
+        0: seqn(0, [1, 2, 3], {}),
+        1: symn(1, "+", {}),
+        2: numn(2, 11, {}, num(1)),
+        3: numn(3, 211, {}, num(21)),
       },
     });
   });
 
   it("root replacement", () => {
     const d = Automerge.change(Automerge.from(document<{}>()), (doc) => {
-      doc.layers.base[0] = { label: 0, value: str("a"), metadata: {} };
+      doc.layers.base[0] = strn(0, "a", {});
       doc.layers.replacement = layer<{}>();
-      doc.layers.replacement[0] = {
-        label: 0,
-        value: str("b"),
-        tracked: str("a"),
-        metadata: {},
-      };
+      doc.layers.replacement[0] = strn(0, "b", {}, str("a"));
     });
 
     expect(
       proj(d, { label: "base", layers: [{ label: "replacement" }] })
     ).toEqual({
       nodes: {
-        0: { label: 0, value: str("b"), tracked: str("a"), metadata: {} },
-      },
-    });
-  });
-
-  it("metadata", () => {
-    const d = Automerge.change(
-      Automerge.from(document<{ descr?: Str; ts?: Num }>()),
-      (doc) => {
-        doc.layers.base[0] = { label: 0, value: seq(1, 2), metadata: {} };
-
-        doc.layers.base[1] = {
-          label: 1,
-          value: str("a"),
-          metadata: { descr: str("small a"), ts: num(1588321340608) },
-        };
-
-        doc.layers.base[2] = {
-          label: 2,
-          value: str("b"),
-          metadata: {
-            descr: str("small b"),
-
-            // Note that this should not be added to the projection.
-            // For now that is how is designed, but we are not sure it's the
-            // right way to handle it.
-            ts: num(1588321366606),
-          },
-        };
-
-        doc.layers.alt = layer();
-
-        doc.layers.alt[2] = {
-          label: 2,
-          value: str("B"),
-          metadata: {
-            descr: str("big b"),
-          },
-          tracked: str("b"),
-        };
-
-        doc.compositions.default = {
-          label: "base",
-          layers: [{ label: "alt" }],
-        };
-      }
-    );
-
-    const result = proj(d);
-
-    expect(result).toEqual({
-      nodes: {
-        0: { label: 0, value: seq(1, 2), metadata: {} },
-        1: {
-          label: 1,
-          value: str("a"),
-          metadata: { descr: str("small a"), ts: num(1588321340608) },
-        },
-        2: {
-          label: 2,
-          value: str("B"),
-          tracked: str("b"),
-          metadata: { descr: str("big b") },
-        },
+        0: strn(0, "b", {}, str("a")),
       },
     });
   });
 
   it("simple agreement", () => {
     const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
-      doc.layers.base[0] = { label: 0, value: str("a"), metadata: {} };
+      doc.layers.base[0] = strn(0, "a", {});
 
       doc.layers.layer1 = layer<{}>();
 
-      doc.layers.layer1[0] = {
-        label: 0,
-        value: str("b"),
-        tracked: str("a"),
-        metadata: {},
-      };
+      doc.layers.layer1[0] = strn(0, "b", {}, str("a"));
 
       doc.compositions.default = {
         label: "base",
@@ -208,7 +116,7 @@ describe("proj", () => {
 
     expect(proj(x)).toEqual({
       nodes: {
-        0: { label: 0, value: str("b"), tracked: str("a"), metadata: {} },
+        0: strn(0, "b", {}, str("a")),
       },
     });
   });
@@ -216,23 +124,13 @@ describe("proj", () => {
   // TODO will not support this for now. Not sure it is right anyway.
   xit("agreement of two equal mappings", () => {
     const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
-      doc.layers.base[0] = { label: 0, value: str("a"), metadata: {} };
+      doc.layers.base[0] = strn(0, "a", {});
 
       doc.layers.layer1 = layer<{}>();
-      doc.layers.layer1[0] = {
-        label: 0,
-        value: str("b"),
-        tracked: str("a"),
-        metadata: {},
-      };
+      doc.layers.layer1[0] = strn(0, "b", {}, str("a"));
 
       doc.layers.layer2 = layer<{}>();
-      doc.layers.layer2[0] = {
-        label: 0,
-        value: str("b"),
-        tracked: str("a"),
-        metadata: {},
-      };
+      doc.layers.layer2[0] = strn(0, "b", {}, str("a"));
 
       doc.compositions.default = {
         label: "base",
@@ -243,23 +141,18 @@ describe("proj", () => {
     const res = proj(x);
     expect(res).toEqual({
       nodes: {
-        0: { label: 0, value: str("b"), tracked: str("a"), metadata: {} },
+        0: strn(0, "b", {}, str("a")),
       },
     });
   });
 
   it("simple disagreement", () => {
     const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
-      doc.layers.base[0] = { label: 0, value: str("a"), metadata: {} };
+      doc.layers.base[0] = strn(0, "a", {});
 
       doc.layers.layer1 = layer<{}>();
 
-      doc.layers.layer1[0] = {
-        label: 0,
-        value: str("c"),
-        tracked: str("b"),
-        metadata: {},
-      };
+      doc.layers.layer1[0] = strn(0, "c", {}, str("b"));
 
       doc.compositions.default = {
         label: "base",
@@ -270,15 +163,169 @@ describe("proj", () => {
     expect(proj(x)).toEqual({
       nodes: {
         0: {
-          label: 0,
-          value: str("c"),
-          tracked: str("b"),
-          disagreement: dis({
-            expected: str("b"),
-            actual: str("a"),
-            to: str("c"),
-          }),
-          metadata: {},
+          ...strn(0, "c", {}, str("b")),
+          disagreements: {
+            layer1: {
+              expected: str("b"),
+              actual: str("a"),
+              to: str("c"),
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it("disagreement on disagreement", () => {
+    const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
+      doc.layers.base[0] = strn(0, "a", {});
+
+      doc.layers.layer1 = layer<{}>();
+
+      doc.layers.layer1[0] = strn(0, "c", {}, str("b"));
+
+      doc.layers.layer2 = layer<{}>();
+
+      doc.layers.layer2[0] = strn(0, "e", {}, str("d"));
+
+      doc.compositions.default = {
+        label: "base",
+        layers: [{ label: "layer1" }, { label: "layer2" }],
+      };
+    });
+
+    expect(proj(x)).toEqual({
+      nodes: {
+        0: {
+          ...strn(0, "e", {}, str("d")),
+          disagreements: {
+            layer1: { expected: str("b"), actual: str("a"), to: str("c") },
+            layer2: { expected: str("d"), actual: str("c"), to: str("e") },
+          },
+        },
+      },
+    });
+  });
+
+  it("metadata agreement", () => {
+    type M = { foo: Str; bar: Num; humle: Str; dumle: Str };
+
+    const x = Automerge.change(Automerge.from(document<M>()), (doc) => {
+      doc.layers.base[0] = strn(0, "a", {
+        foo: str("x"),
+        bar: num(1),
+        humle: str("one"),
+        dumle: str("two"),
+      });
+      doc.layers.layer1 = layer<M>();
+      doc.layers.layer1[0] = strn(
+        0,
+        "a",
+        { foo: str("z"), bar: num(2), humle: str("two"), dumle: str("three") },
+        str("a"),
+        {
+          foo: str("x"),
+          bar: num(1),
+          humle: str("one"),
+        }
+      );
+
+      doc.compositions.default = {
+        label: "base",
+        layers: [{ label: "layer1" }],
+      };
+    });
+
+    expect(proj(x)).toEqual({
+      nodes: {
+        0: {
+          ...strn(
+            0,
+            "a",
+            {
+              foo: str("z"),
+              bar: num(2),
+              humle: str("two"),
+              dumle: str("three"),
+            },
+            str("a"),
+            {
+              foo: str("x"),
+              bar: num(1),
+              humle: str("one"),
+            }
+          ),
+        },
+      },
+    });
+  });
+
+  it("metadata disagreement", () => {
+    type M = { foo: Str; bar: Num; humle: Str; dumle: Str };
+
+    const x = Automerge.change(Automerge.from(document<M>()), (doc) => {
+      doc.layers.base[0] = strn(0, "a", {
+        foo: str("x"),
+        bar: num(1),
+        humle: str("one"),
+        dumle: str("two"),
+      });
+      doc.layers.layer1 = layer<M>();
+      doc.layers.layer1[0] = strn(
+        0,
+        "a",
+        { foo: str("z"), bar: num(3), humle: str("two"), dumle: str("three") },
+        str("a"),
+        {
+          foo: str("y"),
+          bar: num(2),
+          humle: str("one"),
+        }
+      );
+
+      doc.compositions.default = {
+        label: "base",
+        layers: [{ label: "layer1" }],
+      };
+    });
+
+    expect(proj(x)).toEqual({
+      nodes: {
+        0: {
+          ...strn(
+            0,
+            "a",
+            {
+              foo: str("z"),
+              bar: num(3),
+              humle: str("two"),
+              dumle: str("three"),
+            },
+            str("a"),
+            {
+              foo: str("y"),
+              bar: num(2),
+              humle: str("one"),
+            }
+          ),
+          disagreements: {
+            layer1: {
+              metadata: {
+                expected: {
+                  foo: str("y"),
+                  bar: num(2),
+                },
+                actual: {
+                  foo: str("x"),
+                  bar: num(1),
+                },
+                to: {
+                  foo: str("z"),
+                  bar: num(3),
+                },
+              },
+            },
+          },
         },
       },
     });
@@ -286,11 +333,11 @@ describe("proj", () => {
 
   it("disagreement, expected undefined was set", () => {
     const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
-      doc.layers.base[0] = { label: 0, value: str("a"), metadata: {} };
+      doc.layers.base[0] = strn(0, "a", {});
 
       doc.layers.layer1 = layer<{}>();
 
-      doc.layers.layer1[0] = { label: 0, value: str("c"), metadata: {} };
+      doc.layers.layer1[0] = strn(0, "c", {});
 
       doc.compositions.default = {
         label: "base",
@@ -301,14 +348,10 @@ describe("proj", () => {
     expect(proj(x)).toEqual({
       nodes: {
         0: {
-          label: 0,
-          value: str("c"),
-          disagreement: dis({
-            expected: undefined,
-            actual: str("a"),
-            to: str("c"),
-          }),
-          metadata: {},
+          ...strn(0, "c", {}),
+          disagreements: {
+            layer1: { expected: undefined, actual: str("a"), to: str("c") },
+          },
         },
       },
     });
@@ -318,7 +361,7 @@ describe("proj", () => {
     const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
       doc.layers.layer1 = layer<{}>();
 
-      doc.layers.layer1[0] = { label: 0, value: str("a"), metadata: {} };
+      doc.layers.layer1[0] = strn(0, "a", {});
 
       doc.compositions.default = {
         label: "base",
@@ -327,7 +370,9 @@ describe("proj", () => {
     });
 
     expect(proj(x)).toEqual({
-      nodes: { 0: { label: 0, value: str("a"), metadata: {} } },
+      nodes: {
+        0: strn(0, "a", {}),
+      },
     });
   });
 
@@ -335,12 +380,7 @@ describe("proj", () => {
     const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
       doc.layers.layer1 = layer<{}>();
 
-      doc.layers.layer1[0] = {
-        label: 0,
-        value: str("c"),
-        tracked: str("b"),
-        metadata: {},
-      };
+      doc.layers.layer1[0] = strn(0, "c", {}, str("b"));
 
       doc.compositions.default = {
         label: "base",
@@ -351,15 +391,10 @@ describe("proj", () => {
     expect(proj(x)).toEqual({
       nodes: {
         0: {
-          label: 0,
-          value: str("c"),
-          tracked: str("b"),
-          disagreement: dis({
-            expected: str("b"),
-            actual: undefined,
-            to: str("c"),
-          }),
-          metadata: {},
+          ...strn(0, "c", {}, str("b")),
+          disagreements: {
+            layer1: { expected: str("b"), actual: undefined, to: str("c") },
+          },
         },
       },
     });
@@ -367,16 +402,11 @@ describe("proj", () => {
 
   it("sequence agreement", () => {
     const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
-      doc.layers.base[0] = { label: 0, value: seq(1, 2, 3), metadata: {} };
+      doc.layers.base[0] = seqn(0, [1, 2, 3], {});
 
       doc.layers.layer1 = layer<{}>();
 
-      doc.layers.layer1[0] = {
-        label: 0,
-        value: seq(3, 2, 1),
-        tracked: seq(1, 2, 3),
-        metadata: {},
-      };
+      doc.layers.layer1[0] = seqn(0, [3, 2, 1], {}, seq([1, 2, 3]));
 
       doc.compositions.default = {
         label: "base",
@@ -386,28 +416,18 @@ describe("proj", () => {
 
     expect(proj(x)).toEqual({
       nodes: {
-        0: {
-          label: 0,
-          value: seq(3, 2, 1),
-          tracked: seq(1, 2, 3),
-          metadata: {},
-        },
+        0: seqn(0, [3, 2, 1], {}, seq([1, 2, 3])),
       },
     });
   });
 
   it("sequence disagreement", () => {
     const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
-      doc.layers.base[0] = { label: 0, value: seq(1, 2, 3), metadata: {} };
+      doc.layers.base[0] = seqn(0, [1, 2, 3], {});
 
       doc.layers.layer1 = layer<{}>();
 
-      doc.layers.layer1[0] = {
-        label: 0,
-        value: seq(3, 2, 1),
-        tracked: seq(1, 3, 2),
-        metadata: {},
-      };
+      doc.layers.layer1[0] = seqn(0, [3, 2, 1], {}, seq([1, 3, 2]));
 
       doc.compositions.default = {
         label: "base",
@@ -418,15 +438,14 @@ describe("proj", () => {
     expect(proj(x)).toEqual({
       nodes: {
         0: {
-          label: 0,
-          value: seq(3, 2, 1),
-          tracked: seq(1, 3, 2),
-          metadata: {},
-          disagreement: dis({
-            expected: seq(1, 3, 2),
-            actual: seq(1, 2, 3),
-            to: seq(3, 2, 1),
-          }),
+          ...seqn(0, [3, 2, 1], {}, seq([1, 3, 2])),
+          disagreements: {
+            layer1: {
+              expected: seq([1, 3, 2]),
+              actual: seq([1, 2, 3]),
+              to: seq([3, 2, 1]),
+            },
+          },
         },
       },
     });
@@ -441,13 +460,13 @@ describe("proj", () => {
     let b = Automerge.merge(Automerge.init<Document<{}>>("bb"), a);
     let c = Automerge.merge(Automerge.init<Document<{}>>("cc"), a);
     a = Automerge.change(a, (doc) => {
-      doc.layers.base[0] = { label: 0, value: str("a"), metadata: {} };
+      doc.layers.base[0] = strn(0, "a", {});
     });
     b = Automerge.change(b, (doc) => {
-      doc.layers.base[0] = { label: 0, value: str("b"), metadata: {} };
+      doc.layers.base[0] = strn(0, "b", {});
     });
     c = Automerge.change(c, (doc) => {
-      doc.layers.base[0] = { label: 0, value: str("c"), metadata: {} };
+      doc.layers.base[0] = strn(0, "c", {});
     });
 
     a = Automerge.merge(a, b);
@@ -455,16 +474,14 @@ describe("proj", () => {
 
     expect(proj(a)).toEqual({
       nodes: {
-        0: {
-          label: 0,
-          metadata: {},
-          value: str("c"),
-        },
+        0: strn(0, "c", {}),
       },
       simultaneities: {
-        aa: { 0: { label: 0, metadata: {}, value: str("a") } },
-        bb: { 0: { label: 0, metadata: {}, value: str("b") } },
-        cc: { 0: { label: 0, metadata: {}, value: str("c") } },
+        0: {
+          aa: strn(0, "a", {}),
+          bb: strn(0, "b", {}),
+          cc: strn(0, "c", {}),
+        },
       },
     });
   });
@@ -476,11 +493,10 @@ describe("proj", () => {
     });
 
     a = Automerge.change(a, (doc) => {
-      doc.layers.base[0] = {
-        label: 0,
-        value: str("a"),
-        metadata: { author: str("Mrs A"), date: str("2020-10-08") },
-      };
+      doc.layers.base[0] = strn(0, "a", {
+        author: str("Mrs A"),
+        date: str("2020-10-08"),
+      });
     });
 
     let b = Automerge.merge(Automerge.init<Document<{ author: Str }>>("bb"), a);
@@ -488,20 +504,17 @@ describe("proj", () => {
     let c = Automerge.merge(Automerge.init<Document<{ author: Str }>>("cc"), a);
 
     a = Automerge.change(a, (doc) => {
-      doc.layers.base[0].value = str("A");
-      doc.layers.base[0].tracked = str("_");
+      doc.layers.base[0].value = "A";
     });
 
     b = Automerge.change(b, (doc) => {
-      doc.layers.base[0].value = str("B");
-      doc.layers.base[0].tracked = str("…");
+      doc.layers.base[0].value = "B";
       doc.layers.base[0].metadata.author = str("Mr B");
     });
 
     c = Automerge.change(c, (doc) => {
-      doc.layers.base[0].value = str("C");
+      doc.layers.base[0].value = "C";
       doc.layers.base[0].metadata.author = str("Dr C");
-      doc.layers.base[0].tracked = str("x");
     });
 
     a = Automerge.merge(a, b);
@@ -510,23 +523,17 @@ describe("proj", () => {
     expect(proj(a)).toEqual({
       nodes: {
         0: {
-          label: 0,
-          metadata: { author: str("Mr B"), date: str("2020-10-08") },
-          value: str("C"),
-          tracked: str("x"),
+          ...strn(0, "C", { author: str("Dr C"), date: str("2020-10-08") }),
           simultaneities: {
             aa: {
-              value: str("A"),
-              tracked: str("_"),
+              value: "A",
             },
             bb: {
-              value: str("B"),
-              tracked: str("…"),
+              value: "B",
               metadata: { author: str("Mr B") },
             },
             cc: {
-              value: str("C"),
-              tracked: str("x"),
+              value: "C",
               metadata: { author: str("Dr C") },
             },
           },

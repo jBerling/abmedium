@@ -1,40 +1,26 @@
-import { num, sym, layer } from "./core";
+import { numn, symn, layer } from "./core";
 import { layers } from "./layers";
 import { document } from "./document";
 import Automerge from "automerge";
 
-describe("layers", () => {
-  it("return layers but not nodes", () => {
-    let doc = Automerge.change(Automerge.from(document<{}>()), (doc) => {
-      doc.layers.base.a = { label: "a", value: sym("A") };
-      doc.layers.base.two = { label: "two", value: num(2) };
-      doc.layers.c = layer<{}>({ a: { label: "a", value: sym("AA") } });
-      doc.layers.d = layer<{}>({ a: { label: "a", value: sym("a") } });
-    });
-
-    expect([...layers(doc)]).toMatchObject([
-      {
-        a: {
-          label: "a",
-          value: sym("A"),
-        },
-        two: {
-          label: "two",
-          value: num(2),
-        },
-      },
-      {
-        a: {
-          label: "a",
-          value: sym("AA"),
-        },
-      },
-      {
-        a: {
-          label: "a",
-          value: sym("a"),
-        },
-      },
-    ]);
+test("layers", () => {
+  let doc = Automerge.change(Automerge.from(document<{}>()), (doc) => {
+    doc.layers.base.a = symn("a", "A", {});
+    doc.layers.base.two = numn("two", 2, {});
+    doc.layers.c = layer<{}>({ a: symn("a", "AA", {}) });
+    doc.layers.d = layer<{}>({ a: symn("a", "a", {}) });
   });
+
+  expect([...layers(doc)]).toMatchObject([
+    {
+      a: symn("a", "A", {}),
+      two: numn("two", 2, {}),
+    },
+    {
+      a: symn("a", "AA", {}),
+    },
+    {
+      a: symn("a", "a", {}),
+    },
+  ]);
 });

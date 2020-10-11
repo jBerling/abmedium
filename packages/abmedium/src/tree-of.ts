@@ -1,23 +1,21 @@
-import { valswitch } from "./valswitch";
-import { Label, NodePresenter, Projection, Scalar, Metadata } from "./types";
-import { asSeq } from "./core";
+// TODO rename back to pres
 
-export const defaultNodePresenter: NodePresenter<any, Scalar | Scalar[]> = ({
-  value,
-  items,
-}) =>
-  valswitch<Scalar | Scalar[]>({
-    seq: items as Scalar[],
-    // TODO: Add presented items here.
-    sim: (/*[, items]*/) => {
-      throw new Error("not implemented");
-    },
-    _: value as Scalar,
-  })(value, items);
+import { presNodeswitch } from "./nodeswitch";
+import { valtype } from "./core";
+import {
+  Label,
+  NodePresenter,
+  Projection,
+  Metadata,
+  Seq,
+  NodeValue,
+} from "./types";
 
-export const treeOf = <M extends Metadata, R>(
-  projection: Projection<M>,
-  nodePresenter: NodePresenter<M, R> = defaultNodePresenter as any,
+export const treeOf = <M extends Metadata, R, T extends NodeValue = NodeValue>(
+  projection: Projection<M, T>,
+  nodePresenter: NodePresenter<M, R, T> = presNodeswitch<M, R, T>({
+    _: (n: any) => n,
+  }),
   rootLabel: Label = 0,
   pos?: number,
   parent?: Label
@@ -29,17 +27,21 @@ export const treeOf = <M extends Metadata, R>(
   }
 
   let items: R[] | undefined;
-  const seq = asSeq(node.value);
-  if (seq) {
-    items = seq[1].map((label, pos) =>
+
+  if (valtype(node) === "seq") {
+    items = (node as Seq).value.map((label, pos) =>
       treeOf(projection, nodePresenter, label, pos, rootLabel)
     );
   }
 
-  return nodePresenter({
-    ...node,
+  return nodePresenter(
+    {
+      ...node,
+      items,
+      pos,
+      parent,
+    },
     items,
-    pos,
-    parent,
-  });
+    projection.simultaneities && projection.simultaneities[rootLabel]
+  );
 };

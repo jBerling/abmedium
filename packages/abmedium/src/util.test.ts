@@ -12,10 +12,11 @@ describe("util", () => {
     const o = { a: { b: "c" }, d: {} };
 
     mSetIn(o, ["d", "e"], "f");
+    mSetIn(o, ["d", "g"], "h");
 
     expect(o).toEqual({
       a: { b: "c" },
-      d: { e: "f" },
+      d: { e: "f", g: "h" },
     });
   });
 

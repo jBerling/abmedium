@@ -6,138 +6,134 @@ import {
   Node,
   Str,
   Num,
-  Sim,
-  Dis,
   Sym,
   Seq,
   Nil,
-  Scalar,
   Ref,
   Metadata,
 } from "./types";
 
 import {
-  disName,
-  simName,
   symName,
   seqName,
   strName,
   numName,
   nilName,
   refName,
-  scalarTypeNames,
-  metaPrefix,
 } from "./constants";
 
 import { valswitch } from "./valswitch";
-
-// TODO: remove?
-export const asLayer = <M extends Metadata>(x: any): Layer<M> | undefined =>
-  x !== null && !Array.isArray(x) && typeof x === "object"
-    ? (x as Layer<M>)
-    : undefined;
 
 export const layer = <M extends Metadata>(
   nodes: Record<Label, Node<M>> = {}
 ): Layer<M> => nodes;
 
-// TODO: remove?
-export const isMetalayerLabel = (label: Label): boolean =>
-  String(label).startsWith(metaPrefix);
-
-export const valtype = (v: NodeValue): NodeValueType | null => {
-  if (typeof v === "string") return strName;
-  if (typeof v === "number") return numName;
-  if (v === null) return nilName;
-  if (Array.isArray(v)) {
-    const [type] = v as any;
-    return type;
-  }
-
-  // Not an Abmedium value type
-  return null;
-};
+export const valtype = ({ type }: NodeValue): NodeValueType => type;
 
 export const valtypeIn = (
-  v: NodeValue,
+  n: NodeValue,
   ...types: NodeValueType[]
 ): NodeValueType | undefined => {
-  const vt = valtype(v);
+  const nt = valtype(n);
   for (const vtype of types) {
-    if (vtype === vt) return vt;
+    if (vtype === nt) return nt;
   }
   return undefined;
 };
 
-export const asScalar = (x: any): Scalar | undefined =>
-  valtypeIn(x, ...scalarTypeNames) ? (x as Scalar) : undefined;
+export const node = <M extends Metadata, T extends NodeValue>(
+  label: Label,
+  value: T,
+  metadata: M,
+  tracked?: NodeValue,
+  trackedMeta?: Partial<M>
+): Node<M, T> => {
+  let node: Node<M, T> = { ...value, label, metadata };
 
-export const sim = (...members: NodeValue[]): Sim => {
-  const s = new Set<NodeValue>();
+  // We handle tracked this way,
+  // because Automerge seems to not support undefined.
+  if (tracked) node.tracked = tracked;
+  if (trackedMeta) node.trackedMeta = trackedMeta;
 
-  const swtch = valswitch({
-    sim: ([, values]) => {
-      for (const v of values) s.add(v);
-    },
-    _: (v) => {
-      s.add(v);
-    },
-  });
-
-  for (const member of members) swtch(member);
-
-  return [simName, [...s.values()]];
+  return node;
 };
 
-export const asSim = (v: any): Sim | undefined => valtypeIn(v, "sim") && v;
+export const nodeValueOf = <T extends NodeValue>({
+  type,
+  value,
+}: Node<any, T>): T => ({ type, value } as T);
 
-export const dis = (args: {
-  expected: NodeValue | undefined;
-  actual: NodeValue | undefined;
-  to: NodeValue;
-}): Dis => [disName, args];
+export const nil: Nil = { type: nilName, value: null };
 
-export const asDis = (v: any): Dis | undefined =>
-  valtypeIn(v, disName) && (v as Dis);
+export const niln = <M extends Metadata>(
+  label: Label,
+  metadata: M,
+  tracked?: NodeValue,
+  trackedMeta?: Partial<M>
+): Node<M, Nil> => node(label, nil, metadata, tracked, trackedMeta);
 
-export const sym = (name: string): Sym => [symName, name];
+export const num = (x: string | number): Num => ({
+  type: numName,
+  value: typeof x === "string" ? Number(x) : x,
+});
 
-export const asSym = (v: any): Sym | undefined =>
-  valtypeIn(v, symName) && (v as Sym);
+export const numn = <M extends Metadata>(
+  label: Label,
+  value: Num["value"],
+  metadata: M,
+  tracked?: NodeValue,
+  trackedMeta?: Partial<M>
+): Node<M, Num> => node(label, num(value), metadata, tracked, trackedMeta);
 
-export const ref = (label: Label): Ref => [refName, label];
+export const ref = (value: Ref["value"]): Ref => ({ type: refName, value });
 
-export const asRef = (v: any): Ref | undefined =>
-  valtypeIn(v, refName) && (v as Ref);
+export const refn = <M extends Metadata>(
+  label: Label,
+  value: Ref["value"],
+  metadata: M,
+  tracked?: NodeValue,
+  trackedMeta?: Partial<M>
+): Node<M, Ref> => node(label, ref(value), metadata, tracked, trackedMeta);
 
-export const str = (s: string): Str => s;
+export const seq = (value: Seq["value"] = []): Seq => ({
+  type: seqName,
+  value,
+});
 
-export const asStr = (v: any): Str | undefined =>
-  valtypeIn(v, strName) && (v as Str);
+export const seqn = <M extends Metadata>(
+  label: Label,
+  value: Seq["value"],
+  metadata: M,
+  tracked?: NodeValue,
+  trackedMeta?: Partial<M>
+): Node<M, Seq> => node(label, seq(value), metadata, tracked, trackedMeta);
 
-export const num = (x: string | number): Num =>
-  typeof x === "string" ? Number(x) : x;
+export const str = (value: Str["value"]): Str => ({ type: strName, value });
 
-export const asNum = (v: any): Num | undefined =>
-  valtypeIn(v, numName) && (v as Num);
+export const strn = <M extends Metadata>(
+  label: Label,
+  value: Str["value"],
+  metadata: M,
+  tracked?: NodeValue,
+  trackedMeta?: Partial<M>
+): Node<M, Str> => node(label, str(value), metadata, tracked, trackedMeta);
 
-export const seq = (...items: Label[]): Seq => [seqName, items];
+export const sym = (name: string): Sym => ({ type: symName, value: name });
 
-export const seqItems = (s: Seq) => s[1];
-
-export const asSeq = (v: any): Seq | undefined =>
-  valtypeIn(v, seqName) && (v as Seq);
-
-export const nil: Nil = null;
+export const symn = <M extends Metadata>(
+  label: Label,
+  value: Sym["value"],
+  metadata: M,
+  tracked?: NodeValue,
+  trackedMeta?: Partial<M>
+): Node<M, Sym> => node(label, sym(value), metadata, tracked, trackedMeta);
 
 export const lengthOf = (value) =>
   valswitch<number>({
-    seq: ([, s]) => s.length,
-    sym: ([, name]) => name.length,
-    str: (s) => s.length,
-    num: (n) => String(n).length,
-    sim: NaN,
-    dis: NaN,
+    seq: (v) => v.length,
+    sym: (v) => v.length,
+    str: (v) => v.length,
+    num: (v) => String(v).length,
     ref: NaN,
     nil: 0,
   })(value);
@@ -147,48 +143,18 @@ export const isEqual = (a: NodeValue | undefined, b: NodeValue | undefined) => {
   if (a === undefined || b === undefined) return false;
 
   return valswitch<boolean>({
-    sym: ([, aName]) => {
-      const [, bName] = asSym(b) || [];
-      return aName === bName;
-    },
+    seq: (aVal) => {
+      const bSeq = b as Seq;
+      if (!bSeq || aVal.length !== bSeq.value.length) return false;
 
-    ref: ([, aLabel]) => {
-      const [, bLabel] = asRef(b) || [];
-      return String(aLabel) === String(bLabel);
-    },
-
-    seq: ([, aItems]) => {
-      const bSeq = asSeq(b);
-      if (!bSeq || aItems.length !== bSeq[1].length) return false;
-      for (const [i, aItem] of aItems.entries()) {
-        if (aItem !== bSeq[1][i]) return false;
+      for (const [i, aItem] of aVal.entries()) {
+        if (aItem !== bSeq.value[i]) return false;
       }
       return true;
     },
 
-    sim: ([, aItems]) => {
-      const bSim = asSim(b);
-      if (!bSim || aItems.length !== bSim[1].length) return false;
-      for (const aItem of aItems) {
-        if (!bSim[1].find((bItem) => isEqual(aItem, bItem))) {
-          return false;
-        }
-      }
-      return true;
-    },
+    ref: (aVal) => b.type === "ref" && String(aVal) === String(b.value),
 
-    dis: ([, { actual: aActual, to: aTo, expected: aExpected }]) => {
-      const bDis = asDis(b);
-      if (!bDis) return false;
-      const [, { actual: bActual, to: bTo, expected: bExpected }] = bDis;
-
-      return (
-        isEqual(aActual, bActual) &&
-        isEqual(aTo, bTo) &&
-        isEqual(aExpected, bExpected)
-      );
-    },
-
-    _: () => a === b,
+    _: () => a.type === b.type && a.value === b.value,
   })(a);
 };

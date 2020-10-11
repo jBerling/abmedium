@@ -1,25 +1,15 @@
-import { asRef } from "./core";
-import { Projection, Label, Ref, ProjectionNode, Metadata } from "./types";
+import { Projection, ProjNode, Metadata, NodeValue } from "./types";
 
-export const node = <M extends Metadata>(
-  projection: Projection<M>,
-  labelOrRef: Label | Ref
-): ProjectionNode<M> | undefined => {
-  const ref = asRef(labelOrRef);
-  const label = ref ? ref[1] : (labelOrRef as Label);
-  return projection.nodes[label];
-};
-
-export const nodes = <M extends Metadata>(
-  projection: Projection<M>
-): Iterable<ProjectionNode<M>> => {
+export const nodes = <M extends Metadata, T extends NodeValue = NodeValue>(
+  projection: Projection<M, T>
+): Iterable<ProjNode<M, T>> => {
   const labels = Object.keys(projection.nodes);
   let i = 0;
 
-  const nextNode = (): ProjectionNode<M> | undefined => {
+  const nextNode = (): ProjNode<M, T> | undefined => {
     const label = labels[i++];
     if (!label) return undefined;
-    return node(projection, label);
+    return projection.nodes[label];
   };
 
   return {

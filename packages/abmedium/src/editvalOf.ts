@@ -1,17 +1,9 @@
 import { valswitch } from "./valswitch";
-import { Str, Num } from "./types";
+import { Label, NodeValue } from "./types";
 
-export const editvalOf = (value) =>
-  valswitch<any>({
-    seq: ([, items]) => items,
-    sym: ([, name]) => name,
-    str: (s: Str) => s,
-    num: (n: Num) => String(n),
+export const editvalOf = (value: NodeValue) =>
+  valswitch<string | Label[]>({
     nil: "",
-    sim: ([, items]) => items.map(editvalOf),
-    dis: ([, { expected, actual, to }]) => ({
-      expected: editvalOf(expected),
-      actual: editvalOf(actual),
-      to: editvalOf(to),
-    }),
+    seq: (items) => items,
+    _: (v) => String(v),
   })(value);

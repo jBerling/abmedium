@@ -1,6 +1,6 @@
 import Automerge from "automerge";
 
-import { dis, sim, isEqual } from "./core";
+import { isEqual, nodeValueOf } from "./core";
 
 import { mSetIn } from "./util";
 
@@ -12,57 +12,49 @@ import {
   Metadata,
   NodeValue,
   Node,
+  Label,
 } from "./types";
 
 const projectLayer = <M extends Metadata>(
   projection: Projection<M>,
+  layerLabel: Label,
   layer: Automerge.FreezeObject<Layer<M>>
 ) => {
   for (const node of Object.values(layer)) {
-    const { label, value, tracked } = node;
-    const actual = projection.nodes[label]?.value;
-    projection.nodes[label] = node as Node<M, NodeValue>;
+    const actual = projection.nodes[node.label];
 
-    // const simultaneities = Automerge.getConflicts(layer, label);
-    // if (simultaneities) {
-    //   projection.nodes[label].simultaneities = sim(
-    //     node.value,
-    //     ...(Object.values(simultaneities) as any).map(
-    //       (n: typeof node): NodeValue => n.value
-    //     )
-    //   );
-    // }
+    const shadowedNode = projection.nodes[node.label];
+    const shadowedDisagreements = shadowedNode?.disagreements;
 
-    // const simultaneities: Record<string, NodeValue> = Automerge.getConflicts(
-    //   layer[label],
-    //   "value"
-    // );
-    // if (simultaneities) {
-    //   projection.nodes[label].simultaneities = sim(
-    //     node.value,
-    //     ...Object.values(simultaneities)
-    //   );
-    // }
+    projection.nodes[node.label] = node as Node<M, NodeValue>;
 
-    const nodeSimultaneities = Automerge.getConflicts(layer, label);
-
-    if (nodeSimultaneities) {
-      projection.simultaneities = Object.keys(nodeSimultaneities).reduce(
-        (acc, key) => {
-          const actorId = key.split("@")[1];
-          const actorSims = acc[actorId] || {};
-
-          return {
-            ...acc,
-            [actorId]: { ...actorSims, [label]: nodeSimultaneities[key] },
-          };
-        },
-        projection.simultaneities || {}
+    if (shadowedDisagreements) {
+      mSetIn(
+        projection.nodes,
+        [node.label, "disagreements"],
+        shadowedDisagreements
       );
     }
 
+    const nodeSimultaneities = Automerge.getConflicts(layer, node.label);
+
+    if (nodeSimultaneities) {
+      for (const key of Object.keys(nodeSimultaneities)) {
+        const actorId = key.split("@")[1];
+        mSetIn(
+          projection,
+          ["simultaneities", node.label, actorId],
+          nodeSimultaneities[key]
+        );
+      }
+    }
+
     for (const prop of Object.keys(node)) {
-      const conflicts = Automerge.getConflicts(node, prop as keyof Node<M>);
+      // TODO, why do I need to use any?
+      const conflicts = Automerge.getConflicts(
+        node as any,
+        prop as keyof Node<M>
+      );
       if (!conflicts) continue;
 
       for (const key of Object.keys(conflicts)) {
@@ -70,7 +62,7 @@ const projectLayer = <M extends Metadata>(
 
         mSetIn(
           projection.nodes,
-          [String(label), "simultaneities", actorId, prop],
+          [String(node.label), "simultaneities", actorId, prop],
           conflicts[key]
         );
       }
@@ -85,20 +77,63 @@ const projectLayer = <M extends Metadata>(
 
         mSetIn(
           projection.nodes,
-          [String(label), "simultaneities", actorId, "metadata", prop],
+          [String(node.label), "simultaneities", actorId, "metadata", prop],
           conflicts[key]
         );
       }
     }
 
-    // if (!isEqual(actual, tracked)) {
-    //   // TODO: remove use of dis, just create {expected, actual, to} directly
-    //   projection.nodes[label].disagreement = dis({
-    //     expected: tracked,
-    //     actual,
-    //     to: value,
-    //   });
-    // }
+    // Check value disagreement
+    if (
+      !isEqual(
+        actual && nodeValueOf(actual),
+        node.tracked && nodeValueOf(node.tracked as Node<any, any>)
+      )
+    ) {
+      mSetIn(projection.nodes, [node.label, "disagreements", layerLabel], {
+        expected: node.tracked,
+        actual: actual && nodeValueOf(actual),
+        to: nodeValueOf(node),
+      });
+    }
+
+    if (node.trackedMeta) {
+      for (const prop of Object.keys(node.trackedMeta)) {
+        if (!isEqual(actual.metadata[prop], node.trackedMeta[prop])) {
+          mSetIn(
+            projection.nodes,
+            [
+              node.label,
+              "disagreements",
+              layerLabel,
+              "metadata",
+              "expected",
+              prop,
+            ],
+            node.trackedMeta[prop]
+          );
+
+          mSetIn(
+            projection.nodes,
+            [
+              node.label,
+              "disagreements",
+              layerLabel,
+              "metadata",
+              "actual",
+              prop,
+            ],
+            actual.metadata[prop]
+          );
+
+          mSetIn(
+            projection.nodes,
+            [node.label, "disagreements", layerLabel, "metadata", "to", prop],
+            node.metadata[prop]
+          );
+        }
+      }
+    }
   }
 };
 
@@ -111,7 +146,7 @@ const projectLayers = <M extends Metadata>(
 
   if (!layer) return;
 
-  projectLayer(projection, layer);
+  projectLayer(projection, composition.label, layer);
 
   if (!composition.layers || !composition.layers.length) return;
 

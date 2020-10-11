@@ -1,180 +1,86 @@
-import { num, sym, str, nil, seq, sim, dis } from "./core";
-import { valswitch } from "./valswitch";
+import { numn, sym, symn, strn, niln, seqn } from "./core";
 import { treeOf } from "./tree-of";
-import {
-  NodePresenter,
-  NodeValue,
-  PresentationNode,
-  Label,
-  Sym,
-  Metadata,
-} from "./types";
+import { PresNode, Sym } from "./types";
+import { presNodeswitch } from "./nodeswitch";
 
 describe("treeOf", () => {
   it("creates a tree with default presenter", () => {
+    type Meta = { type: Sym };
+    const call = sym("call");
+    const number = sym("number");
+    const symbol = sym("symbol");
     expect(
-      treeOf({
+      treeOf<Meta, PresNode<Meta, PresNode<Meta, any>>>({
         nodes: {
-          0: { label: 0, value: seq(1, 2, 3) },
-          1: { label: 1, value: sym("+") },
-          2: { label: 2, value: seq(4, 5) },
-          3: { label: 3, value: num(200) },
-          4: { label: 4, value: sym("inc") },
-          5: { label: 5, value: num(10) },
+          0: seqn(0, [1, 2, 3], { type: call }),
+          1: symn(1, "+", { type: symbol }),
+          2: seqn(2, [4, 5], { type: call }),
+          3: numn(3, 200, { type: number }),
+          4: symn(4, "inc", { type: symbol }),
+          5: numn(5, 10, { type: number }),
         },
       })
-    ).toEqual([sym("+"), [sym("inc"), num(10)], num(200)]);
+    ).toEqual({
+      ...seqn(0, [1, 2, 3], { type: call }),
+      items: [
+        { ...symn(1, "+", { type: symbol }), parent: 0, pos: 0 },
+        {
+          ...seqn(2, [4, 5], { type: call }),
+          items: [
+            { ...symn(4, "inc", { type: symbol }), parent: 2, pos: 0 },
+            { ...numn(5, 10, { type: number }), parent: 2, pos: 1 },
+          ],
+          parent: 0,
+          pos: 1,
+        },
+        { ...numn(3, 200, { type: number }), parent: 0, pos: 2 },
+      ],
+    });
   });
 
   it("Handles nil values", () => {
-    expect(treeOf({ nodes: { 0: { label: 0, value: nil } } })).toEqual(nil);
+    expect(treeOf({ nodes: { 0: niln(0, {}) } })).toEqual(niln(0, {}));
   });
 
   it("creates a tree with a custom root node", () => {
     const res = treeOf(
       {
         nodes: {
-          3: { label: 3, value: seq(4, 5) },
-          4: { label: 4, value: str("a") },
-          5: { label: 5, value: str("b") },
+          3: seqn(3, [4, 5], {}),
+          4: strn(4, "a", {}),
+          5: strn(5, "b", {}),
         },
       },
       undefined,
       3
     );
-    expect(res).toEqual(["a", "b"]);
-  });
-
-  type TestNode<M extends Metadata> = PresentationNode<M, ITestNode<M>>;
-  interface ITestNode<M extends Metadata> extends TestNode<M> {}
-  type TestMeta = { type?: Sym };
-
-  it("passes presentation nodes to the presenter", () => {
-    const expected: TestNode<TestMeta> = {
-      label: 0,
-      value: seq(1, 2),
+    expect(res).toEqual({
+      ...seqn(3, [4, 5], {}),
       items: [
-        {
-          value: sym("inc"),
-          label: 1,
-          metadata: { type: sym("func") },
-          pos: 0,
-          parent: 0,
-          disagreement: [
-            "dis",
-            {
-              expected: sym("+1"),
-              actual: sym("inc1"),
-              to: sym("inc"),
-            },
-          ],
-        },
-        {
-          value: num(10),
-          label: 2,
-          metadata: { type: sym("number") },
-          pos: 1,
-          parent: 0,
-          simultaneities: ["sim", [num(11), num(10)]],
-        },
+        { ...strn(4, "a", {}), parent: 3, pos: 0 },
+        { ...strn(5, "b", {}), parent: 3, pos: 1 },
       ],
-      metadata: { type: sym("call") },
-    };
-
-    const res = treeOf<TestMeta, TestNode<TestMeta>>(
-      {
-        nodes: {
-          0: { label: 0, value: seq(1, 2), metadata: { type: sym("call") } },
-          1: {
-            label: 1,
-            value: sym("inc"),
-            metadata: { type: sym("func") },
-            disagreement: dis({
-              expected: sym("+1"),
-              actual: sym("inc1"),
-              to: sym("inc"),
-            }),
-          },
-          2: {
-            label: 2,
-            value: num(10),
-            metadata: {
-              type: sym("number"),
-            },
-            simultaneities: sim(num(11), num(10)),
-          },
-        },
-      },
-      (n) => n
-    );
-
-    expect(res).toEqual(expected);
+    });
   });
 
   it("uses a custom node presenter", () => {
-    type TreeNode = {
-      label: Label;
-      type?: NodeValue;
-      value: NodeValue | TreeNode[];
-      pos?: number;
-      parent?: Label;
-    };
+    type Sexpr = string;
 
-    const presenter: NodePresenter<TestMeta, TreeNode> = ({
-      value,
-      items,
-      label,
-      pos,
-      parent,
-      metadata: { type } = {},
-    }: PresentationNode<TestMeta, TreeNode>): TreeNode =>
-      valswitch<TreeNode>({
-        seq: (_, items): TreeNode => ({
-          label,
-          pos,
-          parent,
-          type,
-          value: items,
-        }),
-        _: (v): TreeNode => ({ label, pos, parent, type, value: v }),
-      })(value, items);
-
-    const res = treeOf<TestMeta, TreeNode>(
+    const res = treeOf(
       {
         nodes: {
-          0: {
-            label: 0,
-            value: seq("op", 2, 3),
-            metadata: { type: sym("call") },
-          },
-          op: {
-            label: "op",
-            value: sym("+"),
-            metadata: {
-              type: sym("function"),
-            },
-          },
-          2: { label: 2, value: num(10), metadata: { type: sym("number") } },
-          3: { label: 3, value: num(20), metadata: { type: sym("number") } },
+          0: seqn(0, [1, 2, 3], {}),
+          1: symn(1, "+", {}),
+          2: numn(2, 100, {}),
+          3: numn(3, 200, {}),
         },
       },
-      presenter
+      presNodeswitch<{}, Sexpr>({
+        seq: (_, items) => `(${items.join(" ")})`,
+        scalar: (node) => String(node.value),
+      })
     );
 
-    expect(res).toEqual({
-      label: 0,
-      type: sym("call"),
-      value: [
-        {
-          label: "op",
-          type: sym("function"),
-          value: sym("+"),
-          pos: 0,
-          parent: 0,
-        },
-        { label: 2, type: sym("number"), value: num(10), pos: 1, parent: 0 },
-        { label: 3, type: sym("number"), value: num(20), pos: 2, parent: 0 },
-      ],
-    });
+    expect(res).toEqual("(+ 100 200)");
   });
 });

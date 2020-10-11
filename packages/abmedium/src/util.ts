@@ -4,7 +4,7 @@
 // const hasIn = (o, prop) => !!getIn(o, prop);
 
 // const set = (o, prop, value) => ({ ...o, [prop]: value });
-export const setIn = (o = {}, [prop, ...path]: string[], value) => ({
+export const setIn = (o = {}, [prop, ...path]: (string | number)[], value) => ({
   ...o,
   [prop]: !path.length ? value : setIn(o[prop], path, value),
 });
@@ -16,7 +16,11 @@ export const setIn = (o = {}, [prop, ...path]: string[], value) => ({
  * @param param1
  * @param value
  */
-export const mSetIn = (o: Object, [prop, ...path]: string[], value) => {
+export const mSetIn = (
+  o: Object,
+  [prop, ...path]: (string | number)[],
+  value
+) => {
   o[prop] = !path.length ? value : mSetIn(o[prop] || {}, path, value);
   return o;
 };

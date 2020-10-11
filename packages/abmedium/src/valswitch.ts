@@ -1,17 +1,15 @@
-import { NodeValue, Str, Num, Sim, Dis, Sym, Seq, Nil, Ref } from "./types";
+import { NodeValue, Str, Num, Sym, Seq, Nil, Ref } from "./types";
 
 import { valtype } from "./core";
 
 type Switch<R> = {
-  seq?: ((seq: Seq, items: R[]) => R) | R;
-  sym?: ((sym: Sym) => R) | R;
-  str?: ((str: Str) => R) | R;
-  num?: ((num: Num) => R) | R;
-  sim?: ((sim: Sim, items: R[]) => R) | R;
-  dis?: ((dis: Dis) => R) | R;
-  nil?: ((nil: Nil) => R) | R;
-  ref?: ((ref: Ref) => R) | R;
-  _?: ((v: NodeValue) => R) | R;
+  seq?: ((value: Seq["value"], items: R[]) => R) | R;
+  sym?: ((value: Sym["value"]) => R) | R;
+  str?: ((value: Str["value"]) => R) | R;
+  num?: ((value: Num["value"]) => R) | R;
+  nil?: ((value: Nil["value"]) => R) | R;
+  ref?: ((value: Ref["value"]) => R) | R;
+  _?: ((v: NodeValue["value"]) => R) | R;
 };
 
 export const valswitch = <R>(sw: Switch<R>) => (
@@ -28,7 +26,7 @@ export const valswitch = <R>(sw: Switch<R>) => (
     throw new Error("no _ or " + vt + " handler");
   }
   if (typeof handler === "function") {
-    return (handler as any)(v, items);
+    return (handler as any)(v.value, items);
   }
   return handler;
 };

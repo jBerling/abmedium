@@ -2,21 +2,23 @@
 
 ## 0.10.0
 
-Once again big breaking changes. Migrate the project to TypeScript, make it dependent on Automerge, and make it support @abrovink/versioning.
+Once again big breaking changes. Migrate the project to TypeScript, make it dependent on Automerge. Most of the functionality has been rewritten.
 
-- TODO Add simultaneities directly in this package again.
-- Rethink how layers work. They are now implemented using Automerge tables.
-- Metalayers are removed. Instead metadata is now added directly on each node.
-- Replace view stacks with layer compositions. Compositions are more verbose but easier to read.
+Some of the changes:
+
+- Add simultaneities directly in this package again
+- Metalayers are removed. Instead metadata is now added directly on each node
+- Add niln, numn, seqn, strn, and symn
+- Replace view stacks with layer compositions. Compositions are more verbose but easier to read
 - Rename handles to labels
-- valtype broken apart into valtype, valtypeIn, valswitch and nodeswitch.
-- remove editval
-- add as<NodeType> functions
-- new node value type added: Ref
+- valtype broken apart into valtype, valtypeIn, valswitch
+- add nodeswitch, projNodeSwitch and presNodeSwitch
+- add Ref NodeValue type. Also add ref and refn functions
+- remove Dis NodeValue type
+- remove Sim NodeValue type
+- TODO rename treeOf back to pres
 - TODO new node value type added: Txt
 - ... and more!
-- TODO remove dis as node value type?
-- TODO remove sim as node value types?
 - TODO update disagreement example
 
 ## 0.9.1

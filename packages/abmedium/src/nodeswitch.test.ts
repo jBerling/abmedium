@@ -1,43 +1,102 @@
-import { seq, sym, str, num, nil, ref } from "./core";
-import { nodeswitch } from "./nodeswitch";
-import { Node } from "./types";
+import { seqn, symn, strn, numn, niln, refn } from "./core";
+import { nodeswitch, projNodeswitch, presNodeswitch } from "./nodeswitch";
+import { Node, ProjNode, PresNode } from "./types";
 
-describe("valswitch", () => {
-  test("All functions", () => {
+describe("nodeswitch", () => {
+  test("nodeswitch", () => {
     const switcher = nodeswitch<{}, [string, Node<{}>]>({
-      seq: (s) => ["seq", s],
-      sym: (s) => ["sym", s],
-      str: (s) => ["str", s],
-      num: (n) => ["num", n],
       nil: (n) => ["nil", n],
-      ref: (l) => ["ref", l],
-      _: (v) => ["_", v],
+      num: (n) => ["num", n],
+      ref: (n) => ["ref", n],
+      seq: (n) => ["seq", n],
+      str: (n) => ["str", n],
+      sym: (n) => ["sym", n],
     });
 
     const collected = [
-      switcher({ label: 0, value: seq() }),
-      switcher({ label: 0, value: sym("a") }),
-      switcher({ label: 0, value: str("") }),
-      switcher({ label: 0, value: num(0) }),
-      switcher({ label: 0, value: nil }),
-      switcher({ label: 0, value: ref(10) }),
+      switcher(niln(0, {})),
+      switcher(numn(0, 0, {})),
+      switcher(refn(0, 10, {})),
+      switcher(seqn(0, [], {}), []),
+      switcher(strn(0, "", {})),
+      switcher(symn(0, "a", {})),
     ];
 
     expect(collected).toMatchObject([
-      ["seq", { label: 0, value: seq() }],
-      ["sym", { label: 0, value: sym("a") }],
-      ["str", { label: 0, value: str("") }],
-      ["num", { label: 0, value: num(0) }],
-      ["nil", { label: 0, value: nil }],
-      ["ref", { label: 0, value: ref(10) }],
+      ["nil", niln(0, {})],
+      ["num", numn(0, 0, {})],
+      ["ref", refn(0, 10, {})],
+      ["seq", seqn(0, [], {})],
+      ["str", strn(0, "", {})],
+      ["sym", symn(0, "a", {})],
     ]);
   });
 
-  test("Use PresentationNode", () => {});
+  test("scalar", () => {
+    type StringList = string | StringList[];
+    const switcher = nodeswitch<{}, StringList>({
+      seq: (_, items) => items,
+      scalar: (item) => String(item.value),
+    });
 
-  test("_", () => {
-    expect(nodeswitch({ _: "foo" })({ label: 0, value: sym("a") })).toEqual(
-      "foo"
-    );
+    expect(switcher(seqn(0, [1, 2], {}), ["foo", "bar"])).toEqual([
+      "foo",
+      "bar",
+    ]);
+
+    expect(switcher(symn(1, "foo", {}))).toEqual("foo");
+  });
+
+  test("projNodeSwitch", () => {
+    const switcher = projNodeswitch<{}, [string, ProjNode<{}>]>({
+      num: (n, sims) => {
+        if (sims && sims.bb) return switcher(sims.bb);
+        return ["num", n];
+      },
+      _: (n) => ["_", n],
+    });
+
+    const collected = [
+      switcher(niln(0, {})),
+      switcher(numn(0, 10, {})),
+      switcher(numn(0, 11, {}), undefined, {
+        aa: numn(0, 11, {}),
+        bb: symn(0, "unset", {}),
+      }),
+    ];
+
+    expect(collected).toMatchObject([
+      ["_", niln(0, {})],
+      ["num", numn(0, 10, {})],
+      ["_", symn(0, "unset", {})],
+    ]);
+  });
+
+  test("presNodeSwitch", () => {
+    const switcher = presNodeswitch<{}, [string, PresNode<{}, string>]>({
+      num: (n, sims) => {
+        if (sims && sims.bb) return switcher(sims.bb);
+        return ["num", n];
+      },
+      _: (n, sims) => {
+        if (sims && sims.bb) return switcher(sims.bb);
+        return ["_", n];
+      },
+    });
+
+    const collected = [
+      switcher(niln(0, {})),
+      switcher(numn(0, 10, {})),
+      switcher(numn(0, 11, {}), undefined, {
+        aa: numn(0, 11, {}),
+        bb: symn(0, "unset", {}),
+      }),
+    ];
+
+    expect(collected).toMatchObject([
+      ["_", niln(0, {})],
+      ["num", numn(0, 10, {})],
+      ["_", symn(0, "unset", {})],
+    ]);
   });
 });
