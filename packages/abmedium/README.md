@@ -23,17 +23,19 @@ Layers can get in a conflict when they are projected in a stack. This is called 
 Let's put the content `[["a", 1], ["b", 2], ["c", 3]]` into an Abmedium document. This is done by destructuring the content into nodes.
 
 ```javascript
-let fruits = Automerge.change(document<{}>(), (doc) => {
-  doc.layers.base[0] = { label: 0, value: seq(1, 2, 3) };
-  doc.layers.base[1] = { label: 1, value: seq(4, 5) };
-  doc.layers.base[2] = { label: 2, value: seq(6, 7) };
-  doc.layers.base[3] = { label: 3, value: seq(8, 9) };
-  doc.layers.base[4] = { label: 4, value: str("apple") };
-  doc.layers.base[5] = { label: 5, value: num(1) };
-  doc.layers.base[6] = { label: 6, value: str("banana") };
-  doc.layers.base[7] = { label: 7, value: num(2) };
-  doc.layers.base[8] = { label: 8, value: str("pear") };
-  doc.layers.base[9] = { label: 9, value: num(3) };
+let fruits = Automerge.from(document<{}>());
+
+fruits = Automerge.change(fruits, (doc) => {
+  doc.layers.base[0] = node(0, seq([1, 2, 3]), {});
+  doc.layers.base[1] = node(1, seq([4, 5]), {});
+  doc.layers.base[2] = node(2, seq([6, 7]), {});
+  doc.layers.base[3] = node(3, seq([8, 9]), {});
+  doc.layers.base[4] = node(4, str("apple"), {});
+  doc.layers.base[5] = node(5, num(1), {});
+  doc.layers.base[6] = node(6, str("banana"), {});
+  doc.layers.base[7] = node(7, num(2), {});
+  doc.layers.base[8] = node(8, str("pear"), {});
+  doc.layers.base[9] = node(9, num(3), {});
 });
 ```
 
@@ -42,14 +44,13 @@ This is a very cumbersome format. Don't be frightened! The library is meant to b
 To make sure we have not lost our content structure, let's rebuild it!
 
 ```javascript
-const stringPresenter: NodePresenter<{}, string> = ({ value, items }) =>
-  valswitch({
-    seq: (_, items) => `[${items.join(", ")}]`,
-    str: () => `"${value}"`,
-    _: (v) => String(v),
-  })(value, items);
+const stringPresenter: NodePresenter<{}, string> = presNodeswitch({
+  seq: (_, items) => `[${items.join(", ")}]`,
+  str: (n) => `"${n.value}"`,
+  _: (n: PresNode<any, string>) => String(n.value),
+});
 
-let out = treeOf(proj(fruits), stringPresenter);
+let out = pres(proj(fruits), stringPresenter);
 console.log("1.", out);
 // ⇒ 1. [(["apple", 1], ["banana", 2], ["pear", 3])];
 ```
@@ -79,11 +80,15 @@ The structure also works with layers and projections.
 
 By the way, Abmedium is built on top of [Automerge](https://github.com/automerge/automerge). If it is new for you, you should probably take a look at it before you continue to read.
 
+## Nodes and NodeValues
+
+There are six types of node values: nil, numbers, references, sequences, strings , and symbols. A NodeValue can be created using a three-letter function: `nil`, `num`, `ref`, `seq`, `str`, or `sym`. A Node is a NodeValue with some extra information. It has a label, metadata and possibly tracked values (more about that later). A Node can be created using the `node` function, as in the examples above. This is pretty verbose. Therefore there are some shorthand functions, named after the NodeValue type of the node with an `n`-suffix. For example, the shorthand for a string node is `strn`.
+
+Instead of `node(0, str("foo"), {})` you can write `strn(0, "foo", {})`. We are going to use these shorthand functions in the rest of the examples.
+
 ## Layers and Projections
 
-A document has layers. It is a collection of nodes.
-
-So far we have only worked with one layer, the base layer which is part of a document by default. Let's add another layer.
+A document has layers. Nodes must be added to a layer, and can not be added to the document directly. So far we have only worked with one layer, the base layer. It is part of a document by default. Let's add another layer.
 
 ```javascript
 fruits = Automerge.change(fruits, (doc) => {
@@ -101,9 +106,9 @@ The se layer should contain Swedish content. Let's add it.
 
 ```javascript
 fruits = Automerge.change(fruits, (doc) => {
-  doc.layers.se[4] = { label: 4, value: str("äpple") };
-  doc.layers.se[6] = { label: 6, value: str("banan") };
-  doc.layers.se[8] = { label: 8, value: str("päron") };
+  doc.layers.se[4] = strn(4, "äpple", {});
+  doc.layers.se[6] = strn(6, "banan", {});
+  doc.layers.se[8] = strn(8, "päron", {});
 });
 ```
 
@@ -114,7 +119,7 @@ To create a projection we call the `proj` function, which already has been prese
 Let's log the se composition.
 
 ```javascript
-out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter);
+out = pres(proj(fruits, fruits.compositions.se), stringPresenter);
 console.log("3.", out);
 // ⇒ 3. [["äpple", 1], ["banan", 2], ["päron", 3]]
 ```
@@ -130,23 +135,23 @@ We have already created disagreements. All of the nodes of se expects to cover a
 The answer lies in the `stringPresenter` function we previously, silently defined. This function evaluates a projection when passed to `treeOf` (TODO rename). If we want to display disagreements we need to pass a different function. Let's do it.
 
 ```javascript
-const stringPresenter2: NodePresenter<{}, string> = (node) =>
-  nodeswitch<{}, string, NodeValue, PresentationNode<{}, string>>({
-    seq: ({ items = [] }) => `[${items.join(", ")}]`,
-    str: ({ value, disagreement }) => {
-      if (disagreement) {
-        const [, { expected, actual, to }] = disagreement;
-        return `»${expected} ≠ ${actual} → ${to}«`;
-      } else return `"${value}"`;
-    },
-    _: ({ value }) => String(value),
-  })(node);
+const stringPresenter2: NodePresenter<{}, string> = presNodeswitch({
+  seq: (_, items) => `[${items.join(", ")}]`,
+  str: ({ value, disagreements }) => {
+    if (disagreements) {
+      const { expected, actual, to } = disagreements.se;
+
+      return `»${expected?.value} ≠ ${actual?.value} → ${to?.value}«`;
+    } else return `"${value}"`;
+  },
+  _: (n) => String(n.value),
+});
 ```
 
-Then pass this function to `treeOf`.
+Then pass this function to `pres`.
 
 ```javascript
-out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter2);
+out = pres(proj(fruits, fruits.compositions.se), stringPresenter2);
 console.log("4.", out);
 // ⇒ 4. [[»undefined ≠ apple → äpple«, 1], [»undefined ≠ banana → banan«, 2], [»undefined ≠ pear → päron«, 3]]
 ```
@@ -157,30 +162,16 @@ Let's fix the disagreements, now that we have been shown that they exist.
 
 ```javascript
 fruits = Automerge.change(fruits, (doc) => {
-  doc.layers.se[4] = {
-    label: 4,
-    value: str("äpple"),
-    tracked: str("apple"),
-  };
-
-  doc.layers.se[6] = {
-    label: 6,
-    value: str("banan"),
-    tracked: str("banana"),
-  };
-
-  doc.layers.se[8] = {
-    label: 8,
-    value: str("päron"),
-    tracked: str("pear"),
-  };
+  doc.layers.se[4] = strn(4, "äpple", {}, str("apple"));
+  doc.layers.se[6] = strn(6, "banan", {}, str("banana"));
+  doc.layers.se[8] = strn(8, "päron", {}, str("pear"));
 });
 ```
 
-Then call `treeOf` with the projected se composition to verify the disagreemets are gone.
+Then call `pres` with the projected se composition to verify the disagreemets are gone.
 
 ```javascript
-out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter2);
+out = pres(proj(fruits, fruits.compositions.se), stringPresenter2);
 console.log("5.", out);
 // ⇒ 5. [["äpple", 1], ["banan", 2], ["päron", 3]]
 ```
@@ -192,22 +183,23 @@ In addition to disagreements Abmedium also have the concept of simultaneities. A
 Let's create a new document from the existing one. In a more realistic example this other document would live on another device (or at least another process).
 
 ```javascript
-let fruits2 = Automerge.merge(Automerge.init<Document<{}>>(), fruits);
+let fruits2 = Automerge.init<Document<{}>>();
+fruits2 = Automerge.merge(fruits2, fruits);
 ```
 
 Now update the original document.
 
 ```javascript
 fruits = Automerge.change(fruits, (doc) => {
-  doc.layers.se[4] = { label: 4, value: str("Äpple") };
+  doc.layers.se[4].value = "Äpple";
 });
 ```
 
-Then update the copy.
+Then update the new document.
 
 ```javascript
 fruits2 = Automerge.change(fruits2, (doc) => {
-  doc.layers.se[4] = { label: 4, value: str("ÄPPLE") };
+  doc.layers.se[4].value = "ÄPPLE";
 });
 ```
 
@@ -222,27 +214,26 @@ What we just did was to update the documents concurrently. It means both of the 
 Just as with disagreements you need to update the stringPresenter function, otherwise one of the simultaneous values will randomly be selected and the other ones silently discarded.
 
 ```javascript
-const stringPresenter3: NodePresenter<{}, string> = (node) =>
-  nodeswitch<{}, string, NodeValue, PresentationNode<{}, string>>({
-    seq: ({ items = [] }) => `[${items.join(", ")}]`,
-    str: ({ value, disagreement, simultaneities }) => {
-      if (simultaneities) {
-        return `{${simultaneities[1].map((value) => `"${value}"`).join(" ")}}`;
-      } else if (disagreement) {
-        const [, { expected, actual, to }] = disagreement;
-        return `»"${expected}" ≠ "${actual}" → "${to}"«`;
-      } else {
-        return `"${value}"`;
-      }
-    },
-    _: ({ value }) => String(value),
-  })(node);
+const stringPresenter3: NodePresenter<{}, string> = presNodeswitch({
+  seq: (_, items) => `[${items.join(", ")}]`,
+  str: ({ value, disagreements, simultaneities }) => {
+    if (disagreements) {
+      const { expected, actual, to } = disagreements.se;
+      return `»${expected?.value} ≠ ${actual?.value} → ${to?.value}«`;
+    } else if (simultaneities) {
+      return `{${Object.values(simultaneities)
+        .map(({ value }) => String(value))
+        .join(" ")}}`;
+    } else return `"${value}"`;
+  },
+  _: (n) => String(n.value),
+});
 ```
 
-Now let's render the document with the simultaneities visible inside of the curly brackets, which we decided was the way to represent them in this case.
+Now let's render the document with the simultaneities visible inside of the curly brackets, as defined by `stringPresenter3`.
 
 ```javascript
-out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter3);
+out = pres(proj(fruits, fruits.compositions.se), stringPresenter3);
 console.log("6.", out);
 // ⇒ 6. [[{"Äpple" "ÄPPLE"}, 1], ["banan", 2], ["päron", 3]]
 ```
@@ -251,10 +242,10 @@ To get rid of the simultaneity just update the troublesome node again. In a real
 
 ```javascript
 fruits = Automerge.change(fruits, (doc) => {
-  doc.layers.se[4] = { label: 4, value: str("Äpple"), tracked: "apple" };
+  doc.layers.se[4].value = "Äpple";
 });
 
-out = treeOf(proj(fruits, fruits.compositions.se), stringPresenter3);
+out = pres(proj(fruits, fruits.compositions.se), stringPresenter3);
 console.log("7.", out);
 // ⇒ 7. [["Äpple", 1], ["banan", 2], ["päron", 3]]
 ```

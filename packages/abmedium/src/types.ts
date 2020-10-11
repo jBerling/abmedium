@@ -65,7 +65,7 @@ export type ProjNode<
   M extends Metadata,
   T extends NodeValue = NodeValue
 > = Node<M> & {
-  disagreements?: Record<Label, Partial<Node<M, T>>>;
+  disagreements?: Record<Label, Disagreement<M>>;
   simultaneities?: Record<ActorId, Partial<Node<M, T>>>;
 };
 

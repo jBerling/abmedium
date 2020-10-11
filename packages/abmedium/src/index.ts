@@ -2,7 +2,7 @@ export * from "./types";
 export * from "./core";
 export * from "./constants";
 export * from "./proj";
-export * from "./tree-of";
+export * from "./pres";
 export * from "./nodes";
 export * from "./layers";
 export * from "./valswitch";
