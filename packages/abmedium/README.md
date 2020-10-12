@@ -244,7 +244,11 @@ To get rid of the simultaneity just update the troublesome node again. In a real
 fruits = Automerge.change(fruits, (doc) => {
   doc.layers.se[4].value = "Äpple";
 });
+```
 
+Once again, run `proj` and `pres` and verify that the simultaneity is gone.
+
+```javascript
 out = pres(proj(fruits, fruits.compositions.se), stringPresenter3);
 console.log("7.", out);
 // ⇒ 7. [["Äpple", 1], ["banan", 2], ["päron", 3]]

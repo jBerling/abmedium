@@ -143,10 +143,4 @@ fruits = Automerge.change(fruits, (doc) => {
 
 out = pres(proj(fruits, fruits.compositions.se), stringPresenter3);
 console.log("7.", out);
-// TODO This is not working
-//
-// expected:
-// ⇒ 7. [["Äpple", 1], ["banan", 2], ["päron", 3]]
-//
-// actual:
-// ⇒ 7. [[{ÄPPLE Äpple}, 1], ["banan", 2], ["päron", 3]]
+// ⇒ 7. [(["Äpple", 1], ["banan", 2], ["päron", 3])];

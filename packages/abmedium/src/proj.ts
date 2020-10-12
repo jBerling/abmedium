@@ -26,7 +26,8 @@ const projectLayer = <M extends Metadata>(
     const shadowedNode = projection.nodes[node.label];
     const shadowedDisagreements = shadowedNode?.disagreements;
 
-    projection.nodes[node.label] = node as Node<M, NodeValue>;
+    // TODO deep clone?
+    projection.nodes[node.label] = { ...node } as Node<M, NodeValue>;
 
     if (shadowedDisagreements) {
       mSetIn(
