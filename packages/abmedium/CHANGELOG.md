@@ -9,7 +9,9 @@ Some of the changes:
 - Add simultaneities directly in this package again
 - Metalayers are removed. Instead metadata is now added directly on each node
 - Add niln, numn, seqn, strn, and symn
-- Replace view stacks with layer compositions. Compositions are more verbose but easier to read
+- Replace view stacks with layer compositions. Compositions are more verbose but easier to read.
+  They are also part of the documents, and therefore versioned.
+- Sublayers are removed. Instead layers are put together using compositions.
 - Rename handles to labels
 - valtype broken apart into valtype, valtypeIn, valswitch
 - add nodeswitch, projNodeSwitch and presNodeSwitch

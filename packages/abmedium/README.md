@@ -100,7 +100,7 @@ fruits = Automerge.change(fruits, (doc) => {
 });
 ```
 
-Above we add a layer with the layer "se". We also add a _layer composition_, which is used to define the relation between layers. In this case we specify that se is on top of base. !!!!!!!TODO!!!!!! If you want to better understand how compositions work, take a look at the [compositions](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples/compositions.ts) example in the [examples](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples) directory.
+Above we add a layer called se. We also add a _layer composition_, which is used to define the relation between layers. In this case we specify that se is on top of base.
 
 The se layer should contain Swedish content. Let's add it.
 
@@ -254,7 +254,7 @@ console.log("7.", out);
 // ⇒ 7. [["Äpple", 1], ["banan", 2], ["päron", 3]]
 ```
 
-## Examples !!!TODO update!!!
+## Examples
 
 Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/master/packages/abmedium/examples/from-readme.js) contains all the examples in this document.
 
