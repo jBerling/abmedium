@@ -121,31 +121,6 @@ describe("proj", () => {
     });
   });
 
-  // TODO will not support this for now. Not sure it is right anyway.
-  xit("agreement of two equal mappings", () => {
-    const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
-      doc.layers.base[0] = strn(0, "a", {});
-
-      doc.layers.layer1 = layer<{}>();
-      doc.layers.layer1[0] = strn(0, "b", {}, str("a"));
-
-      doc.layers.layer2 = layer<{}>();
-      doc.layers.layer2[0] = strn(0, "b", {}, str("a"));
-
-      doc.compositions.default = {
-        label: "base",
-        layers: [{ label: "layer1" }, { label: "layer2" }],
-      };
-    });
-
-    const res = proj(x);
-    expect(res).toEqual({
-      nodes: {
-        0: strn(0, "b", {}, str("a")),
-      },
-    });
-  });
-
   it("simple disagreement", () => {
     const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
       doc.layers.base[0] = strn(0, "a", {});
@@ -172,6 +147,39 @@ describe("proj", () => {
             },
           },
         },
+      },
+    });
+  });
+
+  // TODO verify this is a good strategy.
+  // Do not implement for now. Might be a bad idea
+  xit("agreement, nodes have equal values", () => {
+    const x = Automerge.change(Automerge.from(document<{}>()), (doc) => {
+      doc.layers.base[0] = strn(0, "b", {});
+
+      doc.layers.layer1 = layer<{}>();
+
+      doc.layers.layer1[0] = strn(0, "a", {}, str("b"));
+      doc.layers.layer1[1] = strn(1, "d", {});
+      doc.layers.layer1[2] = strn(2, "f", {}, str("e"));
+
+      doc.layers.layer2 = layer<{}>();
+
+      doc.layers.layer2[0] = strn(0, "a", {}, str("b"));
+      doc.layers.layer2[1] = strn(1, "d", {}, str("c"));
+      doc.layers.layer2[2] = strn(2, "f", {});
+
+      doc.compositions.default = {
+        label: "base",
+        layers: [{ label: "layer1" }, { label: "layer2" }],
+      };
+    });
+
+    expect(proj(x)).toEqual({
+      nodes: {
+        0: strn(0, "a", {}, str("b")),
+        1: strn(1, "d", {}, str("c")),
+        2: strn(2, "f", {}),
       },
     });
   });
