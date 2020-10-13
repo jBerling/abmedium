@@ -1,4 +1,4 @@
-import { seqn, symn, strn, numn, niln, refn, txtn } from "./core";
+import { seqn, symn, strn, numn, niln, refn } from "./core";
 import { nodeswitch, projNodeswitch, presNodeswitch } from "./nodeswitch";
 import { Node, ProjNode, PresNode } from "./types";
 
@@ -11,7 +11,6 @@ describe("nodeswitch", () => {
       seq: (n) => ["seq", n],
       str: (n) => ["str", n],
       sym: (n) => ["sym", n],
-      txt: (n) => ["txt", n],
     });
 
     const collected = [
@@ -21,7 +20,6 @@ describe("nodeswitch", () => {
       switcher(seqn(0, [], {}), []),
       switcher(strn(0, "", {})),
       switcher(symn(0, "a", {})),
-      switcher(txtn(0, "a", {})),
     ];
 
     expect(collected).toMatchObject([
@@ -31,7 +29,6 @@ describe("nodeswitch", () => {
       ["seq", seqn(0, [], {})],
       ["str", strn(0, "", {})],
       ["sym", symn(0, "a", {})],
-      ["txt", txtn(0, "a", {})],
     ]);
   });
 

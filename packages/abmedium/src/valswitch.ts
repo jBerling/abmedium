@@ -1,9 +1,5 @@
 import { NodeValue, Str, Num, Sym, Seq, Nil, Ref, Scalar } from "./types";
-
-import { Txt } from "./txt";
-
 import { valtype, valtypeIn } from "./core";
-
 import { scalarTypeNames } from "./constants";
 
 type Switch<R> = {
@@ -13,7 +9,6 @@ type Switch<R> = {
   seq?: ((value: Seq["value"], items: R[]) => R) | R;
   str?: ((value: Str["value"]) => R) | R;
   sym?: ((value: Sym["value"]) => R) | R;
-  txt?: ((value: Txt["value"]) => R) | R;
   scalar?: ((value: Scalar["value"]) => R) | R;
   _?: ((v: NodeValue["value"]) => R) | R;
 };

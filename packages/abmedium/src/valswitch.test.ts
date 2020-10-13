@@ -1,8 +1,6 @@
-import { seq, sym, str, num, nil, ref, txt } from "./core";
+import { seq, sym, str, num, nil, ref } from "./core";
 import { valswitch } from "./valswitch";
 import { NodeValue } from "./types";
-import { Txt } from "./txt";
-// import Automerge from "automerge";
 
 describe("valswitch", () => {
   test("All functions", () => {
@@ -13,7 +11,6 @@ describe("valswitch", () => {
       seq: (s) => ["seq", s],
       str: (s) => ["str", s],
       sym: (s) => ["sym", s],
-      txt: (s) => ["txt", s],
     });
 
     const collected = [
@@ -23,7 +20,6 @@ describe("valswitch", () => {
       switcher(seq()),
       switcher(str("")),
       switcher(sym("a")),
-      switcher(txt("abc")),
     ];
 
     expect(collected).toMatchObject([
@@ -33,7 +29,6 @@ describe("valswitch", () => {
       ["seq", []],
       ["str", ""],
       ["sym", "a"],
-      ["txt", "abc"],
     ]);
   });
 

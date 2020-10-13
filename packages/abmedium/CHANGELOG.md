@@ -17,7 +17,6 @@ Some of the changes:
 - valtype broken apart into valtype, valtypeIn, valswitch
 - add nodeswitch, projNodeSwitch and presNodeSwitch
 - add Ref NodeValue type. Also add ref and refn functions
-- add Txt NodeValue type. Also add txt and txtn functions
 - remove Dis NodeValue type
 - remove Sim NodeValue type
 - rename treeOf back to pres

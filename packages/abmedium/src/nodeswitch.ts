@@ -15,8 +15,6 @@ import {
   Scalar,
 } from "./types";
 
-import { Txt } from "./txt";
-
 import { valtype, valtypeIn } from "./core";
 
 import { scalarTypeNames } from "./constants";
@@ -30,7 +28,6 @@ type NodeSwitch<M extends Metadata, R> = {
   seq?: ((node: Node<M, Seq>, items: R[]) => R) | R;
   str?: ((str: Node<M, Str>) => R) | R;
   sym?: ((sym: Node<M, Sym>) => R) | R;
-  txt?: ((txt: Node<M, Txt>) => R) | R;
   scalar?: ((scalar: Node<M, Scalar>) => R) | R;
   _?: ((v: Node<M>) => R) | R;
 };
@@ -96,12 +93,6 @@ type ProjNodeSwitch<M extends Metadata, R> = {
   sym?:
     | ((
         node: ProjNode<M, Sym>,
-        simultaneities?: Record<ActorId, ProjNode<M>>
-      ) => R)
-    | R;
-  txt?:
-    | ((
-        node: ProjNode<M, Txt>,
         simultaneities?: Record<ActorId, ProjNode<M>>
       ) => R)
     | R;
@@ -182,12 +173,6 @@ type PresNodeSwitch<M extends Metadata, R> = {
   sym?:
     | ((
         node: PresNode<M, R, Sym>,
-        simultaneities?: Record<ActorId, PresNode<M, R>>
-      ) => R)
-    | R;
-  txt?:
-    | ((
-        node: PresNode<M, R, Txt>,
         simultaneities?: Record<ActorId, PresNode<M, R>>
       ) => R)
     | R;

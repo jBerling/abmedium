@@ -13,15 +13,13 @@ import {
   Metadata,
 } from "./types";
 
-import { Txt, createTxt } from "./txt";
-
 import {
-  nilName,
-  numName,
-  refName,
+  symName,
   seqName,
   strName,
-  symName,
+  numName,
+  nilName,
+  refName,
 } from "./constants";
 
 import { valswitch } from "./valswitch";
@@ -130,22 +128,14 @@ export const symn = <M extends Metadata>(
   trackedMeta?: Partial<M>
 ): Node<M, Sym> => node(label, sym(value), metadata, tracked, trackedMeta);
 
-export const txt = (value: string): Txt => createTxt(value);
-
-export const txtn = <M extends Metadata>(
-  label: Label,
-  value: string,
-  metadata: M,
-  tracked?: NodeValue,
-  trackedMeta?: Partial<M>
-): Node<M, Txt> => node(label, txt(value), metadata, tracked, trackedMeta);
-
 export const lengthOf = (value) =>
   valswitch<number>({
-    nil: 0,
-    ref: NaN,
     seq: (v) => v.length,
-    _: (v) => String(v).length,
+    sym: (v) => v.length,
+    str: (v) => v.length,
+    num: (v) => String(v).length,
+    ref: NaN,
+    nil: 0,
   })(value);
 
 export const isEqual = (a: NodeValue | undefined, b: NodeValue | undefined) => {
