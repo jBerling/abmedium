@@ -5,6 +5,7 @@ import {
   seq,
   str,
   sym,
+  txt,
   valtype,
   valtypeIn,
   lengthOf,
@@ -19,6 +20,7 @@ describe("core", () => {
     expect(valtype(num(0))).toEqual("num");
     expect(valtype(nil)).toEqual("nil");
     expect(valtype(ref(0))).toEqual("ref");
+    expect(valtype(txt(""))).toEqual("txt");
   });
 
   test("valtypeIn", () => {
@@ -40,8 +42,9 @@ describe("core", () => {
         num("1001"),
         nil,
         ref("root"),
+        txt("humle"),
       ].map(lengthOf)
-    ).toMatchObject([3, 2, 3, 4, 0, NaN]);
+    ).toMatchObject([3, 2, 3, 4, 0, NaN, 5]);
   });
 
   describe("isEqual", () => {

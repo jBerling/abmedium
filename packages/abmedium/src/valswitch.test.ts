@@ -1,39 +1,47 @@
-import { seq, sym, str, num, nil, ref } from "./core";
+import { seq, sym, str, num, nil, ref, txt } from "./core";
 import { valswitch } from "./valswitch";
 import { NodeValue } from "./types";
+import { Txt } from "./txt";
+// import Automerge from "automerge";
 
 describe("valswitch", () => {
   test("All functions", () => {
     const switcher = valswitch<[string, NodeValue["value"]]>({
-      seq: (s) => ["seq", s],
-      sym: (s) => ["sym", s],
-      str: (s) => ["str", s],
-      num: (n) => ["num", n],
       nil: (n) => ["nil", n],
+      num: (n) => ["num", n],
       ref: (l) => ["ref", l],
-      _: (v) => ["_", v],
+      seq: (s) => ["seq", s],
+      str: (s) => ["str", s],
+      sym: (s) => ["sym", s],
+      txt: (s) => ["txt", s],
     });
 
     const collected = [
-      switcher(seq()),
-      switcher(sym("a")),
-      switcher(str("")),
-      switcher(num(0)),
       switcher(nil),
+      switcher(num(0)),
       switcher(ref(10)),
+      switcher(seq()),
+      switcher(str("")),
+      switcher(sym("a")),
+      switcher(txt("abc")),
     ];
 
     expect(collected).toMatchObject([
-      ["seq", []],
-      ["sym", "a"],
-      ["str", ""],
-      ["num", 0],
       ["nil", null],
+      ["num", 0],
       ["ref", 10],
+      ["seq", []],
+      ["str", ""],
+      ["sym", "a"],
+      ["txt", "abc"],
     ]);
   });
 
   test("_", () => {
     expect(valswitch({ _: "foo" })(sym("a"))).toEqual("foo");
+  });
+
+  test("scalar", () => {
+    expect(valswitch({ scalar: "bar" })(sym("a"))).toEqual("bar");
   });
 });

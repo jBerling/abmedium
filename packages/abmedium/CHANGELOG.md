@@ -2,7 +2,8 @@
 
 ## 0.10.0
 
-Once again big breaking changes. Migrate the project to TypeScript, make it dependent on Automerge. Most of the functionality has been rewritten.
+Once again big breaking changes. Migrate the project to TypeScript. Also, make the scope bigger again
+and dependent on Automerge. Most of the functionality has been rewritten.
 
 Some of the changes:
 
@@ -16,12 +17,11 @@ Some of the changes:
 - valtype broken apart into valtype, valtypeIn, valswitch
 - add nodeswitch, projNodeSwitch and presNodeSwitch
 - add Ref NodeValue type. Also add ref and refn functions
+- add Txt NodeValue type. Also add txt and txtn functions
 - remove Dis NodeValue type
 - remove Sim NodeValue type
 - rename treeOf back to pres
-- TODO new node value type added: Txt
 - ... and more!
-- TODO update disagreement example
 
 ## 0.9.1
 

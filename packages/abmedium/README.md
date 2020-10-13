@@ -26,16 +26,17 @@ Let's put the content `[["a", 1], ["b", 2], ["c", 3]]` into an Abmedium document
 let fruits = Automerge.from(document<{}>());
 
 fruits = Automerge.change(fruits, (doc) => {
-  doc.layers.base[0] = node(0, seq([1, 2, 3]), {});
-  doc.layers.base[1] = node(1, seq([4, 5]), {});
-  doc.layers.base[2] = node(2, seq([6, 7]), {});
-  doc.layers.base[3] = node(3, seq([8, 9]), {});
-  doc.layers.base[4] = node(4, str("apple"), {});
-  doc.layers.base[5] = node(5, num(1), {});
-  doc.layers.base[6] = node(6, str("banana"), {});
-  doc.layers.base[7] = node(7, num(2), {});
-  doc.layers.base[8] = node(8, str("pear"), {});
-  doc.layers.base[9] = node(9, num(3), {});
+  const base = doc.layers.base;
+  base[0] = node(0, seq([1, 2, 3]), {});
+  base[1] = node(1, seq([4, 5]), {});
+  base[2] = node(2, seq([6, 7]), {});
+  base[3] = node(3, seq([8, 9]), {});
+  base[4] = node(4, str("apple"), {});
+  base[5] = node(5, num(1), {});
+  base[6] = node(6, str("banana"), {});
+  base[7] = node(7, num(2), {});
+  base[8] = node(8, str("pear"), {});
+  base[9] = node(9, num(3), {});
 });
 ```
 

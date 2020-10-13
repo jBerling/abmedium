@@ -9,3 +9,4 @@ export * from "./valswitch";
 export * from "./nodeswitch";
 export * from "./editvalOf";
 export * from "./document";
+export * from "./txt";
