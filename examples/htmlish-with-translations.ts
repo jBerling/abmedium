@@ -8,7 +8,7 @@ import {
   proj,
   document,
   layer,
-} from "@abrovink/abmedium";
+} from "../dist";
 
 import Automerge from "automerge";
 

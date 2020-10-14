@@ -10,7 +10,7 @@ import {
   NodeValue,
   document,
   nodeValueOf,
-} from "@abrovink/abmedium";
+} from "../dist";
 
 import Automerge from "automerge";
 

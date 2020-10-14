@@ -1,10 +1,31 @@
 {
-  "extends": "./tsconfig.build.json",
-
   "compilerOptions": {
-    "baseUrl": "./packages",
-    "paths": {
-      "@abrovink/*": ["*/src"]
-    }
-  }
+    "target": "ES2018",
+    "module": "CommonJS",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "strict": true,
+    "pretty": true,
+    "sourceMap": true,
+
+    /* Additional Checks */
+    "noImplicitAny": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Module Resolution Options */
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+
+  "exclude": ["node_modules", "dist", "examples", "jest.config.js"]
 }

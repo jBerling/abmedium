@@ -11,7 +11,7 @@ import {
   document,
   Document,
   layer,
-} from "@abrovink/abmedium";
+} from "../dist";
 
 import Automerge from "automerge";
 
