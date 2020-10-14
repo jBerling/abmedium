@@ -7,6 +7,7 @@ and dependent on Automerge. Most of the functionality has been rewritten.
 
 Some of the changes:
 
+- From monorepo with Lerna to an ordinary single-package repository.
 - Add simultaneities directly in this package again
 - Metalayers are removed. Instead metadata is now added directly on each node
 - Add niln, numn, seqn, strn, and symn
