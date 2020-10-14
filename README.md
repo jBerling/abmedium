@@ -257,7 +257,7 @@ console.log("7.", out);
 
 ## Examples
 
-Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/main/packages/abmedium/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/main/packages/abmedium/examples/from-readme.js) contains all the examples in this document.
+Inspect the [examples](https://gitlab.com/berling/abmedium/-/tree/main/examples) directory for more examples. [from-readme.js](https://gitlab.com/berling/abmedium/-/tree/main/examples/from-readme.js) contains all the examples in this document.
 
 ## Maturity Status
 
