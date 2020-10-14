@@ -13,7 +13,8 @@
     "test-watch": "jest watch",
     "clean": "rm -rf ./dist",
     "build": "tsc -p tsconfig.json",
-    "clean-build": "yarn clean && yarn build"
+    "clean-build": "yarn clean && yarn build",
+    "prepublishOnly": "tsc -p tsconfig.json"
   },
   "publishConfig": {
     "access": "public"
