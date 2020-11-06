@@ -5,6 +5,7 @@ import {
   nilName,
   numName,
   refName,
+  txtName,
 } from "./constants";
 
 export type Label = string | number;
@@ -17,8 +18,12 @@ export type Ref = { type: typeof refName; value: Label };
 export type Seq = { type: typeof seqName; value: Array<Label> };
 export type Str = { type: typeof strName; value: string };
 export type Sym = { type: typeof symName; value: string };
+export interface Txt {
+  type: typeof txtName;
+  value: string;
+}
 
-export type Scalar = Nil | Num | Ref | Str | Sym;
+export type Scalar = Nil | Num | Ref | Str | Sym | Txt;
 export type NodeValue = Scalar | Seq;
 
 export type NodeValueType =
@@ -27,7 +32,8 @@ export type NodeValueType =
   | typeof refName
   | typeof seqName
   | typeof strName
-  | typeof symName;
+  | typeof symName
+  | typeof txtName;
 
 export type Disagreement<M extends Metadata> = {
   expected?: NodeValue;

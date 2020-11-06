@@ -5,6 +5,7 @@ import {
   Seq,
   Str,
   Sym,
+  Txt,
   Node,
   ProjNode,
   PresNode,
@@ -28,6 +29,7 @@ type NodeSwitch<M extends Metadata, R> = {
   seq?: ((node: Node<M, Seq>, items: R[]) => R) | R;
   str?: ((str: Node<M, Str>) => R) | R;
   sym?: ((sym: Node<M, Sym>) => R) | R;
+  txt?: ((txt: Node<M, Txt>) => R) | R;
   scalar?: ((scalar: Node<M, Scalar>) => R) | R;
   _?: ((v: Node<M>) => R) | R;
 };

@@ -1,3 +1,5 @@
+import { Text } from "automerge";
+
 import {
   Label,
   NodeValue,
@@ -10,6 +12,7 @@ import {
   Seq,
   Nil,
   Ref,
+  Txt,
   Metadata,
 } from "./types";
 
@@ -20,6 +23,7 @@ import {
   numName,
   nilName,
   refName,
+  txtName,
 } from "./constants";
 
 import { valswitch } from "./valswitch";
@@ -127,6 +131,29 @@ export const symn = <M extends Metadata>(
   tracked?: NodeValue,
   trackedMeta?: Partial<M>
 ): Node<M, Sym> => node(label, sym(value), metadata, tracked, trackedMeta);
+
+export const txt = (value: string): Txt =>
+  new Proxy(new Text(value), {
+    get: (t, p, r) => {
+      if (p === "value") return t.toString();
+      if (p === "type") return txtName;
+      return Reflect.get(t, p, r);
+    },
+    set: (t, p, v, r) => {
+      if (p === "value" || p === "type") {
+        throw new Error(`You can not set ${p} on a Txt node`);
+      }
+      return Reflect.set(t, p, v, r);
+    },
+  }) as Text & { type: typeof txtName; value: string };
+
+export const txtn = <M extends Metadata>(
+  label: Label,
+  value: Txt["value"],
+  metadata: M,
+  tracked?: NodeValue,
+  trackedMeta?: Partial<M>
+): Node<M, Txt> => node(label, txt(value), metadata, tracked, trackedMeta);
 
 export const lengthOf = (value) =>
   valswitch<number>({

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.1
+
+- Add Txt NodeValue type and txt and txtn functions.
+
 ## 0.10.0
 
 Once again big breaking changes. Migrate the project to TypeScript. Also, make the scope bigger again

@@ -5,6 +5,7 @@ import {
   seq,
   str,
   sym,
+  txt,
   valtype,
   valtypeIn,
   lengthOf,
@@ -19,6 +20,7 @@ describe("core", () => {
     expect(valtype(num(0))).toEqual("num");
     expect(valtype(nil)).toEqual("nil");
     expect(valtype(ref(0))).toEqual("ref");
+    expect(valtype(txt("foo"))).toEqual("txt");
   });
 
   test("valtypeIn", () => {
@@ -29,19 +31,21 @@ describe("core", () => {
     expect(valtypeIn(num(0), "num")).toBe("num");
     expect(valtypeIn(sym("a"), "str", "num", "sym")).toBe("sym");
     expect(valtypeIn(nil, "nil")).toBe("nil");
+    expect(valtypeIn(txt("b"), "txt")).toBe("txt");
   });
 
   test("lengthOf", () => {
     expect(
       [
-        seq([1, 2, 3]),
-        sym("ab"),
-        str("abc"),
-        num("1001"),
         nil,
+        num("1001"),
         ref("root"),
+        seq([1, 2, 3]),
+        str("abc"),
+        sym("ab"),
+        txt("tada"),
       ].map(lengthOf)
-    ).toMatchObject([3, 2, 3, 4, 0, NaN]);
+    ).toMatchObject([NaN, 4, 4, 3, 3, 2, 4]);
   });
 
   describe("isEqual", () => {
@@ -65,6 +69,7 @@ describe("core", () => {
     testEquality(ref(0), ref("0"), ref(1));
     testEquality(seq([1, 2, 3]), seq([1, 2, 3]), seq([3, 2, 1]));
     testEquality(nil, nil);
+    testEquality(txt("abra"), txt("abra"), str("abra"), sym("abra"));
     testEquality(undefined, undefined, nil);
   });
 });
