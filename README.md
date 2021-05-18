@@ -12,7 +12,7 @@ Layers can get in a conflict when they are projected in a stack. This is called 
 - _Layers_ are sets of nodes.
 - All nodes have _Labels_. They can be numbers or strings.
 - _Nodes_ are values with a label.
-- _Values_ are sequences, strings, symbols, numbers, refs or nil.
+- _Values_ are sequences, strings, texts, symbols, numbers, refs or nil.
 - _Projections_ are created when a composition is projected.
 - _Layer Composition_ describes which layers, and in what order, to project.
 - _Disagreements_ are created during a projection. They represent a mismatch between an expected and actual value.
@@ -83,7 +83,7 @@ By the way, Abmedium is built on top of [Automerge](https://github.com/automerge
 
 ## Nodes and NodeValues
 
-There are six types of node values: nil, numbers, references, sequences, strings , and symbols. A NodeValue can be created using a three-letter function: `nil`, `num`, `ref`, `seq`, `str`, or `sym`. A Node is a NodeValue with some extra information. It has a label, metadata and possibly tracked values (more about that later). A Node can be created using the `node` function, as in the examples above. This is pretty verbose. Therefore there are some shorthand functions, named after the NodeValue type of the node with an `n`-suffix. For example, the shorthand for a string node is `strn`.
+There are seven types of node values: nil, numbers, references, sequences, strings, symbols, and texts. A NodeValue can be created using a three-letter function: `nil`, `num`, `ref`, `seq`, `str`, `sym`, or `txt`. A Node is a NodeValue with some extra information. It has a label, metadata and possibly tracked values (more about that later). A Node can be created using the `node` function, as in the examples above. This is pretty verbose. Therefore there are some shorthand functions, named after the NodeValue type of the node with an `n`-suffix. For example, the shorthand for a string node is `strn`.
 
 Instead of `node(0, str("foo"), {})` you can write `strn(0, "foo", {})`. We are going to use these shorthand functions in the rest of the examples.
 
