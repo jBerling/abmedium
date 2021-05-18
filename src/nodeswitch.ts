@@ -79,6 +79,12 @@ type ProjNodeSwitch<M extends Metadata, R> = {
         simultaneities?: Record<ActorId, ProjNode<M>>
       ) => R)
     | R;
+  scalar?:
+    | ((
+        scalar: ProjNode<M, Scalar>,
+        simultaneities?: Record<ActorId, ProjNode<M>>
+      ) => R)
+    | R;
   seq?:
     | ((
         node: ProjNode<M, Seq>,
@@ -98,9 +104,9 @@ type ProjNodeSwitch<M extends Metadata, R> = {
         simultaneities?: Record<ActorId, ProjNode<M>>
       ) => R)
     | R;
-  scalar?:
+  txt?:
     | ((
-        scalar: ProjNode<M, Scalar>,
+        node: ProjNode<M, Txt>,
         simultaneities?: Record<ActorId, ProjNode<M>>
       ) => R)
     | R;
@@ -159,6 +165,10 @@ type PresNodeSwitch<M extends Metadata, R> = {
         simultaneities?: Record<ActorId, PresNode<M, R>>
       ) => R)
     | R;
+  scalar?: (
+    scalar: PresNode<M, R, Scalar>,
+    simultaneities?: Record<ActorId, PresNode<M, R>>
+  ) => R | R;
   seq?:
     | ((
         node: PresNode<M, R, Seq>,
@@ -178,10 +188,12 @@ type PresNodeSwitch<M extends Metadata, R> = {
         simultaneities?: Record<ActorId, PresNode<M, R>>
       ) => R)
     | R;
-  scalar?: (
-    scalar: PresNode<M, R, Scalar>,
-    simultaneities?: Record<ActorId, PresNode<M, R>>
-  ) => R | R;
+  txt?:
+    | ((
+        node: PresNode<M, R, Txt>,
+        simultaneities?: Record<ActorId, PresNode<M, R>>
+      ) => R)
+    | R;
   _?:
     | ((
         node: PresNode<M, R>,

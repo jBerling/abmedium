@@ -50,7 +50,8 @@ export const node = <M extends Metadata, T extends NodeValue>(
   value: T,
   metadata: M,
   tracked?: NodeValue,
-  trackedMeta?: Partial<M>
+  trackedMeta?: Partial<M>,
+  type?: NodeValueType
 ): Node<M, T> => {
   let node: Node<M, T> = { ...value, label, metadata };
 
@@ -58,6 +59,7 @@ export const node = <M extends Metadata, T extends NodeValue>(
   // because Automerge seems to not support undefined.
   if (tracked) node.tracked = tracked;
   if (trackedMeta) node.trackedMeta = trackedMeta;
+  if (node.type === undefined && type !== undefined) node.type = type;
 
   return node;
 };
@@ -153,13 +155,22 @@ export const txtn = <M extends Metadata>(
   metadata: M,
   tracked?: NodeValue,
   trackedMeta?: Partial<M>
-): Node<M, Txt> => node(label, txt(value), metadata, tracked, trackedMeta);
+): Node<M, Txt> => {
+  let val = txt(value);
+
+  // TODO Investigate why we have to send the valtype as the last argument.
+  // Why is it lost?
+  //
+  // It has to have something to do with the txt value being a proxy.
+  return node(label, val, metadata, tracked, trackedMeta, valtype(val));
+};
 
 export const lengthOf = (value) =>
   valswitch<number>({
     seq: (v) => v.length,
     sym: (v) => v.length,
     str: (v) => v.length,
+    txt: (v) => v.length,
     num: (v) => String(v).length,
     ref: NaN,
     nil: 0,

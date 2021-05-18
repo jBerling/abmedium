@@ -45,7 +45,7 @@ describe("core", () => {
         sym("ab"),
         txt("tada"),
       ].map(lengthOf)
-    ).toMatchObject([NaN, 4, 4, 3, 3, 2, 4]);
+    ).toMatchObject([0, 4, NaN, 3, 3, 2, 4]);
   });
 
   describe("isEqual", () => {
