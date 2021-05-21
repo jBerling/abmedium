@@ -22,8 +22,7 @@ export type Str = { type: typeof strName; value: string };
 export type Sym = { type: typeof symName; value: string };
 export interface Txt {
   type: typeof txtName;
-  value: string;
-  _value: Text;
+  value: Text;
 }
 
 export type Scalar = Nil | Num | Ref | Str | Sym | Txt;

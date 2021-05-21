@@ -11,7 +11,7 @@
   "scripts": {
     "test": "jest",
     "test-watch": "jest watch",
-    "clean": "rm -rf ./dist",
+    "clean": "rm -rf ./dist && rm ./tsconfig.tsbuildinfo",
     "build": "tsc -p tsconfig.json",
     "clean-build": "yarn clean && yarn build",
     "prepublishOnly": "tsc -p tsconfig.json"

@@ -132,31 +132,7 @@ export const symn = <M extends Metadata>(
   trackedMeta?: Partial<M>
 ): Node<M, Sym> => node(label, sym(value), metadata, tracked, trackedMeta);
 
-// export const txt = (value: string): Txt =>
-//   new Proxy(new Text(value), {
-//     get: (t, p, r) => {
-//       if (p === "value") return t.toString();
-//       if (p === "type") return txtName;
-//       return Reflect.get(t, p, r);
-//     },
-//     set: (t, p, v, r) => {
-//       if (p === "value" || p === "type") {
-//         throw new Error(`You can not set ${p} on a Txt node`);
-//       }
-//       return Reflect.set(t, p, v, r);
-//     },
-//   }) as Text & { type: typeof txtName; value: string };
-
-export const txt = (value: string): Txt => ({
-  type: txtName,
-  _value: new Text(value),
-  get value() {
-    return this._value.toString();
-  },
-  set value(_: string) {
-    throw new Error(`You can not set value on a Txt node`);
-  },
-});
+export const txt = (value: Text): Txt => ({ type: txtName, value });
 
 export const txtn = <M extends Metadata>(
   label: Label,
@@ -185,7 +161,7 @@ export const isEqual = (a: NodeValue | undefined, b: NodeValue | undefined) => {
   if (a === undefined || b === undefined) return false;
 
   return valswitch<boolean>({
-    seq: (aVal) => {
+    [seqName]: (aVal) => {
       const bSeq = b as Seq;
       if (!bSeq || aVal.length !== bSeq.value.length) return false;
 
@@ -195,7 +171,10 @@ export const isEqual = (a: NodeValue | undefined, b: NodeValue | undefined) => {
       return true;
     },
 
-    ref: (aVal) => b.type === "ref" && String(aVal) === String(b.value),
+    [refName]: (aVal) => b.type === refName && String(aVal) === String(b.value),
+
+    [txtName]: (aVal) =>
+      b.type === txtName && aVal.toString() === b.value.toString(),
 
     _: () => a.type === b.type && a.value === b.value,
   })(a);

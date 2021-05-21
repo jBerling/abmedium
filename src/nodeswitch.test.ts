@@ -1,6 +1,7 @@
 import { seqn, symn, strn, numn, niln, refn, txtn } from "./core";
 import { nodeswitch, projNodeswitch, presNodeswitch } from "./nodeswitch";
 import { Node, ProjNode, PresNode } from "./types";
+import { Text } from "automerge";
 
 describe("nodeswitch", () => {
   test("nodeswitch", () => {
@@ -21,7 +22,7 @@ describe("nodeswitch", () => {
       switcher(seqn(0, [], {}), []),
       switcher(strn(0, "", {})),
       switcher(symn(0, "a", {})),
-      switcher(txtn(0, "foo", {})),
+      switcher(txtn(0, new Text("foo"), {})),
     ];
 
     expect(collected).toMatchObject([
@@ -31,7 +32,7 @@ describe("nodeswitch", () => {
       ["seq", seqn(0, [], {})],
       ["str", strn(0, "", {})],
       ["sym", symn(0, "a", {})],
-      ["txt", txtn(0, "foo", {})],
+      ["txt", txtn(0, new Text("foo"), {})],
     ]);
   });
 
