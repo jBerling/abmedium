@@ -166,34 +166,34 @@
         "signature": "37bc0755a514797f2d90a701c7474472d1863118825d9f554f8899243fa4f42f",
         "affectsGlobalScope": false
       },
-      "./node_modules/automerge/dist/index.d.ts": {
-        "version": "a328e9005e7baabd88ba2bdcdc071a18b683cbbd8842b3d99ed731d7406228a4",
-        "signature": "a328e9005e7baabd88ba2bdcdc071a18b683cbbd8842b3d99ed731d7406228a4",
+      "./node_modules/automerge/@types/automerge/index.d.ts": {
+        "version": "f2abdd72d9accca894ee5fa602d8e5d965f9ab53e4f9813105f80de8dfbaf393",
+        "signature": "f2abdd72d9accca894ee5fa602d8e5d965f9ab53e4f9813105f80de8dfbaf393",
         "affectsGlobalScope": false
       },
       "./src/types.ts": {
-        "version": "1d63cafd63948011d4fe67aa0549ce86c7e63fb14e9fd517559e47259eba337a",
-        "signature": "f2d40e0cbedc506a0e7289a31dce50b9141bcabe3a51c21cce8a8825b16fac87",
+        "version": "fd1ee976e0125e40d048742e8458832543e1ba8546508057223ece87917d86dd",
+        "signature": "d86ccdd75a5551031d634673c5f95095273addb53f4b6795a12612501a68e544",
         "affectsGlobalScope": false
       },
       "./src/valswitch.ts": {
-        "version": "49e7a08eb0ccdea64ad0f23fdf14c4b551535a88e97737eb176850d2af2d7eb0",
-        "signature": "f854f2d5ad054f3ebfcc90b85ed94ba6ced72878c71e95041192ab90a1cb8d92",
+        "version": "440797fb4a2743fe01db6aa9e88035a9f9b641c727cbf26a83e4c30f5e1d51fc",
+        "signature": "0889aa7ae920e0fdec79e937b0867953b38229b711632da2917a4a0556be725c",
         "affectsGlobalScope": false
       },
       "./src/core.ts": {
-        "version": "428bf75c392cff6242805e678b419f63feaf2f3b0849a3396c025c164e070069",
-        "signature": "ccf28b9712bae19a5bf0a493575acc8e0e4fbf37e65ba33bd4fcf6535aedd4ff",
+        "version": "585dac8145d10242f6e02f7524cefbb877037646bdf2a5055fe868018ec0ac16",
+        "signature": "d6a509f7c1e2f4ab315c1b32d95de7e66d77267541e1866a7b5ef95502f5b2fe",
         "affectsGlobalScope": false
       },
       "./src/core.test.ts": {
-        "version": "add77e42d64a96ec493605fe2cda056e7632d8a7d5a0eaac20ca40c33bdb7074",
+        "version": "6b8b37667a8561a865737a6121cd1e70e47a91e549bd5546c307145b8a32889b",
         "signature": "a27bae0b4723c6e6c8b6d58e10b373f0fe330cd884ef25ecf6427a470ca9c39b",
         "affectsGlobalScope": false
       },
       "./src/document.ts": {
         "version": "b815a3dc940578aa75e4b457ed2206f98de05d4f85685dc60cbe285b7de754cb",
-        "signature": "961f1d7bbe7841ed2d98155377d6171c238ca8a24f139084abdd1d83716b9d31",
+        "signature": "a80b345a98f1ca68953ed2496b4402be78712e9c18d2d0d19e14b1830ce91553",
         "affectsGlobalScope": false
       },
       "./src/editvalof.ts": {
@@ -213,17 +213,17 @@
       },
       "./src/proj.ts": {
         "version": "3a0827c269bc27078ca75114e61db7498733a512357cf6560bb29407d451e17b",
-        "signature": "76f2168a1969c572e59722be6f03010b4254240db535e51fb9bdffe356dd9533",
+        "signature": "8032f8531adcc2b57ddf9e74e3569c25d31114dedbf8b14edfeb76c4d8a94c65",
         "affectsGlobalScope": false
       },
       "./src/nodeswitch.ts": {
-        "version": "f275663dc2d460db4fc7155bc1930e9d5c333a4b2d7dd998570124649c51a4de",
-        "signature": "a0c93087e980eedc9c27483eee5b4d7dbf46f7857fb9d72d2897dacbaf13616f",
+        "version": "3d9a62ed3c6a42eb012cf0f44a8207d8350ed2a963e10f8edd39900de9450171",
+        "signature": "26ae8be53c64ca9ca7b1809a92f5d5d82544ffa1ed5fe27e0133b10d1fe99a55",
         "affectsGlobalScope": false
       },
       "./src/pres.ts": {
         "version": "aef83549d866bcc155aa6ea9d8a0b2ef069c622df42442489b76bc30f393ac6c",
-        "signature": "87a0fe56b9c8a400bca36484f4a7554eeaec2f1ec9dd931970e1ceb5540be3f6",
+        "signature": "52215a6d67f7f5f9ba8c504e6a29e14cb9ca384ab61b497bbcf18bb839aa2553",
         "affectsGlobalScope": false
       },
       "./src/nodes.ts": {
@@ -252,7 +252,7 @@
         "affectsGlobalScope": false
       },
       "./src/nodeswitch.test.ts": {
-        "version": "9b7b6338c13f73502fbbb5e8523214039477665c837abfb2677fe3d805b53911",
+        "version": "07391060e4c75b0fb56590953ab6a5466d33d8b6ac092e95438fb6c9213ede5c",
         "signature": "f6ce02684178247735315f12f02211605b269529b78f42b8e740fc7481655b0b",
         "affectsGlobalScope": false
       },
@@ -1072,7 +1072,7 @@
         "./src/core.ts"
       ],
       "./src/core.ts": [
-        "./node_modules/automerge/dist/index.d.ts",
+        "./node_modules/automerge/@types/automerge/index.d.ts",
         "./src/constants.ts",
         "./src/types.ts",
         "./src/valswitch.ts"
@@ -1103,13 +1103,13 @@
         "./src/valswitch.ts"
       ],
       "./src/layers.test.ts": [
-        "./node_modules/automerge/dist/index.d.ts",
+        "./node_modules/automerge/@types/automerge/index.d.ts",
         "./src/core.ts",
         "./src/document.ts",
         "./src/layers.ts"
       ],
       "./src/layers.ts": [
-        "./node_modules/automerge/dist/index.d.ts",
+        "./node_modules/automerge/@types/automerge/index.d.ts",
         "./src/types.ts"
       ],
       "./src/nodes.test.ts": [
@@ -1142,19 +1142,20 @@
         "./src/types.ts"
       ],
       "./src/proj.test.ts": [
-        "./node_modules/automerge/dist/index.d.ts",
+        "./node_modules/automerge/@types/automerge/index.d.ts",
         "./src/core.ts",
         "./src/document.ts",
         "./src/proj.ts",
         "./src/types.ts"
       ],
       "./src/proj.ts": [
-        "./node_modules/automerge/dist/index.d.ts",
+        "./node_modules/automerge/@types/automerge/index.d.ts",
         "./src/core.ts",
         "./src/types.ts",
         "./src/util.ts"
       ],
       "./src/types.ts": [
+        "./node_modules/automerge/@types/automerge/index.d.ts",
         "./src/constants.ts"
       ],
       "./src/util.test.ts": [
@@ -1501,7 +1502,7 @@
         "./src/valswitch.ts"
       ],
       "./src/layers.ts": [
-        "./node_modules/automerge/dist/index.d.ts",
+        "./node_modules/automerge/@types/automerge/index.d.ts",
         "./src/types.ts"
       ],
       "./src/nodes.ts": [
@@ -1514,10 +1515,11 @@
         "./src/types.ts"
       ],
       "./src/proj.ts": [
-        "./node_modules/automerge/dist/index.d.ts",
+        "./node_modules/automerge/@types/automerge/index.d.ts",
         "./src/types.ts"
       ],
       "./src/types.ts": [
+        "./node_modules/automerge/@types/automerge/index.d.ts",
         "./src/constants.ts"
       ],
       "./src/valswitch.ts": [
@@ -1616,7 +1618,7 @@
       "./node_modules/@types/webpack/index.d.ts",
       "./node_modules/@types/yargs-parser/index.d.ts",
       "./node_modules/@types/yargs/index.d.ts",
-      "./node_modules/automerge/dist/index.d.ts",
+      "./node_modules/automerge/@types/automerge/index.d.ts",
       "./node_modules/source-map/source-map.d.ts",
       "./node_modules/typescript/lib/lib.dom.d.ts",
       "./node_modules/typescript/lib/lib.dom.iterable.d.ts",

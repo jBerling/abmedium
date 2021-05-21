@@ -50,8 +50,7 @@ export const node = <M extends Metadata, T extends NodeValue>(
   value: T,
   metadata: M,
   tracked?: NodeValue,
-  trackedMeta?: Partial<M>,
-  type?: NodeValueType
+  trackedMeta?: Partial<M>
 ): Node<M, T> => {
   let node: Node<M, T> = { ...value, label, metadata };
 
@@ -59,7 +58,6 @@ export const node = <M extends Metadata, T extends NodeValue>(
   // because Automerge seems to not support undefined.
   if (tracked) node.tracked = tracked;
   if (trackedMeta) node.trackedMeta = trackedMeta;
-  if (node.type === undefined && type !== undefined) node.type = type;
 
   return node;
 };
@@ -134,20 +132,31 @@ export const symn = <M extends Metadata>(
   trackedMeta?: Partial<M>
 ): Node<M, Sym> => node(label, sym(value), metadata, tracked, trackedMeta);
 
-export const txt = (value: string): Txt =>
-  new Proxy(new Text(value), {
-    get: (t, p, r) => {
-      if (p === "value") return t.toString();
-      if (p === "type") return txtName;
-      return Reflect.get(t, p, r);
-    },
-    set: (t, p, v, r) => {
-      if (p === "value" || p === "type") {
-        throw new Error(`You can not set ${p} on a Txt node`);
-      }
-      return Reflect.set(t, p, v, r);
-    },
-  }) as Text & { type: typeof txtName; value: string };
+// export const txt = (value: string): Txt =>
+//   new Proxy(new Text(value), {
+//     get: (t, p, r) => {
+//       if (p === "value") return t.toString();
+//       if (p === "type") return txtName;
+//       return Reflect.get(t, p, r);
+//     },
+//     set: (t, p, v, r) => {
+//       if (p === "value" || p === "type") {
+//         throw new Error(`You can not set ${p} on a Txt node`);
+//       }
+//       return Reflect.set(t, p, v, r);
+//     },
+//   }) as Text & { type: typeof txtName; value: string };
+
+export const txt = (value: string): Txt => ({
+  type: txtName,
+  _value: new Text(value),
+  get value() {
+    return this._value.toString();
+  },
+  set value(_: string) {
+    throw new Error(`You can not set value on a Txt node`);
+  },
+});
 
 export const txtn = <M extends Metadata>(
   label: Label,
@@ -157,12 +166,7 @@ export const txtn = <M extends Metadata>(
   trackedMeta?: Partial<M>
 ): Node<M, Txt> => {
   let val = txt(value);
-
-  // TODO Investigate why we have to send the valtype as the last argument.
-  // Why is it lost?
-  //
-  // It has to have something to do with the txt value being a proxy.
-  return node(label, val, metadata, tracked, trackedMeta, valtype(val));
+  return node(label, val, metadata, tracked, trackedMeta);
 };
 
 export const lengthOf = (value) =>
