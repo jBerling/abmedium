@@ -8,6 +8,8 @@ import {
   txtName,
 } from "./constants";
 
+import { Text } from "automerge";
+
 export type Label = string | number;
 
 export type ActorId = string;
@@ -20,7 +22,7 @@ export type Str = { type: typeof strName; value: string };
 export type Sym = { type: typeof symName; value: string };
 export interface Txt {
   type: typeof txtName;
-  value: string;
+  value: Text;
 }
 
 export type Scalar = Nil | Num | Ref | Str | Sym | Txt;

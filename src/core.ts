@@ -132,20 +132,7 @@ export const symn = <M extends Metadata>(
   trackedMeta?: Partial<M>
 ): Node<M, Sym> => node(label, sym(value), metadata, tracked, trackedMeta);
 
-export const txt = (value: string): Txt =>
-  new Proxy(new Text(value), {
-    get: (t, p, r) => {
-      if (p === "value") return t.toString();
-      if (p === "type") return txtName;
-      return Reflect.get(t, p, r);
-    },
-    set: (t, p, v, r) => {
-      if (p === "value" || p === "type") {
-        throw new Error(`You can not set ${p} on a Txt node`);
-      }
-      return Reflect.set(t, p, v, r);
-    },
-  }) as Text & { type: typeof txtName; value: string };
+export const txt = (value: Text): Txt => ({ type: txtName, value });
 
 export const txtn = <M extends Metadata>(
   label: Label,
@@ -153,13 +140,17 @@ export const txtn = <M extends Metadata>(
   metadata: M,
   tracked?: NodeValue,
   trackedMeta?: Partial<M>
-): Node<M, Txt> => node(label, txt(value), metadata, tracked, trackedMeta);
+): Node<M, Txt> => {
+  let val = txt(value);
+  return node(label, val, metadata, tracked, trackedMeta);
+};
 
 export const lengthOf = (value) =>
   valswitch<number>({
     seq: (v) => v.length,
     sym: (v) => v.length,
     str: (v) => v.length,
+    txt: (v) => v.length,
     num: (v) => String(v).length,
     ref: NaN,
     nil: 0,
@@ -170,7 +161,7 @@ export const isEqual = (a: NodeValue | undefined, b: NodeValue | undefined) => {
   if (a === undefined || b === undefined) return false;
 
   return valswitch<boolean>({
-    seq: (aVal) => {
+    [seqName]: (aVal) => {
       const bSeq = b as Seq;
       if (!bSeq || aVal.length !== bSeq.value.length) return false;
 
@@ -180,7 +171,10 @@ export const isEqual = (a: NodeValue | undefined, b: NodeValue | undefined) => {
       return true;
     },
 
-    ref: (aVal) => b.type === "ref" && String(aVal) === String(b.value),
+    [refName]: (aVal) => b.type === refName && String(aVal) === String(b.value),
+
+    [txtName]: (aVal) =>
+      b.type === txtName && aVal.toString() === b.value.toString(),
 
     _: () => a.type === b.type && a.value === b.value,
   })(a);

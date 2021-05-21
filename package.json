@@ -11,7 +11,7 @@
   "scripts": {
     "test": "jest",
     "test-watch": "jest watch",
-    "clean": "rm -rf ./dist",
+    "clean": "rm -rf ./dist && rm ./tsconfig.tsbuildinfo",
     "build": "tsc -p tsconfig.json",
     "clean-build": "yarn clean && yarn build",
     "prepublishOnly": "tsc -p tsconfig.json"
@@ -47,6 +47,6 @@
   },
   "gitHead": "c2dc173e2ee984a82bbd005f33fdd7da966df8e4",
   "dependencies": {
-    "automerge": "https://github.com/automerge/automerge#performance"
+    "automerge": "^1.0.1-preview.2"
   }
 }

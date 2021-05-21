@@ -12,6 +12,8 @@ import {
   isEqual,
 } from "./core";
 
+import { Text } from "automerge";
+
 describe("core", () => {
   test("valtype", () => {
     expect(valtype(sym("a"))).toEqual("sym");
@@ -20,7 +22,7 @@ describe("core", () => {
     expect(valtype(num(0))).toEqual("num");
     expect(valtype(nil)).toEqual("nil");
     expect(valtype(ref(0))).toEqual("ref");
-    expect(valtype(txt("foo"))).toEqual("txt");
+    expect(valtype(txt(new Text("foo")))).toEqual("txt");
   });
 
   test("valtypeIn", () => {
@@ -31,7 +33,7 @@ describe("core", () => {
     expect(valtypeIn(num(0), "num")).toBe("num");
     expect(valtypeIn(sym("a"), "str", "num", "sym")).toBe("sym");
     expect(valtypeIn(nil, "nil")).toBe("nil");
-    expect(valtypeIn(txt("b"), "txt")).toBe("txt");
+    expect(valtypeIn(txt(new Text("b")), "txt")).toBe("txt");
   });
 
   test("lengthOf", () => {
@@ -43,9 +45,9 @@ describe("core", () => {
         seq([1, 2, 3]),
         str("abc"),
         sym("ab"),
-        txt("tada"),
+        txt(new Text("tada")),
       ].map(lengthOf)
-    ).toMatchObject([NaN, 4, 4, 3, 3, 2, 4]);
+    ).toMatchObject([0, 4, NaN, 3, 3, 2, 4]);
   });
 
   describe("isEqual", () => {
@@ -69,7 +71,12 @@ describe("core", () => {
     testEquality(ref(0), ref("0"), ref(1));
     testEquality(seq([1, 2, 3]), seq([1, 2, 3]), seq([3, 2, 1]));
     testEquality(nil, nil);
-    testEquality(txt("abra"), txt("abra"), str("abra"), sym("abra"));
+    testEquality(
+      txt(new Text("abra")),
+      txt(new Text("abra")),
+      str("abra"),
+      sym("abra")
+    );
     testEquality(undefined, undefined, nil);
   });
 });
