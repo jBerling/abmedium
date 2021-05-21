@@ -13,6 +13,10 @@ import {
 
 import Automerge, { Text } from "automerge";
 
+/*
+Just a simple example using Txt. Not a lot of thought have gone into this...
+*/
+
 let doc = Automerge.from(document<{ author: Str }>());
 
 doc = Automerge.change(doc, (doc) => {
@@ -41,15 +45,23 @@ const stringPresenter = presNodeswitch<{ author: Str }, string>({
 console.log("1.", pres(proj(doc), stringPresenter));
 
 doc = Automerge.change(doc, (doc) => {
-  const chapter1: Txt = doc.layers.base.chapter1 as Txt; // I don't know why eslint fails to parse this line
+  const chapter1: Txt = doc.layers.base.chapter1 as Txt;
 
   if (chapter1?.value?.insertAt !== undefined) {
     chapter1.value.insertAt(19, " What?");
   }
 });
 
-console.log("2.", pres(proj(doc), stringPresenter));
+console.log(`
+Presented
+---------
+${pres(proj(doc), stringPresenter)}
+---------
+`);
 
-console.log("3.", Automerge.save(doc));
-
-console.log("4.", new TextDecoder().decode(Automerge.save(doc)));
+console.log(`
+Saved
+-----
+${new TextDecoder().decode(Automerge.save(doc))}
+-----
+`);
