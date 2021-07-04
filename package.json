@@ -29,7 +29,6 @@
     "@types/yargs": "^15.0.5",
     "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@typescript-eslint/parser": "^3.7.0",
-    "babel-eslint": "^10.1.0",
     "babel-jest": "^26.1.0",
     "babel-loader": "^8.1.0",
     "eslint": "^7.5.0",
@@ -47,6 +46,6 @@
   },
   "gitHead": "c2dc173e2ee984a82bbd005f33fdd7da966df8e4",
   "dependencies": {
-    "automerge": "^1.0.1-preview.2"
+    "automerge": "^1.0.1-preview.3"
   }
 }
